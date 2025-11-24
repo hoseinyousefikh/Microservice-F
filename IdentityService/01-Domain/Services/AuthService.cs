@@ -41,6 +41,25 @@ namespace IdentityService._01_Domain.Services
                     };
                 }
 
+                // تعیین AccountStatus بر اساس نقش
+                AccountStatus status;
+                switch (request.Role)
+                {
+                    case UserRole.Customer:
+                    case UserRole.Seller:
+                        status = AccountStatus.Active;
+                        break;
+                    case UserRole.Moderator:
+                        status = AccountStatus.PendingActivation;
+                        break;
+                    case UserRole.Admin:
+                        status = AccountStatus.Suspended;
+                        break;
+                    default:
+                        status = AccountStatus.PendingActivation; // پیش‌فرض
+                        break;
+                }
+
                 var user = new ApplicationUser
                 {
                     UserName = request.Email,
@@ -48,7 +67,7 @@ namespace IdentityService._01_Domain.Services
                     FirstName = request.FirstName,
                     LastName = request.LastName,
                     EmailConfirmed = false,
-                    Status = AccountStatus.PendingActivation
+                    Status = status
                 };
 
                 var result = await _userManager.CreateAsync(user, request.Password);
@@ -62,11 +81,10 @@ namespace IdentityService._01_Domain.Services
                     };
                 }
 
-                // Fix: Use the role from the request instead of hardcoded UserRole.User
+                // افزودن نقش کاربر
                 await _userManager.AddToRoleAsync(user, request.Role.ToString());
 
                 var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-                // In a real app, send this token via email
                 _logger.LogInformation($"Email confirmation token for {user.Email}: {token}");
 
                 return new ApiResponseDto<AuthResponseDto>

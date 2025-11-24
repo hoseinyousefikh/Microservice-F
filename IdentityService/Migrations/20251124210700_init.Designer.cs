@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace IdentityService.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251124152241_init")]
+    [Migration("20251124210700_init")]
     partial class init
     {
         /// <inheritdoc />
@@ -250,7 +250,6 @@ namespace IdentityService.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Token")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("UserId")
