@@ -1,0 +1,515 @@
+CatalogService
+│
+├── Domain
+│   ├── Core
+│   │   ├── Entities/                # مدل‌های اصلی دامنه بدون وابستگی به فریمورک
+│   │   │   ├── Product.cs            # موجودیت محصول با تمام فیلدها و قوانین دامنه
+│   │   │   ├── Category.cs           # موجودیت دسته‌بندی با ساختار درختی
+│   │   │   ├── Brand.cs              # موجودیت برند
+│   │   │   ├── ImageResource.cs      # موجودیت منابع تصویری
+│   │   │   ├── User.cs               # موجودیت کاربر (برای ردیابی مالکیت)
+│   │   │   ├── RefreshToken.cs       # موجودیت توکن‌های تازه‌سازی
+│   │   │   └── OutboxMessage.cs      # موجودیت پیام‌های خروجی برای الگوی Outbox
+│   │   │
+│   │   ├── Enums/
+│   │   │   ├── ProductStatus.cs      # وضعیت‌های محصول (پیش‌نویس، منتشرشده، آرشیو)
+│   │   │   ├── ImageType.cs          # نوع تصویر (محصول، برند، دسته‌بندی)
+│   │   │   ├── UserRole.cs           # نقش‌های کاربران (ادمین، فروشنده، خریدار)
+│   │   │   └── OutboxMessageStatus.cs # وضعیت‌های پیام خروجی (درانتظار، پردازش‌شده، خطا)
+│   │   │
+│   │   ├── Primitives/              # پایه‌های دامنه
+│   │   │   ├── AggregateRoot.cs     # کلاس پایه برای موجودیت‌های دامنه
+│   │   │   ├── ValueObject.cs       # کلاس پایه برای اشیاء مقداری
+│   │   │   ├── Slug.cs              # شیء مقداری برای اسلاگ‌ها
+│   │   │   ├── Money.cs             # شیء مقداری برای قیمت (مبلغ + واحد پول)
+│   │   │   ├── AuditInfo.cs         # شیء مقداری برای اطلاعات حسابرسی
+│   │   │   └── Result.cs            # کلاس پایه برای نتیجه عملیات
+│   │   │
+│   │   ├── Events/                  # رویدادهای دامنه
+│   │   │   ├── IDomainEvent.cs      # اینترفیس رویدادهای دامنه
+│   │   │   ├── ProductCreatedEvent.cs
+│   │   │   ├── ProductUpdatedEvent.cs
+│   │   │   ├── ProductDeletedEvent.cs
+│   │   │   ├── BrandCreatedEvent.cs
+│   │   │   ├── BrandUpdatedEvent.cs
+│   │   │   ├── BrandDeletedEvent.cs
+│   │   │   ├── CategoryCreatedEvent.cs
+│   │   │   ├── CategoryUpdatedEvent.cs
+│   │   │   └── CategoryDeletedEvent.cs
+│   │   │
+│   │   ├── Contracts/               # قراردادهای دامنه
+│   │   │   ├── Repositories/        # اینترفیس‌های ریپازیتوری
+│   │   │   │   ├── IRepository.cs   # اینترفیس پایه ریپازیتوری
+│   │   │   │   ├── IProductRepository.cs
+│   │   │   │   ├── ICategoryRepository.cs
+│   │   │   │   ├── IBrandRepository.cs
+│   │   │   │   ├── IImageRepository.cs
+│   │   │   │   ├── IUserRepository.cs
+│   │   │   │   └── IRefreshTokenRepository.cs
+│   │   │   │
+│   │   │   ├── Services/            # اینترفیس‌های سرویس‌های دامنه
+│   │   │   │   ├── IProductService.cs
+│   │   │   │   ├── ICategoryService.cs
+│   │   │   │   ├── IBrandService.cs
+│   │   │   │   ├── IImageService.cs
+│   │   │   │   ├── IAuthService.cs
+│   │   │   │   ├── IUserService.cs
+│   │   │   │   └── IOutboxService.cs
+│   │   │   │
+│   │   │   ├── External/            # اینترفیس‌های سرویس‌های خارجی
+│   │   │   │   ├── IFileStorage.cs   # سرویس ذخیره‌سازی فایل
+│   │   │   │   ├── ISearchService.cs # سرویس جستجو (Elasticsearch)
+│   │   │   │   ├── ICacheService.cs  # سرویس کش
+│   │   │   │   ├── IEmailService.cs  # سرویس ایمیل
+│   │   │   │   ├── ILoggerService.cs # سرویس لاگینگ
+│   │   │   │   ├── IMetricsService.cs # سرویس متریک
+│   │   │   │   └── IKeyManagementService.cs # سرویس مدیریت کلیدها
+│   │   │   │
+│   │   │   └── Security/            # قراردادهای امنیتی
+│   │   │       ├── IJwtTokenGenerator.cs
+│   │   │       ├── IPasswordHasher.cs
+│   │   │       ├── IEncryptionService.cs
+│   │   │       └── IAuthorizationService.cs
+│   │   │
+│   │   ├── Exceptions/              # استثناهای دامنه
+│   │   │   ├── DomainException.cs   # کلاس پایه استثناهای دامنه
+│   │   │   ├── NotFoundException.cs
+│   │   │   ├── BusinessRuleException.cs
+│   │   │   ├── UnauthorizedException.cs
+│   │   │   ├── ConcurrencyException.cs
+│   │   │   └── ValidationException.cs
+│   │   │
+│   │   └── Specifications/          # الگوی Specification برای کوئری‌های پیچیده
+│   │       ├── ISpecification.cs
+│   │       ├── SpecificationEvaluator.cs
+│   │       ├── ProductSpecifications.cs
+│   │       ├── CategorySpecifications.cs
+│   │       └── BrandSpecifications.cs
+│   │
+│   └── Services/                    # پیاده‌سازی سرویس‌های دامنه
+│       ├── ProductService.cs        # منطق بیزینسی محصولات
+│       ├── CategoryService.cs       # منطق بیزینسی دسته‌بندی‌ها
+│       ├── BrandService.cs          # منطق بیزینسی برندها
+│       ├── ImageService.cs          # منطق بیزینسی تصاویر
+│       ├── AuthService.cs           # منطق بیزینسی احراز هویت
+│       ├── UserService.cs           # منطق بیزینسی کاربران
+│       └── OutboxService.cs         # مدیریت پیام‌های خروجی
+│
+├── Infrastructure
+│   ├── Data/
+│   │   ├── Db/
+│   │   │   ├── AppDbContext.cs      # کانتکست پایگاه داده
+│   │   │   ├── UnitOfWork.cs        # پیاده‌سازی الگوی UnitOfWork
+│   │   │   └── DbInitialiser.cs     # مقداردهی اولیه پایگاه داده
+│   │   │
+│   │   ├── Repositories/            # پیاده‌سازی ریپازیتوری‌ها
+│   │   │   ├── RepositoryBase.cs    # کلاس پایه ریپازیتوری
+│   │   │   ├── ProductRepository.cs
+│   │   │   ├── CategoryRepository.cs
+│   │   │   ├── BrandRepository.cs
+│   │   │   ├── ImageRepository.cs
+│   │   │   ├── UserRepository.cs
+│   │   │   └── RefreshTokenRepository.cs
+│   │   │
+│   │   └── Migrations/              # مایگریشن‌های پایگاه داده
+│   │
+│   ├── Configuration/               # تنظیمات Entity Framework
+│   │   ├── ProductConfiguration.cs
+│   │   ├── CategoryConfiguration.cs
+│   │   ├── BrandConfiguration.cs
+│   │   ├── ImageConfiguration.cs
+│   │   ├── UserConfiguration.cs
+│   │   ├── RefreshTokenConfiguration.cs
+│   │   └── OutboxMessageConfiguration.cs
+│   │
+│   ├── FileStorage/                 # پیاده‌سازی ذخیره‌سازی فایل
+│   │   ├── IFileStorage.cs
+│   │   ├── LocalFileStorage.cs      # ذخیره‌سازی محلی (برای توسعه)
+│   │   ├── S3FileStorage.cs         # ذخیره‌سازی در AWS S3
+│   │   ├── AzureBlobStorage.cs      # ذخیره‌سازی در Azure Blob
+│   │   └── FileUploadResult.cs      # نتیجه آپلود فایل
+│   │
+│   ├── Search/                      # پیاده‌سازی جستجو
+│   │   ├── IElasticService.cs
+│   │   ├── ElasticService.cs        # پیاده‌سازی Elasticsearch
+│   │   ├── ElasticIndexManager.cs   # مدیریت ایندکس‌ها
+│   │   ├── ElasticMappings.cs       # مپینگ‌های Elasticsearch
+│   │   └── SearchQuery.cs           # مدل کوئری جستجو
+│   │
+│   ├── Security/
+│   │   ├── JwtTokenGenerator.cs     # تولید توکن JWT
+│   │   ├── JwtTokenValidator.cs     # اعتبارسنجی توکن JWT
+│   │   ├── PasswordHasher.cs        # هش کردن رمز عبور
+│   │   ├── EncryptionService.cs      # سرویس رمزنگاری
+│   │   ├── KeyManagementService.cs  # مدیریت کلیدها
+│   │   ├── ApiKeyValidator.cs       # اعتبارسنجی کلیدهای API
+│   │   └── SecurityHeaders.cs       # هدرهای امنیتی
+│   │
+│   ├── Caching/
+│   │   ├── ICacheService.cs
+│   │   ├── RedisCacheService.cs     # پیاده‌سازی Redis
+│   │   ├── MemoryCacheService.cs    # پیاده‌سازی حافظه (برای توسعه)
+│   │   ├── CacheKeys.cs             # کلیدهای کش استاندارد
+│   │   └── CachePolicy.cs           # سیاست‌های کش
+│   │
+│   ├── Communication/
+│   │   ├── IEmailService.cs
+│   │   ├── SmtpEmailService.cs      # پیاده‌سازی SMTP
+│   │   ├── SendGridEmailService.cs  # پیاده‌سازی SendGrid
+│   │   ├── EmailTemplate.cs         # قالب‌های ایمیل
+│   │   └── NotificationService.cs   # سرویس اطلاع‌رسانی
+│   │
+│   ├── Logging/
+│   │   ├── ILoggerService.cs
+│   │   ├── SerilogService.cs        # پیاده‌سازی Serilog
+│   │   ├── LogEnricher.cs           # غنی‌سازی لاگ‌ها
+│   │   ├── LogFilter.cs             # فیلتر کردن لاگ‌ها
+│   │   └── LogConstants.cs          # ثابت‌های لاگینگ
+│   │
+│   ├── Monitoring/
+│   │   ├── IMetricsService.cs
+│   │   ├── PrometheusMetrics.cs     # پیاده‌سازی Prometheus
+│   │   ├── HealthCheckService.cs    # بررسی سلامت سرویس
+│   │   ├── PerformanceMetrics.cs    # متریک‌های عملکرد
+│   │   └── CustomMetrics.cs         # متریک‌های سفارشی
+│   │
+│   └── ExternalServices/            # اتصال به سرویس‌های خارجی
+│       ├── VirusScannerService.cs   # اسکن ویروس فایل‌ها
+│       ├── ImageProcessor.cs        # پردازش تصاویر
+│       ├── NotificationHub.cs       # مرکز اطلاع‌رسانی
+│       └── AuditService.cs          # سرویس حسابرسی
+│
+├── Endpoints
+│   ├── Controllers/
+│   │   ├── BaseController.cs        # کنترلر پایه
+│   │   ├── AuthController.cs        # کنترلر احراز هویت
+│   │   ├── ProductController.cs     # کنترلر محصولات
+│   │   ├── CategoryController.cs    # کنترلر دسته‌بندی‌ها
+│   │   ├── BrandController.cs       # کنترلر برندها
+│   │   ├── ImageController.cs       # کنترلر تصاویر
+│   │   ├── UserController.cs        # کنترلر کاربران
+│   │   ├── AdminController.cs       # کنترلر ادمین
+│   │   └── HealthController.cs      # کنترلر بررسی سلامت
+│   │
+│   ├── DTOs/
+│   │   ├── Requests/
+│   │   │   ├── Auth/
+│   │   │   │   ├── LoginRequest.cs
+│   │   │   │   ├── RegisterRequest.cs
+│   │   │   │   ├── RefreshTokenRequest.cs
+│   │   │   │   └── ChangePasswordRequest.cs
+│   │   │   │
+│   │   │   ├── Product/
+│   │   │   │   ├── CreateProductRequest.cs
+│   │   │   │   ├── UpdateProductRequest.cs
+│   │   │   │   ├── DeleteProductRequest.cs
+│   │   │   │   └── GetProductRequest.cs
+│   │   │   │
+│   │   │   ├── Category/
+│   │   │   │   ├── CreateCategoryRequest.cs
+│   │   │   │   ├── UpdateCategoryRequest.cs
+│   │   │   │   ├── DeleteCategoryRequest.cs
+│   │   │   │   └── GetCategoryRequest.cs
+│   │   │   │
+│   │   │   ├── Brand/
+│   │   │   │   ├── CreateBrandRequest.cs
+│   │   │   │   ├── UpdateBrandRequest.cs
+│   │   │   │   ├── DeleteBrandRequest.cs
+│   │   │   │   └── GetBrandRequest.cs
+│   │   │   │
+│   │   │   ├── Image/
+│   │   │   │   ├── UploadImageRequest.cs
+│   │   │   │   ├── DeleteImageRequest.cs
+│   │   │   │   └── GetImageRequest.cs
+│   │   │   │
+│   │   │   ├── User/
+│   │   │   │   ├── CreateUserRequest.cs
+│   │   │   │   ├── UpdateUserRequest.cs
+│   │   │   │   ├── DeleteUserRequest.cs
+│   │   │   │   └── GetUserRequest.cs
+│   │   │   │
+│   │   │   └── Common/
+│   │   │       ├── PaginationRequest.cs
+│   │   │       ├── FilterRequest.cs
+│   │   │       └── SortRequest.cs
+│   │   │
+│   │   └── Responses/
+│   │       ├── Auth/
+│   │       │   ├── LoginResponse.cs
+│   │       │   ├── RegisterResponse.cs
+│   │       │   └── RefreshTokenResponse.cs
+│   │       │
+│   │       ├── Product/
+│   │       │   ├── ProductResponse.cs
+│   │       │   ├── ProductListResponse.cs
+│   │       │   └── ProductDetailResponse.cs
+│   │       │
+│   │       ├── Category/
+│   │       │   ├── CategoryResponse.cs
+│   │       │   ├── CategoryListResponse.cs
+│   │       │   └── CategoryTreeResponse.cs
+│   │       │
+│   │       ├── Brand/
+│   │       │   ├── BrandResponse.cs
+│   │       │   └── BrandListResponse.cs
+│   │       │
+│   │       ├── Image/
+│   │       │   ├── ImageResponse.cs
+│   │       │   └── ImageUploadResponse.cs
+│   │       │
+│   │       ├── User/
+│   │       │   ├── UserResponse.cs
+│   │       │   └── UserListResponse.cs
+│   │       │
+│   │       └── Common/
+│   │           ├── ApiResponse.cs
+│   │           ├── PagedResponse.cs
+│   │           ├── ErrorResponse.cs
+│   │           └── SuccessResponse.cs
+│   │
+│   ├── Mappers/                     # نگاشت DTO به مدل‌های دامنه
+│   │   ├── IMapperService.cs
+│   │   ├── AutoMapperProfile.cs     # پروفایل AutoMapper
+│   │   ├── ProductMapper.cs         # نگاشت محصولات
+│   │   ├── CategoryMapper.cs        # نگاشت دسته‌بندی‌ها
+│   │   ├── BrandMapper.cs           # نگاشت برندها
+│   │   ├── ImageMapper.cs           # نگاشت تصاویر
+│   │   └── UserMapper.cs            # نگاشت کاربران
+│   │
+│   ├── Filters/                     # فیلترهای اکشن
+│   │   ├── ValidateModelStateFilter.cs
+│   │   ├── ValidateModelAttribute.cs
+│   │   ├── ApiExceptionFilter.cs
+│   │   └── RateLimitFilter.cs
+│   │
+│   └── Attributes/                  # اتریبیوت‌های سفارشی
+│       ├── AuthorizeRoleAttribute.cs
+│       ├── ValidateModelAttribute.cs
+│       ├── RateLimitAttribute.cs
+│       └── CacheAttribute.cs
+│
+├── CrossCutting
+│   ├── Middleware/                  # میان‌افزارها
+│   │   ├── ErrorHandlingMiddleware.cs
+│   │   ├── RequestLoggingMiddleware.cs
+│   │   ├── CorrelationIdMiddleware.cs
+│   │   ├── RateLimitingMiddleware.cs
+│   │   ├── JwtRefreshMiddleware.cs
+│   │   ├── ValidationMiddleware.cs
+│   │   ├── SecurityHeadersMiddleware.cs
+│   │   ├── LocalizationMiddleware.cs
+│   │   ├── ResponseCompressionMiddleware.cs
+│   │   └── PerformanceMiddleware.cs
+│   │
+│   ├── Validation/                  # اعتبارسنجی
+│   │   ├── FluentValidation/
+│   │   │   ├── IValidatorBase.cs
+│   │   │   ├── LoginRequestValidator.cs
+│   │   │   ├── RegisterRequestValidator.cs
+│   │   │   ├── CreateProductRequestValidator.cs
+│   │   │   ├── UpdateProductRequestValidator.cs
+│   │   │   ├── CreateCategoryRequestValidator.cs
+│   │   │   ├── UpdateCategoryRequestValidator.cs
+│   │   │   ├── CreateBrandRequestValidator.cs
+│   │   │   ├── UpdateBrandRequestValidator.cs
+│   │   │   ├── UploadImageRequestValidator.cs
+│   │   │   └── CreateUserRequestValidator.cs
+│   │   │
+│   │   └── CustomValidators/
+│   │       ├── SlugValidator.cs
+│   │       ├── PriceValidator.cs
+│   │       ├── ImageValidator.cs
+│   │       └── PasswordValidator.cs
+│   │
+│   ├── Exceptions/                  # استثناها
+│   │   ├── ApiException.cs
+│   │   ├── NotFoundException.cs
+│   │   ├── BadRequestException.cs
+│   │   ├── UnauthorizedException.cs
+│   │   ├── ForbiddenException.cs
+│   │   ├── ConflictException.cs
+│   │   ├── RateLimitExceededException.cs
+│   │   └── ExternalServiceException.cs
+│   │
+│   ├── Security/                    # امنیت
+│   │   ├── Authorization/
+│   │   │   ├── Policies/
+│   │   │   │   ├── AdminPolicy.cs
+│   │   │   │   ├── SellerPolicy.cs
+│   │   │   │   ├── BuyerPolicy.cs
+│   │   │   │   ├── ProductOwnerPolicy.cs
+│   │   │   │   └── BrandManagerPolicy.cs
+│   │   │   │
+│   │   │   ├── Requirements/
+│   │   │   │   ├── AdminRequirement.cs
+│   │   │   │   ├── SellerRequirement.cs
+│   │   │   │   ├── BuyerRequirement.cs
+│   │   │   │   ├── ProductOwnerRequirement.cs
+│   │   │   │   └── BrandManagerRequirement.cs
+│   │   │   │
+│   │   │   └── Handlers/
+│   │   │       ├── AdminHandler.cs
+│   │   │       ├── SellerHandler.cs
+│   │   │       ├── BuyerHandler.cs
+│   │   │       ├── ProductOwnerHandler.cs
+│   │   │       └── BrandManagerHandler.cs
+│   │   │
+│   │   ├── Authentication/
+│   │   │   ├── JwtOptions.cs
+│   │   │   ├── TokenService.cs
+│   │   │   └── RefreshTokenService.cs
+│   │   │
+│   │   ├── Encryption/
+│   │   │   ├── AesEncryption.cs
+│   │   │   └── RsaEncryption.cs
+│   │   │
+│   │   ├── Headers/
+│   │   │   ├── SecurityHeadersBuilder.cs
+│   │   │   └── CspBuilder.cs
+│   │   │
+│   │   └── Keys/
+│   │       ├── KeyRotationService.cs
+│   │       └── KeyStore.cs
+│   │
+│   ├── Extensions/                  # اکستنشن متدها
+│   │   ├── ServiceCollectionExtensions.cs
+│   │   ├── ApplicationBuilderExtensions.cs
+│   │   ├── MiddlewareExtensions.cs
+│   │   ├── ValidationExtensions.cs
+│   │   ├── SecurityExtensions.cs
+│   │   └── LoggingExtensions.cs
+│   │
+│   ├── Caching/                     # کش
+│   │   ├── CacheKeys.cs
+│   │   ├── CacheOptions.cs
+│   │   ├── CacheExtensions.cs
+│   │   └── CacheInvalidationService.cs
+│   │
+│   ├── Localization/                # محلی‌سازی
+│   │   ├── Resources/
+│   │   │   ├── ErrorMessages.Designer.cs
+│   │   │   └── ValidationMessages.Designer.cs
+│   │   │
+│   │   └── LocalizationService.cs
+│   │
+│   └── Utilities/                   # ابزارهای کمکی
+│       ├── DateTimeHelper.cs
+│       ├── StringHelper.cs
+│       ├── FileHelper.cs
+│       ├── CryptoHelper.cs
+│       ├── JsonHelper.cs
+│       └── EnvironmentHelper.cs
+│
+├── tests/
+│   ├── Unit/
+│   │   ├── Domain/
+│   │   │   ├── ProductTests.cs
+│   │   │   ├── CategoryTests.cs
+│   │   │   ├── BrandTests.cs
+│   │   │   └── ImageTests.cs
+│   │   │
+│   │   ├── Services/
+│   │   │   ├── ProductServiceTests.cs
+│   │   │   ├── CategoryServiceTests.cs
+│   │   │   ├── BrandServiceTests.cs
+│   │   │   ├── AuthServiceTests.cs
+│   │   │   └── ImageServiceTests.cs
+│   │   │
+│   │   ├── Validators/
+│   │   │   ├── ProductValidatorTests.cs
+│   │   │   ├── CategoryValidatorTests.cs
+│   │   │   ├── BrandValidatorTests.cs
+│   │   │   └── AuthValidatorTests.cs
+│   │   │
+│   │   └── Utilities/
+│   │       ├── SlugTests.cs
+│   │       ├── MoneyTests.cs
+│   │       └── EncryptionTests.cs
+│   │
+│   ├── Integration/
+│   │   ├── Repositories/
+│   │   │   ├── ProductRepositoryTests.cs
+│   │   │   ├── CategoryRepositoryTests.cs
+│   │   │   ├── BrandRepositoryTests.cs
+│   │   │   └── ImageRepositoryTests.cs
+│   │   │
+│   │   ├── Controllers/
+│   │   │   ├── ProductControllerTests.cs
+│   │   │   ├── CategoryControllerTests.cs
+│   │   │   ├── BrandControllerTests.cs
+│   │   │   └── AuthControllerTests.cs
+│   │   │
+│   │   ├── Infrastructure/
+│   │   │   ├── FileStorageTests.cs
+│   │   │   ├── ElasticServiceTests.cs
+│   │   │   ├── CacheServiceTests.cs
+│   │   │   └── SecurityTests.cs
+│   │   │
+│   │   └── EndToEnd/
+│   │       ├── ProductE2ETests.cs
+│   │       ├── AuthE2ETests.cs
+│   │       └── ImageE2ETests.cs
+│   │
+│   └── Performance/
+│       ├── LoadTesting/
+│       │   ├── ProductLoadTests.cs
+│       │   ├── SearchLoadTests.cs
+│       │   └── AuthLoadTests.cs
+│       │
+│       └── Benchmarks/
+│           ├── RepositoryBenchmarks.cs
+│           ├── ServiceBenchmarks.cs
+│           └── CacheBenchmarks.cs
+│
+├── docs/
+│   ├── API/
+│   │   ├── ProductApi.md
+│   │   ├── CategoryApi.md
+│   │   ├── BrandApi.md
+│   │   ├── AuthApi.md
+│   │   └── ImageApi.md
+│   │
+│   ├── Architecture/
+│   │   ├── DomainModel.md
+│   │   ├── SecurityDesign.md
+│   │   ├── CachingStrategy.md
+│   │   └── DeploymentGuide.md
+│   │
+│   └── Database/
+│       ├── Schema.md
+│       └── Migrations.md
+│
+├── deployment/
+│   ├── scripts/
+│   │   ├── deploy.ps1               # اسکریپت پاورشل برای استقرار
+│   │   ├── migrate.ps1              # اسکریپت پاورشل برای مایگریشن
+│   │   ├── backup.ps1               # اسکریپت پاورشل برای بکاپ
+│   │   ├── deploy.sh                # اسکریپت شل برای استقرار (لینوکس)
+│   │   ├── migrate.sh               # اسکریپت شل برای مایگریشن (لینوکس)
+│   │   └── backup.sh                # اسکریپت شل برای بکاپ (لینوکس)
+│   │
+│   ├── iis/
+│   │   ├── web.config               # تنظیمات IIS
+│   │   ├── applicationHost.config   # تنظیمات پیشرفته IIS
+│   │   └── urlrewrite.xml           # قوانین بازنویسی URL
+│   │
+│   ├── configuration/
+│   │   ├── appsettings.Development.json
+│   │   ├── appsettings.Staging.json
+│   │   ├── appsettings.Production.json
+│   │   └── host.json                # تنظیمات میزبان
+│   │
+│   └── monitoring/
+│       ├── prometheus/
+│       │   ├── prometheus.yml       # تنظیمات پرامتیوس
+│       │   └── alert_rules.yml      # قوانین هشدار
+│       │
+│       ├── grafana/
+│       │   ├── dashboards/          # داشبوردهای گرافانا
+│       │   └── datasources.yml      # تنظیمات منابع داده
+│       │
+│       └── elasticsearch/
+│           ├── logstash/             # تنظیمات لاگ استش
+│           └── kibana/               # داشبوردهای کیبانا
+│
+└── Program.cs                       # نقطه شروع برنامه
