@@ -1,0 +1,252 @@
+CatalogService
+│
+├── Domain
+│   ├── Core
+│   │   ├── Entities/                
+│   │   │   ├── Product.cs
+│   │   │   ├── Category.cs
+│   │   │   ├── Brand.cs
+│   │   │   ├── ImageResource.cs
+│   │   │   ├── ProductVariant.cs
+│   │   │   ├── ProductAttribute.cs
+│   │   │   ├── ProductReview.cs
+│   │   │   └── ProductTag.cs
+│   │   │
+│   │   ├── Enums/
+│   │   │   ├── ProductStatus.cs
+│   │   │   ├── ImageType.cs
+│   │   │   ├── StockStatus.cs
+│   │   │   ├── ReviewStatus.cs
+│   │   │   └── UserRole.cs
+│   │   │
+│   │   ├── Primitives/              
+│   │   │   ├── AggregateRoot.cs
+│   │   │   ├── ValueObject.cs
+│   │   │   ├── Slug.cs
+│   │   │   ├── Money.cs
+│   │   │   ├── Dimensions.cs
+│   │   │   └── Weight.cs
+│   │   │
+│   │   ├── Contracts/
+│   │   │   ├── Repositories/        
+│   │   │   │   ├── IProductRepository.cs
+│   │   │   │   ├── ICategoryRepository.cs
+│   │   │   │   ├── IBrandRepository.cs
+│   │   │   │   ├── IImageRepository.cs
+│   │   │   │   ├── IProductVariantRepository.cs
+│   │   │   │   ├── IProductAttributeRepository.cs
+│   │   │   │   ├── IProductReviewRepository.cs
+│   │   │   │   └── IProductTagRepository.cs
+│   │   │   │
+│   │   │   └── Services/            
+│   │   │       ├── IProductService.cs
+│   │   │       ├── ICategoryService.cs
+│   │   │       ├── IBrandService.cs
+│   │   │       ├── IImageService.cs
+│   │   │       ├── IProductVariantService.cs
+│   │   │       ├── IProductAttributeService.cs
+│   │   │       ├── IProductReviewService.cs
+│   │   │       ├── IProductTagService.cs
+│   │   │       └── ISlugService.cs
+│   │   │
+│   ├── Services/                    
+│   │   ├── ProductService.cs
+│   │   ├── CategoryService.cs
+│   │   ├── BrandService.cs
+│   │   ├── ImageService.cs
+│   │   ├── ProductVariantService.cs
+│   │   ├── ProductAttributeService.cs
+│   │   ├── ProductReviewService.cs
+│   │   ├── ProductTagService.cs
+│   │   └── SlugService.cs
+│
+├── Infrastructure
+│   ├── Data/
+│   │   ├── Db/
+│   │   │   └── AppDbContext.cs      
+│   │   ├── Repositories/            
+│   │   │   ├── ProductRepository.cs
+│   │   │   ├── CategoryRepository.cs
+│   │   │   ├── BrandRepository.cs
+│   │   │   ├── ImageRepository.cs
+│   │   │   ├── ProductVariantRepository.cs
+│   │   │   ├── ProductAttributeRepository.cs
+│   │   │   ├── ProductReviewRepository.cs
+│   │   │   └── ProductTagRepository.cs
+│   │   └── Migrations/
+│   │
+│   ├── Configuration/               
+│   │   ├── ProductConfiguration.cs
+│   │   ├── CategoryConfiguration.cs
+│   │   ├── BrandConfiguration.cs
+│   │   ├── ImageResourceConfiguration.cs
+│   │   ├── ProductVariantConfiguration.cs
+│   │   ├── ProductAttributeConfiguration.cs
+│   │   ├── ProductReviewConfiguration.cs
+│   │   └── ProductTagConfiguration.cs
+│   │
+│   ├── FileStorage/                 
+│   │   ├── IFileStorage.cs
+│   │   ├── LocalFileStorage.cs
+│   │   ├── S3FileStorage.cs
+│   │   └── AzureBlobStorage.cs
+│   │
+│   ├── Search/                      
+│   │   ├── IElasticService.cs
+│   │   ├── ElasticService.cs
+│   │   └── SearchQueryBuilder.cs
+│   │
+│   ├── Security/
+│   │   ├── JwtTokenGenerator.cs
+│   │   ├── IKeyManagementService.cs
+│   │   ├── KeyManagementService.cs
+│   │   ├── ApiKeyValidator.cs
+│   │   └── ServiceAuthenticationHandler.cs
+│   │
+│   ├── Caching/
+│   │   ├── ICacheService.cs
+│   │   ├── RedisCacheService.cs
+│   │   └── CacheKeys.cs
+│   │
+│   ├── ExternalServices/
+│   │   ├── IInventoryServiceClient.cs
+│   │   ├── InventoryServiceClient.cs
+│   │   ├── IPricingServiceClient.cs
+│   │   └── PricingServiceClient.cs
+│   │
+│   └── Logging/
+│       ├── SerilogConfig.cs
+│       └── CustomLogEnricher.cs
+│
+├── Endpoints
+│   ├── Controllers/
+│   │   ├── Admin/
+│   │   │   ├── AdminProductController.cs
+│   │   │   ├── AdminCategoryController.cs
+│   │   │   ├── AdminBrandController.cs
+│   │   │   ├── AdminProductVariantController.cs
+│   │   │   ├── AdminProductAttributeController.cs
+│   │   │   └── AdminProductReviewController.cs
+│   │   │
+│   │   ├── Vendor/
+│   │   │   ├── VendorProductController.cs
+│   │   │   ├── VendorProductVariantController.cs
+│   │   │   └── VendorProductReviewController.cs
+│   │   │
+│   │   └── Public/
+│   │       ├── ProductController.cs
+│   │       ├── CategoryController.cs
+│   │       ├── BrandController.cs
+│   │       └── ProductReviewController.cs
+│   │
+│   ├── DTOs/
+│   │   ├── Requests/
+│   │   │   ├── Admin/
+│   │   │   │   ├── CreateCategoryRequest.cs
+│   │   │   │   ├── UpdateCategoryRequest.cs
+│   │   │   │   ├── CreateBrandRequest.cs
+│   │   │   │   ├── UpdateBrandRequest.cs
+│   │   │   │   └── AdminProductSearchRequest.cs
+│   │   │   │
+│   │   │   ├── Vendor/
+│   │   │   │   ├── CreateProductRequest.cs
+│   │   │   │   ├── UpdateProductRequest.cs
+│   │   │   │   ├── CreateProductVariantRequest.cs
+│   │   │   │   ├── UpdateProductVariantRequest.cs
+│   │   │   │   └── VendorProductSearchRequest.cs
+│   │   │   │
+│   │   │   └── Public/
+│   │   │       ├── ProductSearchRequest.cs
+│   │   │       └── CreateProductReviewRequest.cs
+│   │   │
+│   │   └── Responses/
+│   │       ├── Admin/
+│   │       │   ├── AdminProductResponse.cs
+│   │       │   ├── AdminCategoryResponse.cs
+│   │       │   └── AdminBrandResponse.cs
+│   │       │
+│   │       ├── Vendor/
+│   │       │   ├── VendorProductResponse.cs
+│   │       │   └── VendorProductVariantResponse.cs
+│   │       │
+│   │       └── Public/
+│   │           ├── ProductResponse.cs
+│   │           ├── CategoryResponse.cs
+│   │           ├── BrandResponse.cs
+│   │           └── ProductReviewResponse.cs
+│   │
+│   └── Mappers/                     
+│       ├── AdminMappingProfile.cs
+│       ├── VendorMappingProfile.cs
+│       └── PublicMappingProfile.cs
+│
+├── CrossCutting
+│   ├── Middleware/
+│   │   ├── ErrorHandlingMiddleware.cs
+│   │   ├── RequestLoggingMiddleware.cs
+│   │   ├── CorrelationIdMiddleware.cs
+│   │   ├── RateLimitingMiddleware.cs
+│   │   └── PerformanceMetricsMiddleware.cs
+│   │
+│   ├── Validation/                  
+│   │   ├── Admin/
+│   │   │   ├── CreateCategoryValidator.cs
+│   │   │   ├── UpdateCategoryValidator.cs
+│   │   │   ├── CreateBrandValidator.cs
+│   │   │   └── UpdateBrandValidator.cs
+│   │   │
+│   │   ├── Vendor/
+│   │   │   ├── CreateProductValidator.cs
+│   │   │   ├── UpdateProductValidator.cs
+│   │   │   ├── CreateProductVariantValidator.cs
+│   │   │   └── UpdateProductVariantValidator.cs
+│   │   │
+│   │   └── Public/
+│   │       ├── CreateProductReviewValidator.cs
+│   │       └── ProductSearchValidator.cs
+│   │
+│   ├── Exceptions/
+│   │   ├── NotFoundException.cs
+│   │   ├── BusinessRuleException.cs
+│   │   ├── DuplicateEntityException.cs
+│   │   ├── InvalidImageException.cs
+│   │   ├── UnauthorizedAccessException.cs
+│   │   └── ServiceUnavailableException.cs
+│   │
+│   ├── Security/
+│   │   ├── AuthorizationPolicies.cs
+│   │   ├── RoleConstants.cs
+│   │   ├── PermissionConstants.cs
+│   │   ├── PolicyRequirements/
+│   │   │   ├── AdminRequirement.cs
+│   │   │   ├── VendorRequirement.cs
+│   │   │   └── ProductOwnerRequirement.cs
+│   │   │
+│   │   └── Handlers/
+│   │       ├── ProductOwnerHandler.cs
+│   │       └── VendorAccessHandler.cs
+│   │
+│   ├── Extensions/
+│   │   ├── ServiceCollectionExtensions.cs
+│   │   ├── ApplicationBuilderExtensions.cs
+│   │   └── ClaimsPrincipalExtensions.cs
+│   │
+│   └── Utilities/
+│       ├── SlugHelper.cs
+│       ├── ImageProcessor.cs
+│       ├── DateTimeProvider.cs
+│       └── PaginationHelper.cs
+│
+├── tests/
+│   ├── Unit/
+│   │   ├── Domain/
+│   │   ├── Services/
+│   │   └── Security/
+│   └── Integration/
+│       ├── Controllers/
+│       │   ├── Admin/
+│       │   ├── Vendor/
+│       │   └── Public/
+│       └── Security/
+│
+└── Program.cs این معماری آنیون منه که این سرویس کاتالوگ برای یک سایت فروشگاهی واسطه فروش است که با معماری میکروسرویس در حال توسعه است این یکی از سرویس های من است که باید با دقت و ظرافت به بهترین شکل ساخته شود . هر قسمتی که ازت میخواهم را به بهترین شکل کامل بی نقص و بسیار با دقت برام بساز و بفرست همچنین در نظر داشته باش که با کلاس های دیگر سازگار و قابل اجرا باشد - با حداقل خطا.  
