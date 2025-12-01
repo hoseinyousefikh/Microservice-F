@@ -94,7 +94,11 @@ namespace Catalog_Service.src._01_Domain.Core.Entities
             IsActive = false;
             UpdatedAt = DateTime.UtcNow;
         }
-
+        public void SetStockStatus(StockStatus status)
+        {
+            StockStatus = status;
+            UpdatedAt = DateTime.UtcNow;
+        }
         public void AddAttribute(ProductAttribute attribute)
         {
             _attributes.Add(attribute);

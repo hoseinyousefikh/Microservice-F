@@ -202,7 +202,11 @@ namespace Catalog_Service.src._01_Domain.Core.Entities
             _attributes.Add(attribute);
             UpdatedAt = DateTime.UtcNow;
         }
-
+        public void SetStockStatus(StockStatus status)
+        {
+            StockStatus = status;
+            UpdatedAt = DateTime.UtcNow;
+        }
         public void RemoveAttribute(ProductAttribute attribute)
         {
             _attributes.Remove(attribute);

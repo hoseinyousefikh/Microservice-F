@@ -1,34 +1,21 @@
 ﻿using Catalog_Service.src._01_Domain.Core.Entities;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
 
-namespace Catalog_Service.src._01_Domain.Core.Contracts.Repositories
+namespace Catalog_Service.src._01_Domain.Core.Contracts.Services
 {
-    public interface IProductAttributeRepository
+    public interface IProductAttributeService
     {
         // متدهای اصلی CRUD
         Task<ProductAttribute> GetByIdAsync(int id, CancellationToken cancellationToken = default);
         Task<IEnumerable<ProductAttribute>> GetAllAsync(CancellationToken cancellationToken = default);
         Task<IEnumerable<ProductAttribute>> GetByProductIdAsync(int productId, CancellationToken cancellationToken = default);
         Task<IEnumerable<ProductAttribute>> GetByProductVariantIdAsync(int productVariantId, CancellationToken cancellationToken = default);
-        Task<ProductAttribute> AddAsync(ProductAttribute attribute, CancellationToken cancellationToken = default);
-        void Update(ProductAttribute attribute);
-        void Remove(ProductAttribute attribute);
-        Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
-
-        // متد جدید برای دریافت ویژگی‌های محصول
-        Task<IEnumerable<ProductAttribute>> GetAttributesAsync(int productId, CancellationToken cancellationToken = default);
+        Task<ProductAttribute> CreateAsync(int productId, string name, string value, int? productVariantId = null, bool isVariantSpecific = false, CancellationToken cancellationToken = default);
+        Task UpdateAsync(int id, string name, string value, CancellationToken cancellationToken = default);
+        Task DeleteAsync(int id, CancellationToken cancellationToken = default);
+        Task<bool> ExistsAsync(int id, CancellationToken cancellationToken = default);
 
         // متدهای جستجو و فیلتر
-        Task<(IEnumerable<ProductAttribute> Attributes, int TotalCount)> GetPagedAsync(
-            int pageNumber,
-            int pageSize,
-            int? productId = null,
-            int? productVariantId = null,
-            string name = null,
-            bool onlyVariantSpecific = false,
-            CancellationToken cancellationToken = default);
+        Task<(IEnumerable<ProductAttribute> Attributes, int TotalCount)> GetPagedAsync(int pageNumber, int pageSize, int? productId = null, int? productVariantId = null, string name = null, bool onlyVariantSpecific = false, CancellationToken cancellationToken = default);
 
         // متدهای برای مدیریت ویژگی‌های محصول
         Task<IEnumerable<ProductAttribute>> GetProductAttributesAsync(int productId, CancellationToken cancellationToken = default);
@@ -39,12 +26,6 @@ namespace Catalog_Service.src._01_Domain.Core.Contracts.Repositories
         // متدهای برای مدیریت ویژگی‌های مشترک
         Task<IEnumerable<ProductAttribute>> GetCommonAttributesAsync(IEnumerable<int> productIds, CancellationToken cancellationToken = default);
         Task<IEnumerable<ProductAttribute>> GetDistinctAttributesAsync(int productId, CancellationToken cancellationToken = default);
-
-        // متدهای ویژه
-        Task<bool> ExistsAsync(int id, CancellationToken cancellationToken = default);
-        Task<int> CountAsync(CancellationToken cancellationToken = default);
-        Task<int> CountByProductIdAsync(int productId, CancellationToken cancellationToken = default);
-        Task<int> CountByProductVariantIdAsync(int productVariantId, CancellationToken cancellationToken = default);
 
         // متدهای برای حذف گروهی
         Task RemoveAllProductAttributesAsync(int productId, CancellationToken cancellationToken = default);

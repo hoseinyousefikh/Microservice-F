@@ -97,7 +97,11 @@ namespace Catalog_Service.src._01_Domain.Core.Entities
             _subCategories.Add(category);
             UpdatedAt = DateTime.UtcNow;
         }
-
+        public void SetDisplayOrder(int displayOrder)
+        {
+            DisplayOrder = displayOrder;
+            UpdatedAt = DateTime.UtcNow;
+        }
         public void RemoveSubCategory(Category category)
         {
             _subCategories.Remove(category);

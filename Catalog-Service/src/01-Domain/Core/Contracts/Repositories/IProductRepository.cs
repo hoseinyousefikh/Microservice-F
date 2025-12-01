@@ -1,6 +1,9 @@
 ﻿using Catalog_Service.src._01_Domain.Core.Entities;
 using Catalog_Service.src._01_Domain.Core.Enums;
 using Catalog_Service.src._01_Domain.Core.Primitives;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Catalog_Service.src._01_Domain.Core.Contracts.Repositories
 {
@@ -73,5 +76,10 @@ namespace Catalog_Service.src._01_Domain.Core.Contracts.Repositories
         Task<decimal> GetAveragePriceByBrandAsync(int brandId, CancellationToken cancellationToken = default);
         Task<int> GetViewCountAsync(int productId, CancellationToken cancellationToken = default);
         Task IncrementViewCountAsync(int productId, CancellationToken cancellationToken = default);
+
+        // متدهای جدید برای بررسی‌ها
+        Task<double> GetAverageRatingAsync(int productId, CancellationToken cancellationToken = default);
+        Task<int> GetTotalReviewsCountAsync(int productId, CancellationToken cancellationToken = default);
+        Task<IDictionary<int, int>> GetRatingDistributionAsync(int productId, CancellationToken cancellationToken = default);
     }
 }
