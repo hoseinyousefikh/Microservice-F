@@ -2,7 +2,7 @@ CatalogService
 │
 ├── Domain
 │   ├── Core
-│   │   ├── Entities/                
+│   │   ├── Entities/                ***
 │   │   │   ├── Product.cs
 │   │   │   ├── Category.cs
 │   │   │   ├── Brand.cs
@@ -12,14 +12,14 @@ CatalogService
 │   │   │   ├── ProductReview.cs
 │   │   │   └── ProductTag.cs
 │   │   │
-│   │   ├── Enums/
+│   │   ├── Enums/***
 │   │   │   ├── ProductStatus.cs
 │   │   │   ├── ImageType.cs
 │   │   │   ├── StockStatus.cs
 │   │   │   ├── ReviewStatus.cs
 │   │   │   └── UserRole.cs
 │   │   │
-│   │   ├── Primitives/              
+│   │   ├── Primitives/            ***  
 │   │   │   ├── AggregateRoot.cs
 │   │   │   ├── ValueObject.cs
 │   │   │   ├── Slug.cs
@@ -28,7 +28,7 @@ CatalogService
 │   │   │   └── Weight.cs
 │   │   │
 │   │   ├── Contracts/
-│   │   │   ├── Repositories/        
+│   │   │   ├── Repositories/        ***
 │   │   │   │   ├── IProductRepository.cs
 │   │   │   │   ├── ICategoryRepository.cs
 │   │   │   │   ├── IBrandRepository.cs
@@ -38,7 +38,7 @@ CatalogService
 │   │   │   │   ├── IProductReviewRepository.cs
 │   │   │   │   └── IProductTagRepository.cs
 │   │   │   │
-│   │   │   └── Services/            
+│   │   │   └── Services/            ***
 │   │   │       ├── IProductService.cs
 │   │   │       ├── ICategoryService.cs
 │   │   │       ├── IBrandService.cs
@@ -49,7 +49,7 @@ CatalogService
 │   │   │       ├── IProductTagService.cs
 │   │   │       └── ISlugService.cs
 │   │   │
-│   ├── Services/                    
+│   ├── Services/         ***           
 │   │   ├── ProductService.cs
 │   │   ├── CategoryService.cs
 │   │   ├── BrandService.cs
@@ -63,9 +63,9 @@ CatalogService
 ├── Infrastructure
 │   ├── Data/
 │   │   ├── Db/
-│   │   │   └── AppDbContext.cs      
-│   │   ├── Repositories/            
-│   │   │   ├── ProductRepository.cs
+│   │   │   └── AppDbContext.cs      ***
+│   │   ├── Repositories/            ***
+│   │   │   ├── ProductRepository.cs**
 │   │   │   ├── CategoryRepository.cs
 │   │   │   ├── BrandRepository.cs
 │   │   │   ├── ImageRepository.cs
@@ -75,7 +75,7 @@ CatalogService
 │   │   │   └── ProductTagRepository.cs
 │   │   └── Migrations/
 │   │
-│   ├── Configuration/               
+│   ├── Configuration/               ***
 │   │   ├── ProductConfiguration.cs
 │   │   ├── CategoryConfiguration.cs
 │   │   ├── BrandConfiguration.cs
@@ -249,4 +249,6 @@ CatalogService
 │       │   └── Public/
 │       └── Security/
 │
-└── Program.cs این معماری آنیون منه که این سرویس کاتالوگ برای یک سایت فروشگاهی واسطه فروش است که با معماری میکروسرویس در حال توسعه است این یکی از سرویس های من است که باید با دقت و ظرافت به بهترین شکل ساخته شود . هر قسمتی که ازت میخواهم را به بهترین شکل کامل بی نقص و بسیار با دقت برام بساز و بفرست همچنین در نظر داشته باش که با کلاس های دیگر سازگار و قابل اجرا باشد - با حداقل خطا.  
+└── Program.cs 
+این معماری آنیون منه که این سرویس کاتالوگ برای یک سایت فروشگاهی واسطه فروش است که با معماری میکروسرویس در حال توسعه است این یکی از سرویس های من است که باید با دقت و ظرافت به بهترین شکل ساخته شود . هر قسمتی که ازت میخواهم را به بهترین شکل کامل بی نقص و بسیار با دقت برام بساز و بفرست همچنین در نظر داشته باش که با کلاس های دیگر سازگار و قابل اجرا باشد - با حداقل خطا.  
+قسمت های سرچ الاستیک رو در نظر نگیر از الاستیک استفاده نمیکنم -
