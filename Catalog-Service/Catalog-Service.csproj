@@ -36,8 +36,4 @@
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.7.0" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="src\03-Endpoints\Controllers\" />
-  </ItemGroup>
-
 </Project>
