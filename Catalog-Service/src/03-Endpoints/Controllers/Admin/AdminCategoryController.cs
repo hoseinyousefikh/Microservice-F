@@ -96,14 +96,12 @@ namespace Catalog_Service.src._03_Endpoints.Controllers.Admin
                 request.Name,
                 request.Description,
                 request.DisplayOrder,
-                request.ParentCategoryId,
-                request.ImageUrl,
-                request.MetaTitle,
+                request.ImageUrl,       
+                request.MetaTitle,     
                 request.MetaDescription);
 
             return NoContent();
         }
-
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCategory(int id)
         {

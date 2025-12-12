@@ -1,10 +1,16 @@
 ﻿using AutoMapper;
 using Catalog_Service.src._01_Domain.Core.Contracts.Services;
+using Catalog_Service.src._01_Domain.Core.Enums;
 using Catalog_Service.src._01_Domain.Core.Primitives;
 using Catalog_Service.src._03_Endpoints.DTOs.Requests.Admin;
+using Catalog_Service.src._03_Endpoints.DTOs.Requests.Public;
 using Catalog_Service.src._03_Endpoints.DTOs.Requests.Vendor;
+using Catalog_Service.src._03_Endpoints.DTOs.Responses;
+using Catalog_Service.src._03_Endpoints.DTOs.Responses;
 using Catalog_Service.src._03_Endpoints.DTOs.Responses.Admin;
 using Catalog_Service.src.CrossCutting.Security;
+using Catalog_Service.src.CrossCutting.Validation.Admin;
+using Catalog_Service.src.CrossCutting.Validation.Public;
 using Catalog_Service.src.CrossCutting.Validation.Vendor;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -33,37 +39,56 @@ namespace Catalog_Service.src._03_Endpoints.Controllers.Admin
         [HttpGet]
         public async Task<IActionResult> GetProducts([FromQuery] AdminProductSearchRequest request)
         {
-            var validator = new AdminProductSearchValidator();
-            var validationResult = await validator.ValidateAsync(request);
+            var productSearchRequest = new ProductSearchRequest
+            {
+                PageNumber = request.PageNumber,
+                PageSize = request.PageSize,
+                SearchTerm = request.SearchTerm,
+                CategoryId = request.CategoryId,
+                BrandId = request.BrandId,
+                MinPrice = request.MinPrice,
+                MaxPrice = request.MaxPrice,
+                SortBy = request.SortBy,
+                SortAscending = request.SortAscending
+            };
+
+            var validator = new ProductSearchValidator();
+            var validationResult = await validator.ValidateAsync(productSearchRequest);
 
             if (!validationResult.IsValid)
             {
                 return BadRequest(validationResult.Errors);
             }
 
-            var (products, totalCount) = await _productService.GetPagedAsync(
+            ProductStatus? status = null;
+            if (request.IsActive.HasValue)
+            {
+                status = request.IsActive.Value ? ProductStatus.Published : ProductStatus.Draft;
+            }
+
+            var result = await _productService.GetPagedAsync(
                 request.PageNumber,
                 request.PageSize,
                 request.SearchTerm,
                 request.CategoryId,
                 request.BrandId,
-                request.IsActive,
+                status,
                 request.MinPrice,
                 request.MaxPrice,
                 request.SortBy,
-                request.SortAscending);
+                request.SortAscending,
+                default); // اضافه کردن CancellationToken
 
             var response = new PagedResponse<AdminProductResponse>
             {
-                Items = _mapper.Map<IEnumerable<AdminProductResponse>>(products),
-                TotalCount = totalCount,
+                Items = _mapper.Map<IEnumerable<AdminProductResponse>>(result.Products),
+                TotalCount = result.TotalCount,
                 PageNumber = request.PageNumber,
                 PageSize = request.PageSize
             };
 
             return Ok(response);
         }
-
         [HttpGet("{id}")]
         public async Task<IActionResult> GetProduct(int id)
         {
@@ -91,14 +116,12 @@ namespace Catalog_Service.src._03_Endpoints.Controllers.Admin
             var product = await _productService.CreateAsync(
                 request.Name,
                 request.Description,
-                request.Price,
+                _mapper.Map<Money>(request.Price),
                 request.BrandId,
                 request.CategoryId,
                 request.Sku,
                 _mapper.Map<Dimensions>(request.Dimensions),
-                new Weight(request.Weight, "kg"),
-                request.ImageUrl,
-                request.OriginalPrice,
+                Weight.Create(request.Weight, "kg"),
                 request.MetaTitle,
                 request.MetaDescription);
 
@@ -121,17 +144,16 @@ namespace Catalog_Service.src._03_Endpoints.Controllers.Admin
                 id,
                 request.Name,
                 request.Description,
-                request.Price,
-                request.OriginalPrice,
+                _mapper.Map<Money>(request.Price),
+                _mapper.Map<Money?>(request.OriginalPrice),
                 _mapper.Map<Dimensions>(request.Dimensions),
-                new Weight(request.Weight, "kg"),
-                request.ImageUrl,
+                Weight.Create(request.Weight, "kg"),
                 request.MetaTitle,
-                request.MetaDescription);
+                request.MetaDescription,
+                default); // اضافه کردن CancellationToken
 
             return NoContent();
         }
-
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteProduct(int id)
         {

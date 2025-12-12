@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Catalog_Service.src._01_Domain.Core.Contracts.Services;
+using Catalog_Service.src._03_Endpoints.DTOs.Responses.Admin;
 using Catalog_Service.src.CrossCutting.Security;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

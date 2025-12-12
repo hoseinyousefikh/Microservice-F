@@ -48,5 +48,7 @@ namespace Catalog_Service.src._01_Domain.Core.Contracts.Services
         Task<int> GetTotalProductsCountAsync(int categoryId, CancellationToken cancellationToken = default);
         Task<int> GetActiveProductsCountAsync(int categoryId, CancellationToken cancellationToken = default);
         Task<int> GetTotalSubCategoriesCountAsync(int categoryId, CancellationToken cancellationToken = default);
+        // در فایل ICategoryService.cs
+        Task<IEnumerable<Category>> GetCategoryTreeAsync(CancellationToken cancellationToken = default);
     }
 }

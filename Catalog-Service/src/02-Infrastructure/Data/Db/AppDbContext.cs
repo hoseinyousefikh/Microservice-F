@@ -26,6 +26,7 @@ namespace Catalog_Service.src._02_Infrastructure.Data.Db
         public DbSet<ProductAttribute> ProductAttributes { get; set; }
         public DbSet<ProductReview> ProductReviews { get; set; }
         public DbSet<ProductTag> ProductTags { get; set; }
+        public DbSet<ProductReviewReply> ProductReviewReplies { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

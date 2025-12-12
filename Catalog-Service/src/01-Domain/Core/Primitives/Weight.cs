@@ -11,7 +11,7 @@
             Unit = unit;
         }
 
-        public static Weight Create(decimal value, string unit = "g")
+        public static Weight Create(decimal value, string unit)
         {
             if (value <= 0)
                 throw new ArgumentException("Weight must be positive", nameof(value));

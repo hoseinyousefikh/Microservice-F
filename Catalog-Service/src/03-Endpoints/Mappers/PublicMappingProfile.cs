@@ -3,6 +3,7 @@ using Catalog_Service.src._01_Domain.Core.Entities;
 using Catalog_Service.src._01_Domain.Core.Enums;
 using Catalog_Service.src._01_Domain.Core.Primitives;
 using Catalog_Service.src._03_Endpoints.DTOs.Responses.Public;
+using static Catalog_Service.src._03_Endpoints.DTOs.Responses.Public.ProductVariantResponse;
 
 namespace Catalog_Service.src._03_Endpoints.Mappers
 {

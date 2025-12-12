@@ -35,7 +35,6 @@ builder.Services.AddSwaggerGen(options =>
         }
     });
 
-    // افزودن احراز هویت JWT به Swagger
     options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",

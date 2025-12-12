@@ -1,4 +1,6 @@
-﻿using Catalog_Service.src._01_Domain.Core.Enums;
+﻿using Catalog_Service.src._01_Domain.Core.Entities;
+using Catalog_Service.src._01_Domain.Core.Enums;
+using Catalog_Service.src._01_Domain.Core.Primitives;
 
 namespace Catalog_Service.src._03_Endpoints.DTOs.Responses.Admin
 {
@@ -81,5 +83,38 @@ namespace Catalog_Service.src._03_Endpoints.DTOs.Responses.Admin
     {
         public decimal Value { get; set; }
         public string Unit { get; set; }
+    }
+    public class AdminProductReviewResponse
+    {
+        public int Id { get; set; }
+        public int ProductId { get; set; }
+        public string ProductName { get; set; }
+        public string UserId { get; set; }
+        public string UserName { get; set; }
+        public string UserEmail { get; set; }
+        public string Title { get; set; }
+        public string Comment { get; set; }
+        public int Rating { get; set; }
+        public ReviewStatus Status { get; set; }
+        public bool IsVerifiedPurchase { get; set; }
+        public bool IsHelpful { get; set; }
+        public int HelpfulCount { get; set; }
+        public int UnhelpfulCount { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public DateTime? UpdatedAt { get; set; }
+        public DateTime? ApprovedAt { get; set; }
+        public string? AdminNotes { get; set; }
+        public bool HasImages { get; set; }
+        public int ReplyCount { get; set; }
+    }
+
+    public class AdminProductReviewSummaryResponse
+    {
+        public int TotalReviews { get; set; }
+        public int PendingReviews { get; set; }
+        public int ApprovedReviews { get; set; }
+        int RejectedReviews { get; set; }
+        public double AverageRating { get; set; }
+        public Dictionary<int, int> RatingDistribution { get; set; } // Key: Rating (1-5), Value: Count
     }
 }

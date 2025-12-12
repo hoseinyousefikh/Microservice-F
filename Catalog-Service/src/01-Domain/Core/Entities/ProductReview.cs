@@ -14,9 +14,13 @@ namespace Catalog_Service.src._01_Domain.Core.Entities
         public DateTime? UpdatedAt { get; private set; }
         public bool IsVerifiedPurchase { get; private set; }
         public int HelpfulVotes { get; private set; }
+        public Product Product { get; private set; }
+
+        // این دو خط را اضافه کنید
+        public ICollection<ProductReviewReply> Replies { get; private set; } = new List<ProductReviewReply>();
+        public ICollection<ImageResource> Images { get; private set; } = new List<ImageResource>();
 
         // Navigation properties
-        public Product Product { get; private set; }
 
         // For EF Core
         protected ProductReview() { }

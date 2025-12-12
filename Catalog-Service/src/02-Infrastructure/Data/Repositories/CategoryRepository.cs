@@ -43,6 +43,13 @@ namespace Catalog_Service.src._02_Infrastructure.Data.Repositories
                 .Include(c => c.SubCategories)
                 .ToListAsync(cancellationToken);
         }
+        public async Task<List<Category>> GetAllWithSubCategoriesAsync(CancellationToken cancellationToken = default)
+        {
+            
+            return await _dbContext.Categories
+                                    .Include(c => c.SubCategories)
+                                    .ToListAsync(cancellationToken);
+        }
 
         public async Task<IEnumerable<Category>> GetActiveCategoriesAsync(CancellationToken cancellationToken = default)
         {

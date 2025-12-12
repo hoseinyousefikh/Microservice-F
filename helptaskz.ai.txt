@@ -1,0 +1,2696 @@
+CatalogService
+│
+├── Domain
+│   ├── Core
+│   │   ├── Entities/                ***
+│   │   │   ├── Product.cs
+│   │   │   ├── Category.cs
+│   │   │   ├── Brand.cs
+│   │   │   ├── ImageResource.cs
+│   │   │   ├── ProductVariant.cs
+│   │   │   ├── ProductAttribute.cs
+│   │   │   ├── ProductReview.cs
+│   │   │   └── ProductTag.cs
+│   │   │
+│   │   ├── Enums/***
+│   │   │   ├── ProductStatus.cs
+│   │   │   ├── ImageType.cs
+│   │   │   ├── StockStatus.cs
+│   │   │   ├── ReviewStatus.cs
+│   │   │   └── UserRole.cs
+│   │   │
+│   │   ├── Primitives/            ***  
+│   │   │   ├── AggregateRoot.cs
+│   │   │   ├── ValueObject.cs
+│   │   │   ├── Slug.cs
+│   │   │   ├── Money.cs
+│   │   │   ├── Dimensions.cs
+│   │   │   └── Weight.cs
+│   │   │
+│   │   ├── Contracts/
+│   │   │   ├── Repositories/        ***
+│   │   │   │   ├── IProductRepository.cs
+│   │   │   │   ├── ICategoryRepository.cs
+│   │   │   │   ├── IBrandRepository.cs
+│   │   │   │   ├── IImageRepository.cs
+│   │   │   │   ├── IProductVariantRepository.cs
+│   │   │   │   ├── IProductAttributeRepository.cs
+│   │   │   │   ├── IProductReviewRepository.cs
+│   │   │   │   └── IProductTagRepository.cs
+│   │   │   │
+│   │   │   └── Services/            ***
+│   │   │       ├── IProductService.cs
+│   │   │       ├── ICategoryService.cs
+│   │   │       ├── IBrandService.cs
+│   │   │       ├── IImageService.cs
+│   │   │       ├── IProductVariantService.cs
+│   │   │       ├── IProductAttributeService.cs
+│   │   │       ├── IProductReviewService.cs
+│   │   │       ├── IProductTagService.cs
+│   │   │       └── ISlugService.cs
+│   │   │
+│   ├── Services/         ***           
+│   │   ├── ProductService.cs
+│   │   ├── CategoryService.cs
+│   │   ├── BrandService.cs
+│   │   ├── ImageService.cs
+│   │   ├── ProductVariantService.cs
+│   │   ├── ProductAttributeService.cs
+│   │   ├── ProductReviewService.cs
+│   │   ├── ProductTagService.cs
+│   │   └── SlugService.cs
+│
+├── Infrastructure
+│   ├── Data/
+│   │   ├── Db/
+│   │   │   └── AppDbContext.cs      ***
+│   │   ├── Repositories/            ***
+│   │   │   ├── ProductRepository.cs**
+│   │   │   ├── CategoryRepository.cs
+│   │   │   ├── BrandRepository.cs
+│   │   │   ├── ImageRepository.cs
+│   │   │   ├── ProductVariantRepository.cs
+│   │   │   ├── ProductAttributeRepository.cs
+│   │   │   ├── ProductReviewRepository.cs
+│   │   │   └── ProductTagRepository.cs
+│   │   └── Migrations/
+│   │
+│   ├── Configuration/               ***
+│   │   ├── ProductConfiguration.cs
+│   │   ├── CategoryConfiguration.cs
+│   │   ├── BrandConfiguration.cs
+│   │   ├── ImageResourceConfiguration.cs
+│   │   ├── ProductVariantConfiguration.cs
+│   │   ├── ProductAttributeConfiguration.cs
+│   │   ├── ProductReviewConfiguration.cs
+│   │   └── ProductTagConfiguration.cs
+│   │
+│   ├── FileStorage/                 
+│   │   ├── IFileStorage.cs
+│   │   ├── LocalFileStorage.cs
+│   │   ├── S3FileStorage.cs
+│   │   └── AzureBlobStorage.cs
+│   │
+│   ├── Search/                      
+│   │   ├── IElasticService.cs
+│   │   ├── ElasticService.cs
+│   │   └── SearchQueryBuilder.cs
+│   │
+│   ├── Security/
+│   │   ├── JwtTokenGenerator.cs
+│   │   ├── IKeyManagementService.cs
+│   │   ├── KeyManagementService.cs
+│   │   ├── ApiKeyValidator.cs
+│   │   └── ServiceAuthenticationHandler.cs
+│   │
+│   ├── Caching/
+│   │   ├── ICacheService.cs
+│   │   ├── RedisCacheService.cs
+│   │   └── CacheKeys.cs
+│   │
+│   ├── ExternalServices/
+│   │   ├── IInventoryServiceClient.cs
+│   │   ├── InventoryServiceClient.cs
+│   │   ├── IPricingServiceClient.cs
+│   │   └── PricingServiceClient.cs
+│   │
+│   └── Logging/
+│       ├── SerilogConfig.cs
+│       └── CustomLogEnricher.cs
+│
+├── Endpoints
+│   ├── Controllers/
+│   │   ├── Admin/
+│   │   │   ├── AdminProductController.cs
+│   │   │   ├── AdminCategoryController.cs
+│   │   │   ├── AdminBrandController.cs
+│   │   │   ├── AdminProductVariantController.cs
+│   │   │   ├── AdminProductAttributeController.cs
+│   │   │   └── AdminProductReviewController.cs
+│   │   │
+│   │   ├── Vendor/
+│   │   │   ├── VendorProductController.cs
+│   │   │   ├── VendorProductVariantController.cs
+│   │   │   └── VendorProductReviewController.cs
+│   │   │
+│   │   └── Public/
+│   │       ├── ProductController.cs
+│   │       ├── CategoryController.cs
+│   │       ├── BrandController.cs
+│   │       └── ProductReviewController.cs
+│   │
+│   ├── DTOs/
+│   │   ├── Requests/
+│   │   │   ├── Admin/
+│   │   │   │   ├── CreateCategoryRequest.cs
+│   │   │   │   ├── UpdateCategoryRequest.cs
+│   │   │   │   ├── CreateBrandRequest.cs
+│   │   │   │   ├── UpdateBrandRequest.cs
+│   │   │   │   └── AdminProductSearchRequest.cs
+│   │   │   │
+│   │   │   ├── Vendor/
+│   │   │   │   ├── CreateProductRequest.cs
+│   │   │   │   ├── UpdateProductRequest.cs
+│   │   │   │   ├── CreateProductVariantRequest.cs
+│   │   │   │   ├── UpdateProductVariantRequest.cs
+│   │   │   │   └── VendorProductSearchRequest.cs
+│   │   │   │
+│   │   │   └── Public/
+│   │   │       ├── ProductSearchRequest.cs
+│   │   │       └── CreateProductReviewRequest.cs
+│   │   │
+│   │   └── Responses/
+│   │       ├── Admin/
+│   │       │   ├── AdminProductResponse.cs
+│   │       │   ├── AdminCategoryResponse.cs
+│   │       │   └── AdminBrandResponse.cs
+│   │       │
+│   │       ├── Vendor/
+│   │       │   ├── VendorProductResponse.cs
+│   │       │   └── VendorProductVariantResponse.cs
+│   │       │
+│   │       └── Public/
+│   │           ├── ProductResponse.cs
+│   │           ├── CategoryResponse.cs
+│   │           ├── BrandResponse.cs
+│   │           └── ProductReviewResponse.cs
+│   │
+│   └── Mappers/                     
+│       ├── AdminMappingProfile.cs
+│       ├── VendorMappingProfile.cs
+│       └── PublicMappingProfile.cs
+│
+├── CrossCutting
+│   ├── Middleware/
+│   │   ├── ErrorHandlingMiddleware.cs
+│   │   ├── RequestLoggingMiddleware.cs
+│   │   ├── CorrelationIdMiddleware.cs
+│   │   ├── RateLimitingMiddleware.cs
+│   │   └── PerformanceMetricsMiddleware.cs
+│   │
+│   ├── Validation/                  
+│   │   ├── Admin/
+│   │   │   ├── CreateCategoryValidator.cs
+│   │   │   ├── UpdateCategoryValidator.cs
+│   │   │   ├── CreateBrandValidator.cs
+│   │   │   └── UpdateBrandValidator.cs
+│   │   │
+│   │   ├── Vendor/
+│   │   │   ├── CreateProductValidator.cs
+│   │   │   ├── UpdateProductValidator.cs
+│   │   │   ├── CreateProductVariantValidator.cs
+│   │   │   └── UpdateProductVariantValidator.cs
+│   │   │
+│   │   └── Public/
+│   │       ├── CreateProductReviewValidator.cs
+│   │       └── ProductSearchValidator.cs
+│   │
+│   ├── Exceptions/
+│   │   ├── NotFoundException.cs
+│   │   ├── BusinessRuleException.cs
+│   │   ├── DuplicateEntityException.cs
+│   │   ├── InvalidImageException.cs
+│   │   ├── UnauthorizedAccessException.cs
+│   │   └── ServiceUnavailableException.cs
+│   │
+│   ├── Security/
+│   │   ├── AuthorizationPolicies.cs
+│   │   ├── RoleConstants.cs
+│   │   ├── PermissionConstants.cs
+│   │   ├── PolicyRequirements/
+│   │   │   ├── AdminRequirement.cs
+│   │   │   ├── VendorRequirement.cs
+│   │   │   └── ProductOwnerRequirement.cs
+│   │   │
+│   │   └── Handlers/
+│   │       ├── ProductOwnerHandler.cs
+│   │       └── VendorAccessHandler.cs
+│   │
+│   ├── Extensions/
+│   │   ├── ServiceCollectionExtensions.cs
+│   │   ├── ApplicationBuilderExtensions.cs
+│   │   └── ClaimsPrincipalExtensions.cs
+│   │
+│   └── Utilities/
+│       ├── SlugHelper.cs
+│       ├── ImageProcessor.cs
+│       ├── DateTimeProvider.cs
+│       └── PaginationHelper.cs
+│
+├── tests/
+│   ├── Unit/
+│   │   ├── Domain/
+│   │   ├── Services/
+│   │   └── Security/
+│   └── Integration/
+│       ├── Controllers/
+│       │   ├── Admin/
+│       │   ├── Vendor/
+│       │   └── Public/
+│       └── Security/
+│
+└── Program.cs 
+این معماری آنیون منه که این سرویس کاتالوگ برای یک سایت فروشگاهی واسطه فروش است که با معماری میکروسرویس در حال توسعه است این یکی از سرویس های من است که باید با دقت و ظرافت به بهترین شکل ساخته شود . هر قسمتی که ازت میخواهم را به بهترین شکل کامل بی نقص و بسیار با دقت برام بساز و بفرست همچنین در نظر داشته باش که با کلاس های دیگر سازگار و قابل اجرا باشد - با حداقل خطا.  
+قسمت های سرچ الاستیک رو در نظر نگیر از الاستیک استفاده نمیکنم -namespace Catalog_Service.src._01_Domain.Core.Enums
+{
+    public enum ImageType
+    {
+        Product = 0,
+        Variant = 1,
+        Category = 2,
+        Brand = 3,
+        Gallery = 4
+    }
+}
+namespace Catalog_Service.src._01_Domain.Core.Enums
+{
+    public enum ProductStatus
+    {
+        Draft = 0,
+        Published = 1,
+        Archived = 2
+    }
+}
+namespace Catalog_Service.src._01_Domain.Core.Enums
+{
+    public enum ReviewStatus
+    {
+        Pending = 0,
+        Approved = 1,
+        Rejected = 2
+    }
+}
+namespace Catalog_Service.src._01_Domain.Core.Enums
+{
+    public enum StockStatus
+    {
+        InStock = 0,
+        OutOfStock = 1,
+        PreOrder = 2,
+        BackOrder = 3
+    }
+}
+namespace Catalog_Service.src._01_Domain.Core.Enums
+{
+    public enum UserRole
+    {
+        Customer = 0,
+        Vendor = 1,
+        Admin = 2,
+        SuperAdmin = 3
+    }
+}
+namespace Catalog_Service.src._01_Domain.Core.Primitives
+{
+    public class Weight : ValueObject
+    {
+        public decimal Value { get; }
+        public string Unit { get; }
+
+        private Weight(decimal value, string unit)
+        {
+            Value = value;
+            Unit = unit;
+        }
+
+        public static Weight Create(decimal value, string unit)
+        {
+            if (value <= 0)
+                throw new ArgumentException("Weight must be positive", nameof(value));
+
+            if (string.IsNullOrWhiteSpace(unit))
+                throw new ArgumentException("Unit cannot be empty", nameof(unit));
+
+            return new Weight(value, unit);
+        }
+
+        public Weight Add(Weight other)
+        {
+            if (Unit != other.Unit)
+                throw new InvalidOperationException("Cannot add weights with different units");
+
+            return new Weight(Value + other.Value, Unit);
+        }
+
+        public Weight Subtract(Weight other)
+        {
+            if (Unit != other.Unit)
+                throw new InvalidOperationException("Cannot subtract weights with different units");
+
+            if (Value < other.Value)
+                throw new InvalidOperationException("Resulting weight would be negative");
+
+            return new Weight(Value - other.Value, Unit);
+        }
+
+        public Weight ConvertTo(string newUnit)
+        {
+            if (string.IsNullOrWhiteSpace(newUnit))
+                throw new ArgumentException("Unit cannot be empty", nameof(newUnit));
+
+            if (Unit == newUnit)
+                return this;
+
+            decimal convertedValue = ConvertValue(Value, Unit, newUnit);
+            return new Weight(convertedValue, newUnit);
+        }
+
+        private decimal ConvertValue(decimal value, string fromUnit, string toUnit)
+        {
+            // Simplified conversion - in a real app, you'd have a more comprehensive conversion table
+            if (fromUnit == "g" && toUnit == "kg")
+                return value / 1000;
+            if (fromUnit == "kg" && toUnit == "g")
+                return value * 1000;
+            if (fromUnit == "lb" && toUnit == "oz")
+                return value * 16;
+            if (fromUnit == "oz" && toUnit == "lb")
+                return value / 16;
+
+            throw new InvalidOperationException($"Conversion from {fromUnit} to {toUnit} is not supported");
+        }
+
+        protected override IEnumerable<object> GetEqualityComponents()
+        {
+            yield return Value;
+            yield return Unit;
+        }
+
+        public override string ToString()
+        {
+            return $"{Value} {Unit}";
+        }
+    }
+}
+namespace Catalog_Service.src._01_Domain.Core.Primitives
+{
+    public abstract class ValueObject
+    {
+        protected abstract IEnumerable<object> GetEqualityComponents();
+
+        public override bool Equals(object obj)
+        {
+            if (obj == null || obj.GetType() != GetType())
+            {
+                return false;
+            }
+
+            var other = (ValueObject)obj;
+            return GetEqualityComponents().SequenceEqual(other.GetEqualityComponents());
+        }
+
+        public override int GetHashCode()
+        {
+            return GetEqualityComponents()
+                .Aggregate(1, (current, obj) =>
+                {
+                    unchecked
+                    {
+                        return current * 23 + (obj?.GetHashCode() ?? 0);
+                    }
+                });
+        }
+
+        public static bool operator ==(ValueObject left, ValueObject right)
+        {
+            if (ReferenceEquals(left, null) && ReferenceEquals(right, null))
+                return true;
+
+            if (ReferenceEquals(left, null) || ReferenceEquals(right, null))
+                return false;
+
+            return left.Equals(right);
+        }
+
+        public static bool operator !=(ValueObject left, ValueObject right)
+        {
+            return !(left == right);
+        }
+    }
+}
+using System.Text.RegularExpressions;
+
+namespace Catalog_Service.src._01_Domain.Core.Primitives
+{
+    public class Slug : ValueObject
+    {
+        public string Value { get; }
+
+        private Slug(string value)
+        {
+            Value = value;
+        }
+
+        public static Slug Create(string title)
+        {
+            if (string.IsNullOrWhiteSpace(title))
+                throw new ArgumentException("Slug title cannot be empty", nameof(title));
+
+            string slug = GenerateSlug(title);
+            return new Slug(slug);
+        }
+
+        public static Slug FromString(string slug)
+        {
+            if (string.IsNullOrWhiteSpace(slug))
+                throw new ArgumentException("Slug cannot be empty", nameof(slug));
+
+            if (!IsValidSlug(slug))
+                throw new ArgumentException("Invalid slug format", nameof(slug));
+
+            return new Slug(slug);
+        }
+
+        private static string GenerateSlug(string title)
+        {
+            string slug = title.ToLowerInvariant();
+
+            // Remove all accents
+            slug = Regex.Replace(slug, @"\s+", " ").Trim();
+            slug = slug.Replace(" ", "-");
+
+            // Remove invalid characters
+            slug = Regex.Replace(slug, @"[^a-z0-9\s-]", "");
+            slug = Regex.Replace(slug, @"[-]{2,}", "-");
+
+            return slug;
+        }
+
+        private static bool IsValidSlug(string slug)
+        {
+            return Regex.IsMatch(slug, @"^[a-z0-9]+(?:-[a-z0-9]+)*$");
+        }
+
+        protected override IEnumerable<object> GetEqualityComponents()
+        {
+            yield return Value;
+        }
+
+        public override string ToString()
+        {
+            return Value;
+        }
+    }
+}
+namespace Catalog_Service.src._01_Domain.Core.Primitives
+{
+    public class Money : ValueObject
+    {
+        public decimal Amount { get; }
+        public string Currency { get; }
+
+        private Money(decimal amount, string currency)
+        {
+            Amount = amount;
+            Currency = currency;
+        }
+
+        public static Money Create(decimal amount, string currency)
+        {
+            if (amount < 0)
+                throw new ArgumentException("Amount cannot be negative", nameof(amount));
+
+            if (string.IsNullOrWhiteSpace(currency))
+                throw new ArgumentException("Currency cannot be empty", nameof(currency));
+
+            return new Money(amount, currency);
+        }
+
+        public static Money Zero(string currency) => new(0, currency);
+
+        public Money Add(Money other)
+        {
+            if (Currency != other.Currency)
+                throw new InvalidOperationException("Cannot add money with different currencies");
+
+            return new Money(Amount + other.Amount, Currency);
+        }
+
+        public Money Subtract(Money other)
+        {
+            if (Currency != other.Currency)
+                throw new InvalidOperationException("Cannot subtract money with different currencies");
+
+            if (Amount < other.Amount)
+                throw new InvalidOperationException("Insufficient funds");
+
+            return new Money(Amount - other.Amount, Currency);
+        }
+
+        public Money Multiply(decimal multiplier)
+        {
+            if (multiplier < 0)
+                throw new ArgumentException("Multiplier cannot be negative", nameof(multiplier));
+
+            return new Money(Amount * multiplier, Currency);
+        }
+
+        public Money Divide(decimal divisor)
+        {
+            if (divisor <= 0)
+                throw new ArgumentException("Divisor must be positive", nameof(divisor));
+
+            return new Money(Amount / divisor, Currency);
+        }
+
+        public bool IsZero() => Amount == 0;
+
+        public bool IsGreaterThan(Money other)
+        {
+            if (Currency != other.Currency)
+                throw new InvalidOperationException("Cannot compare money with different currencies");
+
+            return Amount > other.Amount;
+        }
+
+        public bool IsLessThan(Money other)
+        {
+            if (Currency != other.Currency)
+                throw new InvalidOperationException("Cannot compare money with different currencies");
+
+            return Amount < other.Amount;
+        }
+
+        protected override IEnumerable<object> GetEqualityComponents()
+        {
+            yield return Amount;
+            yield return Currency;
+        }
+
+        public override string ToString()
+        {
+            return $"{Amount} {Currency}";
+        }
+    }
+}
+namespace Catalog_Service.src._01_Domain.Core.Primitives
+{
+    public interface IDomainEvent
+    {
+        /// <summary>
+        /// شناسه منحصر به فرد رویداد
+        /// </summary>
+        Guid EventId { get; }
+
+        /// <summary>
+        /// زمان وقوع رویداد
+        /// </summary>
+        DateTime Timestamp { get; }
+
+        /// <summary>
+        /// نوع رویداد
+        /// </summary>
+        string EventType { get; }
+
+        /// <summary>
+        /// نسخه رویداد برای مدیریت تغییرات آینده
+        /// </summary>
+        int Version { get; }
+    }
+
+    /// <summary>
+    /// کلاس پایه انتزاعی برای پیاده‌سازی رویدادهای دامنه
+    /// </summary>
+    public abstract class DomainEventBase : IDomainEvent
+    {
+        public Guid EventId { get; }
+        public DateTime Timestamp { get; }
+        public string EventType { get; }
+        public int Version { get; }
+
+        protected DomainEventBase(int version = 1)
+        {
+            EventId = Guid.NewGuid();
+            Timestamp = DateTime.UtcNow;
+            EventType = GetType().Name;
+            Version = version;
+        }
+    }
+}
+namespace Catalog_Service.src._01_Domain.Core.Primitives
+{
+    public class Dimensions : ValueObject
+    {
+        public decimal Length { get; }
+        public decimal Width { get; }
+        public decimal Height { get; }
+        public string Unit { get; }
+
+        private Dimensions(decimal length, decimal width, decimal height, string unit)
+        {
+            Length = length;
+            Width = width;
+            Height = height;
+            Unit = unit;
+        }
+
+        public static Dimensions Create(decimal length, decimal width, decimal height, string unit = "cm")
+        {
+            if (length <= 0)
+                throw new ArgumentException("Length must be positive", nameof(length));
+
+            if (width <= 0)
+                throw new ArgumentException("Width must be positive", nameof(width));
+
+            if (height <= 0)
+                throw new ArgumentException("Height must be positive", nameof(height));
+
+            if (string.IsNullOrWhiteSpace(unit))
+                throw new ArgumentException("Unit cannot be empty", nameof(unit));
+
+            return new Dimensions(length, width, height, unit);
+        }
+
+        public decimal Volume() => Length * Width * Height;
+
+        public Dimensions Scale(decimal factor)
+        {
+            if (factor <= 0)
+                throw new ArgumentException("Scale factor must be positive", nameof(factor));
+
+            return new Dimensions(
+                Length * factor,
+                Width * factor,
+                Height * factor,
+                Unit);
+        }
+
+        protected override IEnumerable<object> GetEqualityComponents()
+        {
+            yield return Length;
+            yield return Width;
+            yield return Height;
+            yield return Unit;
+        }
+
+        public override string ToString()
+        {
+            return $"{Length} x {Width} x {Height} {Unit}";
+        }
+    }
+}
+namespace Catalog_Service.src._01_Domain.Core.Primitives
+{
+    public abstract class AggregateRoot : Entity
+    {
+        private readonly List<IDomainEvent> _domainEvents = new();
+
+        public IReadOnlyCollection<IDomainEvent> DomainEvents => _domainEvents.AsReadOnly();
+
+        protected void AddDomainEvent(IDomainEvent domainEvent)
+        {
+            _domainEvents.Add(domainEvent);
+        }
+
+        public void ClearDomainEvents()
+        {
+            _domainEvents.Clear();
+        }
+    }
+}
+using Catalog_Service.src._01_Domain.Core.Entities;
+
+namespace Catalog_Service.src._01_Domain.Core.Contracts.Services
+{
+    public interface IBrandService
+    {
+        // متدهای اصلی CRUD
+        Task<Brand> GetByIdAsync(int id, CancellationToken cancellationToken = default);
+        Task<Brand> GetBySlugAsync(string slug, CancellationToken cancellationToken = default);
+        Task<IEnumerable<Brand>> GetAllAsync(CancellationToken cancellationToken = default);
+        Task<IEnumerable<Brand>> GetActiveBrandsAsync(CancellationToken cancellationToken = default);
+        Task<Brand> CreateAsync(string name, string description, string? logoUrl = null, string? websiteUrl = null, string? metaTitle = null, string? metaDescription = null, CancellationToken cancellationToken = default);
+        Task UpdateAsync(int id, string name, string description, string? logoUrl = null, string? websiteUrl = null, string? metaTitle = null, string? metaDescription = null, CancellationToken cancellationToken = default);
+        Task DeleteAsync(int id, CancellationToken cancellationToken = default);
+        Task<bool> ExistsAsync(int id, CancellationToken cancellationToken = default);
+
+        // متدهای جستجو و فیلتر
+        Task<(IEnumerable<Brand> Brands, int TotalCount)> GetPagedAsync(int pageNumber, int pageSize, string searchTerm = null, bool onlyActive = true, string sortBy = null, bool sortAscending = true, CancellationToken cancellationToken = default);
+
+        // متدهای مدیریت محصولات
+        Task<IEnumerable<Product>> GetProductsAsync(int brandId, CancellationToken cancellationToken = default);
+        Task<int> GetProductsCountAsync(int brandId, CancellationToken cancellationToken = default);
+        Task<bool> HasProductsAsync(int brandId, CancellationToken cancellationToken = default);
+
+        // متدهای برای فعال/غیرفعال کردن
+        Task ActivateAsync(int id, CancellationToken cancellationToken = default);
+        Task DeactivateAsync(int id, CancellationToken cancellationToken = default);
+
+        // متدهای مدیریت اسلاگ
+        Task SetSlugAsync(int id, string title, CancellationToken cancellationToken = default);
+
+        // متدهای آمار و گزارش‌گیری
+        Task<decimal> GetAveragePriceAsync(int brandId, CancellationToken cancellationToken = default);
+        Task<int> GetTotalViewCountAsync(int brandId, CancellationToken cancellationToken = default);
+        Task<int> GetTotalReviewsCountAsync(int brandId, CancellationToken cancellationToken = default);
+        Task<double> GetAverageRatingAsync(int brandId, CancellationToken cancellationToken = default);
+
+        // متدهای برای برندهای محبوب
+        Task<IEnumerable<Brand>> GetTopBrandsByProductsCountAsync(int count, CancellationToken cancellationToken = default);
+        Task<IEnumerable<Brand>> GetTopBrandsByRatingAsync(int count, CancellationToken cancellationToken = default);
+        Task<IEnumerable<Brand>> GetTopBrandsBySalesAsync(int count, CancellationToken cancellationToken = default);
+    }
+}
+using Catalog_Service.src._01_Domain.Core.Entities;
+
+namespace Catalog_Service.src._01_Domain.Core.Contracts.Services
+{
+    public interface ICategoryService
+    {
+        // متدهای اصلی CRUD
+        Task<Category> GetByIdAsync(int id, CancellationToken cancellationToken = default);
+        Task<Category> GetBySlugAsync(string slug, CancellationToken cancellationToken = default);
+        Task<IEnumerable<Category>> GetAllAsync(CancellationToken cancellationToken = default);
+        Task<IEnumerable<Category>> GetActiveCategoriesAsync(CancellationToken cancellationToken = default);
+        Task<Category> CreateAsync(string name, string description, int displayOrder, int? parentCategoryId = null, string? imageUrl = null, string? metaTitle = null, string? metaDescription = null, CancellationToken cancellationToken = default);
+        Task UpdateAsync(int id, string name, string description, int displayOrder, string? imageUrl = null, string? metaTitle = null, string? metaDescription = null, CancellationToken cancellationToken = default);
+        Task DeleteAsync(int id, CancellationToken cancellationToken = default);
+        Task<bool> ExistsAsync(int id, CancellationToken cancellationToken = default);
+
+        // متدهای سلسله مراتبی
+        Task<IEnumerable<Category>> GetRootCategoriesAsync(CancellationToken cancellationToken = default);
+        Task<IEnumerable<Category>> GetSubCategoriesAsync(int parentCategoryId, CancellationToken cancellationToken = default);
+        Task<IEnumerable<Category>> GetAllDescendantsAsync(int categoryId, CancellationToken cancellationToken = default);
+        Task<Category> GetParentCategoryAsync(int categoryId, CancellationToken cancellationToken = default);
+        Task<IEnumerable<Category>> GetCategoryPathAsync(int categoryId, CancellationToken cancellationToken = default);
+        Task<bool> HasSubCategoriesAsync(int categoryId, CancellationToken cancellationToken = default);
+        Task<bool> HasProductsAsync(int categoryId, CancellationToken cancellationToken = default);
+
+        // متدهای صفحه‌بندی و جستجو
+        Task<(IEnumerable<Category> Categories, int TotalCount)> GetPagedAsync(int pageNumber, int pageSize, string searchTerm = null, bool onlyActive = true, int? parentCategoryId = null, string sortBy = null, bool sortAscending = true, CancellationToken cancellationToken = default);
+
+        // متدهای ترتیب‌بندی
+        Task<IEnumerable<Category>> GetOrderedByDisplayOrderAsync(CancellationToken cancellationToken = default);
+        Task<int> GetMaxDisplayOrderAsync(int? parentCategoryId = null, CancellationToken cancellationToken = default);
+        Task UpdateDisplayOrderAsync(int id, int displayOrder, CancellationToken cancellationToken = default);
+
+        // متدهای مدیریت ساختار درختی
+        Task MoveCategoryAsync(int categoryId, int? newParentId, CancellationToken cancellationToken = default);
+        Task<bool> WouldCreateCircularReferenceAsync(int parentId, int childId, CancellationToken cancellationToken = default);
+
+        // متدهای برای فعال/غیرفعال کردن
+        Task ActivateAsync(int id, CancellationToken cancellationToken = default);
+        Task DeactivateAsync(int id, CancellationToken cancellationToken = default);
+        Task ActivateWithSubCategoriesAsync(int id, CancellationToken cancellationToken = default);
+        Task DeactivateWithSubCategoriesAsync(int id, CancellationToken cancellationToken = default);
+
+        // متدهای مدیریت اسلاگ
+        Task SetSlugAsync(int id, string title, CancellationToken cancellationToken = default);
+
+        // متدهای آمار و گزارش‌گیری
+        Task<int> GetTotalProductsCountAsync(int categoryId, CancellationToken cancellationToken = default);
+        Task<int> GetActiveProductsCountAsync(int categoryId, CancellationToken cancellationToken = default);
+        Task<int> GetTotalSubCategoriesCountAsync(int categoryId, CancellationToken cancellationToken = default);
+        // در فایل ICategoryService.cs
+        Task<IEnumerable<Category>> GetCategoryTreeAsync(CancellationToken cancellationToken = default);
+    }
+}
+using Catalog_Service.src._01_Domain.Core.Entities;
+using Catalog_Service.src._01_Domain.Core.Enums;
+
+namespace Catalog_Service.src._01_Domain.Core.Contracts.Services
+{
+    public interface IImageService
+    {
+        // متدهای اصلی CRUD
+        Task<ImageResource> GetByIdAsync(int id, CancellationToken cancellationToken = default);
+        Task<IEnumerable<ImageResource>> GetAllAsync(CancellationToken cancellationToken = default);
+        Task<ImageResource> CreateAsync(string originalFileName, string fileExtension, string storagePath, string publicUrl, long fileSize, int width, int height, ImageType imageType, string? altText = null, bool isPrimary = false, CancellationToken cancellationToken = default);
+        Task UpdateAsync(int id, string? altText = null, bool? isPrimary = null, CancellationToken cancellationToken = default);
+        Task DeleteAsync(int id, CancellationToken cancellationToken = default);
+        Task<bool> ExistsAsync(int id, CancellationToken cancellationToken = default);
+
+        // متدهای جستجو و فیلتر بر اساس نوع
+        Task<IEnumerable<ImageResource>> GetByTypeAsync(ImageType imageType, CancellationToken cancellationToken = default);
+        Task<IEnumerable<ImageResource>> GetProductImagesAsync(int productId, CancellationToken cancellationToken = default);
+        Task<IEnumerable<ImageResource>> GetCategoryImagesAsync(int categoryId, CancellationToken cancellationToken = default);
+        Task<IEnumerable<ImageResource>> GetBrandImagesAsync(int brandId, CancellationToken cancellationToken = default);
+        Task<IEnumerable<ImageResource>> GetProductVariantImagesAsync(int productVariantId, CancellationToken cancellationToken = default);
+
+        // متدهای برای مدیریت تصویر اصلی
+        Task<ImageResource> GetPrimaryImageAsync(int productId, CancellationToken cancellationToken = default);
+        Task<ImageResource> GetPrimaryImageByTypeAsync(ImageType imageType, int entityId, CancellationToken cancellationToken = default);
+        Task<IEnumerable<ImageResource>> GetNonPrimaryImagesAsync(int productId, CancellationToken cancellationToken = default);
+        Task SetAsPrimaryAsync(int imageId, CancellationToken cancellationToken = default);
+        Task RemoveAsPrimaryAsync(int imageId, CancellationToken cancellationToken = default);
+        Task<bool> IsPrimaryAsync(int imageId, CancellationToken cancellationToken = default);
+
+        // متدهای صفحه‌بندی
+        Task<(IEnumerable<ImageResource> Images, int TotalCount)> GetPagedAsync(int pageNumber, int pageSize, ImageType? imageType = null, int? entityId = null, bool onlyPrimary = false, CancellationToken cancellationToken = default);
+
+        // متدهای آپلود و پردازش تصویر
+        Task<ImageResource> UploadProductImageAsync(int productId, Stream imageStream, string originalFileName, string? altText = null, bool isPrimary = false, CancellationToken cancellationToken = default);
+        Task<ImageResource> UploadCategoryImageAsync(int categoryId, Stream imageStream, string originalFileName, string? altText = null, bool isPrimary = false, CancellationToken cancellationToken = default);
+        Task<ImageResource> UploadBrandImageAsync(int brandId, Stream imageStream, string originalFileName, string? altText = null, bool isPrimary = false, CancellationToken cancellationToken = default);
+        Task<ImageResource> UploadProductVariantImageAsync(int productVariantId, Stream imageStream, string originalFileName, string? altText = null, bool isPrimary = false, CancellationToken cancellationToken = default);
+
+        // متدهای برای حذف گروهی
+        Task RemoveAllProductImagesAsync(int productId, CancellationToken cancellationToken = default);
+        Task RemoveAllCategoryImagesAsync(int categoryId, CancellationToken cancellationToken = default);
+        Task RemoveAllBrandImagesAsync(int brandId, CancellationToken cancellationToken = default);
+        Task RemoveAllProductVariantImagesAsync(int productVariantId, CancellationToken cancellationToken = default);
+
+        // متدهای برای به‌روزرسانی گروهی
+        Task UpdateAllProductImagesPrimaryStatusAsync(int productId, int primaryImageId, CancellationToken cancellationToken = default);
+        Task UpdateAllCategoryImagesPrimaryStatusAsync(int categoryId, int primaryImageId, CancellationToken cancellationToken = default);
+        Task UpdateAllBrandImagesPrimaryStatusAsync(int brandId, int primaryImageId, CancellationToken cancellationToken = default);
+        Task UpdateAllProductVariantImagesPrimaryStatusAsync(int productVariantId, int primaryImageId, CancellationToken cancellationToken = default);
+
+        // متدهای برای جستجوی پیشرفته
+        Task<IEnumerable<ImageResource>> GetImagesBySizeRangeAsync(int minWidth, int maxWidth, int minHeight, int maxHeight, CancellationToken cancellationToken = default);
+        Task<IEnumerable<ImageResource>> GetImagesByFileSizeRangeAsync(long minSize, long maxSize, CancellationToken cancellationToken = default);
+        Task<IEnumerable<ImageResource>> GetImagesByExtensionAsync(string extension, CancellationToken cancellationToken = default);
+    }
+}
+using Catalog_Service.src._01_Domain.Core.Entities;
+
+namespace Catalog_Service.src._01_Domain.Core.Contracts.Services
+{
+    public interface IProductAttributeService
+    {
+        // متدهای اصلی CRUD
+        Task<ProductAttribute> GetByIdAsync(int id, CancellationToken cancellationToken = default);
+        Task<IEnumerable<ProductAttribute>> GetAllAsync(CancellationToken cancellationToken = default);
+        Task<IEnumerable<ProductAttribute>> GetByProductIdAsync(int productId, CancellationToken cancellationToken = default);
+        Task<IEnumerable<ProductAttribute>> GetByProductVariantIdAsync(int productVariantId, CancellationToken cancellationToken = default);
+        Task<ProductAttribute> CreateAsync(int productId, string name, string value, int? productVariantId = null, bool isVariantSpecific = false, CancellationToken cancellationToken = default);
+        Task UpdateAsync(int id, string name, string value, CancellationToken cancellationToken = default);
+        Task DeleteAsync(int id, CancellationToken cancellationToken = default);
+        Task<bool> ExistsAsync(int id, CancellationToken cancellationToken = default);
+
+        // متدهای جستجو و فیلتر
+        Task<(IEnumerable<ProductAttribute> Attributes, int TotalCount)> GetPagedAsync(int pageNumber, int pageSize, int? productId = null, int? productVariantId = null, string name = null, bool onlyVariantSpecific = false, CancellationToken cancellationToken = default);
+
+        // متدهای برای مدیریت ویژگی‌های محصول
+        Task<IEnumerable<ProductAttribute>> GetProductAttributesAsync(int productId, CancellationToken cancellationToken = default);
+        Task<IEnumerable<ProductAttribute>> GetVariantAttributesAsync(int productVariantId, CancellationToken cancellationToken = default);
+        Task<IEnumerable<string>> GetUniqueAttributeNamesAsync(int productId, CancellationToken cancellationToken = default);
+        Task<IEnumerable<string>> GetUniqueAttributeValuesAsync(int productId, string attributeName, CancellationToken cancellationToken = default);
+
+        // متدهای برای مدیریت ویژگی‌های مشترک
+        Task<IEnumerable<ProductAttribute>> GetCommonAttributesAsync(IEnumerable<int> productIds, CancellationToken cancellationToken = default);
+        Task<IEnumerable<ProductAttribute>> GetDistinctAttributesAsync(int productId, CancellationToken cancellationToken = default);
+
+        // متدهای برای حذف گروهی
+        Task RemoveAllProductAttributesAsync(int productId, CancellationToken cancellationToken = default);
+        Task RemoveAllVariantAttributesAsync(int productVariantId, CancellationToken cancellationToken = default);
+        Task RemoveAllAttributesByNameAsync(int productId, string attributeName, CancellationToken cancellationToken = default);
+
+        // متدهای برای به‌روزرسانی گروهی
+        Task UpdateAllAttributesValueAsync(int productId, string attributeName, string newValue, CancellationToken cancellationToken = default);
+        Task UpdateAllVariantAttributesValueAsync(int productVariantId, string attributeName, string newValue, CancellationToken cancellationToken = default);
+
+        // متدهای برای کپی ویژگی‌ها
+        Task CopyProductAttributesToVariantAsync(int productId, int productVariantId, CancellationToken cancellationToken = default);
+        Task CopyVariantAttributesToProductAsync(int productVariantId, int productId, CancellationToken cancellationToken = default);
+        Task CopyAttributesBetweenProductsAsync(int sourceProductId, int targetProductId, CancellationToken cancellationToken = default);
+
+        // متدهای برای جستجوی پیشرفته
+        Task<IEnumerable<ProductAttribute>> GetAttributesContainingValueAsync(int productId, string searchValue, CancellationToken cancellationToken = default);
+        Task<IEnumerable<ProductAttribute>> GetAttributesByNameAsync(int productId, string attributeName, CancellationToken cancellationToken = default);
+        Task<IEnumerable<ProductAttribute>> GetAttributesByValueAsync(int productId, string attributeValue, CancellationToken cancellationToken = default);
+    }
+}
+using Catalog_Service.src._01_Domain.Core.Entities;
+using Catalog_Service.src._01_Domain.Core.Enums;
+
+namespace Catalog_Service.src._01_Domain.Core.Contracts.Services
+{
+    public interface IProductReviewService
+    {
+        // متدهای اصلی CRUD
+        Task<ProductReview> GetByIdAsync(int id, CancellationToken cancellationToken = default);
+        Task<IEnumerable<ProductReview>> GetAllAsync(CancellationToken cancellationToken = default);
+        Task<IEnumerable<ProductReview>> GetByProductIdAsync(int productId, CancellationToken cancellationToken = default);
+        Task<IEnumerable<ProductReview>> GetByUserIdAsync(string userId, CancellationToken cancellationToken = default);
+        Task<ProductReview> CreateAsync(int productId, string userId, string title, string comment, int rating, bool isVerifiedPurchase = false, CancellationToken cancellationToken = default);
+        Task UpdateAsync(int id, string title, string comment, int rating, CancellationToken cancellationToken = default);
+        Task DeleteAsync(int id, CancellationToken cancellationToken = default);
+        Task<bool> ExistsAsync(int id, CancellationToken cancellationToken = default);
+
+        // متدهای جستجو و فیلتر
+        Task<(IEnumerable<ProductReview> Reviews, int TotalCount)> GetPagedAsync(int pageNumber, int pageSize, int? productId = null, string userId = null, ReviewStatus? status = null, int? minRating = null, int? maxRating = null, bool onlyVerified = false, string sortBy = null, bool sortAscending = true, CancellationToken cancellationToken = default);
+
+        // متدهای برای مدیریت وضعیت بازبینی
+        Task<IEnumerable<ProductReview>> GetPendingReviewsAsync(CancellationToken cancellationToken = default);
+        Task<IEnumerable<ProductReview>> GetApprovedReviewsAsync(int productId, CancellationToken cancellationToken = default);
+        Task<IEnumerable<ProductReview>> GetRejectedReviewsAsync(CancellationToken cancellationToken = default);
+        Task ApproveAsync(int reviewId, CancellationToken cancellationToken = default);
+        Task RejectAsync(int reviewId, CancellationToken cancellationToken = default);
+        Task MarkAsVerifiedAsync(int reviewId, CancellationToken cancellationToken = default);
+
+        // متدهای برای مدیریت امتیازها
+        Task IncrementHelpfulVotesAsync(int reviewId, CancellationToken cancellationToken = default);
+        Task DecrementHelpfulVotesAsync(int reviewId, CancellationToken cancellationToken = default);
+        Task<IEnumerable<ProductReview>> GetMostHelpfulReviewsAsync(int productId, int count, CancellationToken cancellationToken = default);
+
+        // متدهای ویژه
+        Task<bool> UserHasReviewedProductAsync(string userId, int productId, CancellationToken cancellationToken = default);
+        Task<ProductReview> GetUserReviewForProductAsync(string userId, int productId, CancellationToken cancellationToken = default);
+        Task<int> CountAsync(CancellationToken cancellationToken = default);
+        Task<int> CountByProductIdAsync(int productId, CancellationToken cancellationToken = default);
+        Task<int> CountByUserIdAsync(string userId, CancellationToken cancellationToken = default);
+        Task<int> CountByStatusAsync(ReviewStatus status, CancellationToken cancellationToken = default);
+
+        // متدهای برای آمار و گزارش‌گیری
+        Task<double> GetAverageRatingAsync(int productId, CancellationToken cancellationToken = default);
+        Task<int> GetTotalReviewsCountAsync(int productId, CancellationToken cancellationToken = default);
+        Task<int> GetVerifiedReviewsCountAsync(int productId, CancellationToken cancellationToken = default);
+        Task<IDictionary<int, int>> GetRatingDistributionAsync(int productId, CancellationToken cancellationToken = default);
+        Task<IEnumerable<ProductReview>> GetRecentReviewsAsync(int productId, int count, CancellationToken cancellationToken = default);
+
+        // متدهای برای گزارش‌گیری پیشرفته
+        Task<IEnumerable<ProductReview>> GetTopRatedReviewsAsync(int productId, int count, CancellationToken cancellationToken = default);
+        Task<IEnumerable<ProductReview>> GetLowestRatedReviewsAsync(int productId, int count, CancellationToken cancellationToken = default);
+        Task<IEnumerable<ProductReview>> GetMostHelpfulReviewsByUserAsync(string userId, int count, CancellationToken cancellationToken = default);
+        Task<IDictionary<string, double>> GetAverageRatingByCategoryAsync(int categoryId, CancellationToken cancellationToken = default);
+        Task<IDictionary<string, double>> GetAverageRatingByBrandAsync(int brandId, CancellationToken cancellationToken = default);
+    }
+}
+using Catalog_Service.src._01_Domain.Core.Entities;
+using Catalog_Service.src._01_Domain.Core.Enums;
+using Catalog_Service.src._01_Domain.Core.Primitives;
+
+namespace Catalog_Service.src._01_Domain.Core.Contracts.Services
+{
+    public interface IProductService
+    {
+        // متدهای اصلی CRUD
+        Task<Product> GetByIdAsync(int id, CancellationToken cancellationToken = default);
+        Task<Product> GetBySkuAsync(string sku, CancellationToken cancellationToken = default);
+        Task<Product> GetBySlugAsync(string slug, CancellationToken cancellationToken = default);
+        Task<IEnumerable<Product>> GetAllAsync(CancellationToken cancellationToken = default);
+        Task<Product> CreateAsync(string name, string description, Money price, int brandId, int categoryId, string sku, Dimensions dimensions, Weight weight, string? metaTitle = null, string? metaDescription = null, CancellationToken cancellationToken = default);
+        Task UpdateAsync(int id, string name, string description, Money price, Money? originalPrice, Dimensions dimensions, Weight weight, string? metaTitle = null, string? metaDescription = null, CancellationToken cancellationToken = default);
+        Task DeleteAsync(int id, CancellationToken cancellationToken = default);
+        Task<bool> ExistsAsync(int id, CancellationToken cancellationToken = default);
+
+        // متدهای جستجو و فیلتر
+        Task<(IEnumerable<Product> Products, int TotalCount)> GetPagedAsync(int pageNumber, int pageSize, string searchTerm = null, int? categoryId = null, int? brandId = null, ProductStatus? status = null, decimal? minPrice = null, decimal? maxPrice = null, string sortBy = null, bool sortAscending = true, CancellationToken cancellationToken = default);
+        Task<IEnumerable<Product>> GetByCategoryAsync(int categoryId, CancellationToken cancellationToken = default);
+        Task<IEnumerable<Product>> GetByBrandAsync(int brandId, CancellationToken cancellationToken = default);
+        Task<IEnumerable<Product>> GetByPriceRangeAsync(Money minPrice, Money maxPrice, CancellationToken cancellationToken = default);
+        Task<IEnumerable<Product>> GetFeaturedProductsAsync(int count, CancellationToken cancellationToken = default);
+        Task<IEnumerable<Product>> GetNewestProductsAsync(int count, CancellationToken cancellationToken = default);
+        Task<IEnumerable<Product>> GetBestSellingProductsAsync(int count, CancellationToken cancellationToken = default);
+
+        // متدهای مدیریت وضعیت محصول
+        Task PublishAsync(int id, CancellationToken cancellationToken = default);
+        Task UnpublishAsync(int id, CancellationToken cancellationToken = default);
+        Task ArchiveAsync(int id, CancellationToken cancellationToken = default);
+        Task SetAsFeaturedAsync(int id, CancellationToken cancellationToken = default);
+        Task RemoveFromFeaturedAsync(int id, CancellationToken cancellationToken = default);
+        Task IncrementViewCountAsync(int id, CancellationToken cancellationToken = default);
+
+        // متدهای مدیریت موجودی
+        Task UpdateStockQuantityAsync(int id, int quantity, CancellationToken cancellationToken = default);
+        Task UpdateStockStatusAsync(int id, StockStatus status, CancellationToken cancellationToken = default);
+
+        // متدهای مدیریت متغیرهای محصول
+        Task<ProductVariant> AddVariantAsync(int productId, string sku, string name, Money price, Dimensions dimensions, Weight weight, string? imageUrl = null, Money? originalPrice = null, CancellationToken cancellationToken = default);
+        Task UpdateVariantAsync(int variantId, string name, Money price, Money? originalPrice, Dimensions dimensions, Weight weight, string? imageUrl = null, CancellationToken cancellationToken = default);
+        Task DeleteVariantAsync(int variantId, CancellationToken cancellationToken = default);
+        Task ActivateVariantAsync(int variantId, CancellationToken cancellationToken = default);
+        Task DeactivateVariantAsync(int variantId, CancellationToken cancellationToken = default);
+
+        // متدهای مدیریت تصاویر
+        Task<ImageResource> AddImageAsync(int productId, string originalFileName, string fileExtension, string storagePath, string publicUrl, long fileSize, int width, int height, ImageType imageType, string? altText = null, bool isPrimary = false, CancellationToken cancellationToken = default);
+        Task UpdateImageAsync(int imageId, string? altText = null, bool? isPrimary = null, CancellationToken cancellationToken = default);
+        Task DeleteImageAsync(int imageId, CancellationToken cancellationToken = default);
+        Task SetPrimaryImageAsync(int imageId, CancellationToken cancellationToken = default);
+
+        // متدهای مدیریت ویژگی‌ها
+        Task<ProductAttribute> AddAttributeAsync(int productId, string name, string value, CancellationToken cancellationToken = default);
+        Task UpdateAttributeAsync(int attributeId, string name, string value, CancellationToken cancellationToken = default);
+        Task DeleteAttributeAsync(int attributeId, CancellationToken cancellationToken = default);
+
+        // متدهای مدیریت تگ‌ها
+        Task<ProductTag> AddTagAsync(int productId, string tagText, CancellationToken cancellationToken = default);
+        Task RemoveTagAsync(int tagId, CancellationToken cancellationToken = default);
+        Task<IEnumerable<string>> GetTagsByProductIdAsync(int productId, CancellationToken cancellationToken = default);
+
+        // متدهای مدیریت بازبینی‌ها
+        Task<ProductReview> AddReviewAsync(int productId, string userId, string title, string comment, int rating, bool isVerifiedPurchase = false, CancellationToken cancellationToken = default);
+        Task UpdateReviewAsync(int reviewId, string title, string comment, int rating, CancellationToken cancellationToken = default);
+        Task DeleteReviewAsync(int reviewId, CancellationToken cancellationToken = default);
+        Task ApproveReviewAsync(int reviewId, CancellationToken cancellationToken = default);
+        Task RejectReviewAsync(int reviewId, CancellationToken cancellationToken = default);
+        Task MarkReviewAsVerifiedAsync(int reviewId, CancellationToken cancellationToken = default);
+        Task IncrementHelpfulVotesAsync(int reviewId, CancellationToken cancellationToken = default);
+
+        // متدهای مدیریت اسلاگ
+        Task SetSlugAsync(int id, string title, CancellationToken cancellationToken = default);
+
+        // متدهای آمار و گزارش‌گیری
+        Task<decimal> GetAveragePriceByCategoryAsync(int categoryId, CancellationToken cancellationToken = default);
+        Task<decimal> GetAveragePriceByBrandAsync(int brandId, CancellationToken cancellationToken = default);
+        Task<int> GetViewCountAsync(int id, CancellationToken cancellationToken = default);
+        Task<double> GetAverageRatingAsync(int id, CancellationToken cancellationToken = default);
+        Task<int> GetTotalReviewsCountAsync(int id, CancellationToken cancellationToken = default);
+        Task<IDictionary<int, int>> GetRatingDistributionAsync(int id, CancellationToken cancellationToken = default);
+    }
+}
+using Catalog_Service.src._01_Domain.Core.Entities;
+
+namespace Catalog_Service.src._01_Domain.Core.Contracts.Services
+{
+    public interface IProductTagService
+    {
+        // متدهای اصلی CRUD
+        Task<ProductTag> GetByIdAsync(int id, CancellationToken cancellationToken = default);
+        Task<IEnumerable<ProductTag>> GetAllAsync(CancellationToken cancellationToken = default);
+        Task<IEnumerable<ProductTag>> GetByProductIdAsync(int productId, CancellationToken cancellationToken = default);
+        Task<ProductTag> CreateAsync(int productId, string tagText, CancellationToken cancellationToken = default);
+        Task DeleteAsync(int id, CancellationToken cancellationToken = default);
+        Task<bool> ExistsAsync(int id, CancellationToken cancellationToken = default);
+
+        // متدهای جستجو و فیلتر
+        Task<(IEnumerable<ProductTag> Tags, int TotalCount)> GetPagedAsync(int pageNumber, int pageSize, int? productId = null, string searchTerm = null, CancellationToken cancellationToken = default);
+
+        // متدهای برای مدیریت تگ‌های محصول
+        Task<IEnumerable<string>> GetTagsByProductIdAsync(int productId, CancellationToken cancellationToken = default);
+        Task<IEnumerable<int>> GetProductIdsByTagAsync(string tagText, CancellationToken cancellationToken = default);
+        Task<IEnumerable<Product>> GetProductsByTagAsync(string tagText, CancellationToken cancellationToken = default);
+        Task<bool> ProductHasTagAsync(int productId, string tagText, CancellationToken cancellationToken = default);
+
+        // متدهای برای مدیریت تگ‌های محبوب
+        Task<IEnumerable<string>> GetPopularTagsAsync(int count, CancellationToken cancellationToken = default);
+        Task<IEnumerable<string>> GetMostUsedTagsAsync(int count, CancellationToken cancellationToken = default);
+        Task<IDictionary<string, int>> GetTagUsageCountAsync(IEnumerable<string> tags, CancellationToken cancellationToken = default);
+
+        // متدهای ویژه
+        Task<int> CountAsync(CancellationToken cancellationToken = default);
+        Task<int> CountByProductIdAsync(int productId, CancellationToken cancellationToken = default);
+        Task<int> CountByTagTextAsync(string tagText, CancellationToken cancellationToken = default);
+
+        // متدهای برای حذف گروهی
+        Task RemoveAllProductTagsAsync(int productId, CancellationToken cancellationToken = default);
+        Task RemoveAllTagsByTextAsync(string tagText, CancellationToken cancellationToken = default);
+
+        // متدهای برای به‌روزرسانی گروهی
+        Task UpdateTagTextAsync(int productId, string oldTagText, string newTagText, CancellationToken cancellationToken = default);
+        Task CopyTagsBetweenProductsAsync(int sourceProductId, int targetProductId, CancellationToken cancellationToken = default);
+
+        // متدهای برای جستجوی پیشرفته
+        Task<IEnumerable<string>> GetTagsContainingAsync(string searchText, CancellationToken cancellationToken = default);
+        Task<IEnumerable<string>> GetTagsStartingWithAsync(string prefix, CancellationToken cancellationToken = default);
+        Task<IEnumerable<string>> GetTagsEndingWithAsync(string suffix, CancellationToken cancellationToken = default);
+        Task<IEnumerable<string>> GetSimilarTagsAsync(string tagText, int count, CancellationToken cancellationToken = default);
+
+        // متدهای برای تحلیل تگ‌ها
+        Task<IEnumerable<string>> GetRecommendedTagsForProductAsync(int productId, int count, CancellationToken cancellationToken = default);
+        Task<IDictionary<string, int>> GetRelatedTagsAsync(string tagText, int count, CancellationToken cancellationToken = default);
+        Task<IEnumerable<string>> GetTrendingTagsAsync(DateTime sinceDate, int count, CancellationToken cancellationToken = default);
+    }
+}
+using Catalog_Service.src._01_Domain.Core.Entities;
+using Catalog_Service.src._01_Domain.Core.Enums;
+using Catalog_Service.src._01_Domain.Core.Primitives;
+
+namespace Catalog_Service.src._01_Domain.Core.Contracts.Services
+{
+    public interface IProductVariantService
+    {
+        // متدهای اصلی CRUD
+        Task<ProductVariant> GetByIdAsync(int id, CancellationToken cancellationToken = default);
+        Task<ProductVariant> GetBySkuAsync(string sku, CancellationToken cancellationToken = default);
+        Task<IEnumerable<ProductVariant>> GetAllAsync(CancellationToken cancellationToken = default);
+        Task<IEnumerable<ProductVariant>> GetByProductIdAsync(int productId, CancellationToken cancellationToken = default);
+        Task<IEnumerable<ProductVariant>> GetActiveVariantsAsync(int productId, CancellationToken cancellationToken = default);
+        Task<ProductVariant> CreateAsync(int productId, string sku, string name, Money price, Dimensions dimensions, Weight weight, string? imageUrl = null, Money? originalPrice = null, CancellationToken cancellationToken = default);
+        Task UpdateAsync(int id, string name, Money price, Money? originalPrice, Dimensions dimensions, Weight weight, string? imageUrl = null, CancellationToken cancellationToken = default);
+        Task DeleteAsync(int id, CancellationToken cancellationToken = default);
+        Task<bool> ExistsAsync(int id, CancellationToken cancellationToken = default);
+
+        // متدهای جستجو و فیلتر
+        Task<(IEnumerable<ProductVariant> Variants, int TotalCount)> GetPagedAsync(int pageNumber, int pageSize, int? productId = null, bool onlyActive = true, string sortBy = null, bool sortAscending = true, CancellationToken cancellationToken = default);
+
+        // متدهای برای مدیریت موجودی
+        Task<IEnumerable<ProductVariant>> GetOutOfStockVariantsAsync(int productId, CancellationToken cancellationToken = default);
+        Task<IEnumerable<ProductVariant>> GetLowStockVariantsAsync(int productId, int threshold, CancellationToken cancellationToken = default);
+        Task UpdateStockQuantityAsync(int variantId, int quantity, CancellationToken cancellationToken = default);
+        Task UpdateStockStatusAsync(int variantId, StockStatus status, CancellationToken cancellationToken = default);
+
+        // متدهای برای مدیریت قیمت
+        Task<IEnumerable<ProductVariant>> GetVariantsInPriceRangeAsync(int productId, decimal minPrice, decimal maxPrice, CancellationToken cancellationToken = default);
+        Task<ProductVariant> GetCheapestVariantAsync(int productId, CancellationToken cancellationToken = default);
+        Task<ProductVariant> GetMostExpensiveVariantAsync(int productId, CancellationToken cancellationToken = default);
+        Task<decimal> GetMinPriceAsync(int productId, CancellationToken cancellationToken = default);
+        Task<decimal> GetMaxPriceAsync(int productId, CancellationToken cancellationToken = default);
+
+        // متدهای برای فعال/غیرفعال کردن
+        Task ActivateAsync(int variantId, CancellationToken cancellationToken = default);
+        Task DeactivateAsync(int variantId, CancellationToken cancellationToken = default);
+        Task ActivateAllByProductIdAsync(int productId, CancellationToken cancellationToken = default);
+        Task DeactivateAllByProductIdAsync(int productId, CancellationToken cancellationToken = default);
+
+        // متدهای برای مدیریت ویژگی‌ها
+        Task<ProductAttribute> AddAttributeAsync(int variantId, string name, string value, CancellationToken cancellationToken = default);
+        Task UpdateAttributeAsync(int attributeId, string name, string value, CancellationToken cancellationToken = default);
+        Task DeleteAttributeAsync(int attributeId, CancellationToken cancellationToken = default);
+        Task<IEnumerable<ProductAttribute>> GetAttributesAsync(int variantId, CancellationToken cancellationToken = default);
+
+        // متدهای برای مدیریت تصاویر
+        Task<ImageResource> AddImageAsync(int variantId, string originalFileName, string fileExtension, string storagePath, string publicUrl, long fileSize, int width, int height, string? altText = null, bool isPrimary = false, CancellationToken cancellationToken = default);
+        Task UpdateImageAsync(int imageId, string? altText = null, bool? isPrimary = null, CancellationToken cancellationToken = default);
+        Task DeleteImageAsync(int imageId, CancellationToken cancellationToken = default);
+        Task<IEnumerable<ImageResource>> GetImagesAsync(int variantId, CancellationToken cancellationToken = default);
+
+        // متدهای آمار و گزارش‌گیری
+        Task<int> GetTotalStockQuantityAsync(int productId, CancellationToken cancellationToken = default);
+        Task<int> GetTotalSoldQuantityAsync(int productId, CancellationToken cancellationToken = default);
+        Task<decimal> GetAveragePriceAsync(int productId, CancellationToken cancellationToken = default);
+    }
+}
+using Catalog_Service.src._01_Domain.Core.Primitives;
+
+namespace Catalog_Service.src._01_Domain.Core.Contracts.Services
+{
+    public interface ISlugService
+    {
+        // متدهای اصلی
+        Task<Slug> CreateSlugAsync(string title, CancellationToken cancellationToken = default);
+        Task<Slug> CreateUniqueSlugAsync(string title, Func<string, Task<bool>> uniquenessChecker, CancellationToken cancellationToken = default);
+        Task<Slug> CreateUniqueSlugForProductAsync(string title, int? excludeProductId = null, CancellationToken cancellationToken = default);
+        Task<Slug> CreateUniqueSlugForCategoryAsync(string title, int? excludeCategoryId = null, CancellationToken cancellationToken = default);
+        Task<Slug> CreateUniqueSlugForBrandAsync(string title, int? excludeBrandId = null, CancellationToken cancellationToken = default);
+
+        // متدهای برای بررسی یکتایی
+        Task<bool> IsUniqueProductSlugAsync(string slug, int? excludeProductId = null, CancellationToken cancellationToken = default);
+        Task<bool> IsUniqueCategorySlugAsync(string slug, int? excludeCategoryId = null, CancellationToken cancellationToken = default);
+        Task<bool> IsUniqueBrandSlugAsync(string slug, int? excludeBrandId = null, CancellationToken cancellationToken = default);
+
+        // متدهای برای به‌روزرسانی اسلاگ
+        Task<Slug> UpdateProductSlugAsync(int productId, string title, CancellationToken cancellationToken = default);
+        Task<Slug> UpdateCategorySlugAsync(int categoryId, string title, CancellationToken cancellationToken = default);
+        Task<Slug> UpdateBrandSlugAsync(int brandId, string title, CancellationToken cancellationToken = default);
+
+        // متدهای کمکی
+        string GenerateSlugFromTitle(string title);
+        bool IsValidSlug(string slug);
+        Task<string> EnsureUniquenessAsync(string baseSlug, Func<string, Task<bool>> uniquenessChecker, CancellationToken cancellationToken = default);
+    }
+}
+using AutoMapper;
+using Catalog_Service.src._01_Domain.Core.Entities;
+using Catalog_Service.src._01_Domain.Core.Primitives;
+using Catalog_Service.src._03_Endpoints.DTOs.Requests.Admin;
+using Catalog_Service.src._03_Endpoints.DTOs.Responses.Admin;
+
+namespace Catalog_Service.src._03_Endpoints.Mappers
+{
+    public class AdminMappingProfile : Profile
+    {
+        public AdminMappingProfile()
+        {
+            // Category mappings
+            CreateMap<Category, AdminCategoryResponse>();
+            CreateMap<CreateCategoryRequest, Category>();
+            CreateMap<UpdateCategoryRequest, Category>();
+
+            // Brand mappings
+            CreateMap<Brand, AdminBrandResponse>();
+            CreateMap<CreateBrandRequest, Brand>();
+            CreateMap<UpdateBrandRequest, Brand>();
+
+            // Product mappings
+            CreateMap<Product, AdminProductResponse>()
+                .ForMember(dest => dest.BrandName, opt => opt.MapFrom(src => src.Brand.Name))
+                .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category.Name))
+                .ForMember(dest => dest.AverageRating, opt => opt.MapFrom(src => src.Reviews.Any() ? src.Reviews.Average(r => r.Rating) : 0))
+                .ForMember(dest => dest.TotalReviews, opt => opt.MapFrom(src => src.Reviews.Count))
+                .ForMember(dest => dest.Variants, opt => opt.MapFrom(src => src.Variants))
+                .ForMember(dest => dest.Images, opt => opt.MapFrom(src => src.Images))
+                .ForMember(dest => dest.Attributes, opt => opt.MapFrom(src => src.Attributes));
+
+            CreateMap<ProductVariant, ProductVariantResponse>();
+            CreateMap<ImageResource, ProductImageResponse>();
+            CreateMap<ProductAttribute, ProductAttributeResponse>();
+
+            // Value object mappings
+            CreateMap<Dimensions, DimensionsResponse>();
+            CreateMap<Weight, WeightResponse>();
+            CreateMap<ProductReview, AdminProductReviewResponse>()
+               .ForMember(dest => dest.ProductName, opt => opt.MapFrom(src => src.Product.Name))
+               .ForMember(dest => dest.HasImages, opt => opt.MapFrom(src => src.Images.Any()))
+               .ForMember(dest => dest.ReplyCount, opt => opt.MapFrom(src => src.Replies.Count));
+        }
+    }
+    }
+
+using AutoMapper;
+using Catalog_Service.src._01_Domain.Core.Entities;
+using Catalog_Service.src._01_Domain.Core.Enums;
+using Catalog_Service.src._01_Domain.Core.Primitives;
+using Catalog_Service.src._03_Endpoints.DTOs.Responses.Public;
+using static Catalog_Service.src._03_Endpoints.DTOs.Responses.Public.ProductVariantResponse;
+
+namespace Catalog_Service.src._03_Endpoints.Mappers
+{
+    public class PublicMappingProfile : Profile
+    {
+        public PublicMappingProfile()
+        {
+            // Product mappings
+            CreateMap<Product, ProductResponse>()
+                .ForMember(dest => dest.BrandName, opt => opt.MapFrom(src => src.Brand.Name))
+                .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category.Name))
+                .ForMember(dest => dest.AverageRating, opt => opt.MapFrom(src => src.Reviews.Any() ? src.Reviews.Average(r => r.Rating) : 0))
+                .ForMember(dest => dest.TotalReviews, opt => opt.MapFrom(src => src.Reviews.Count))
+                .ForMember(dest => dest.Variants, opt => opt.MapFrom(src => src.Variants.Where(v => v.IsActive)))
+                .ForMember(dest => dest.Images, opt => opt.MapFrom(src => src.Images))
+                .ForMember(dest => dest.Attributes, opt => opt.MapFrom(src => src.Attributes.Where(a => !a.IsVariantSpecific)));
+
+            CreateMap<ProductVariant, ProductVariantResponse>();
+            CreateMap<ImageResource, ProductImageResponse>();
+            CreateMap<ProductAttribute, ProductAttributeResponse>();
+
+            // Category mappings
+            CreateMap<Category, CategoryResponse>()
+                .ForMember(dest => dest.ProductCount, opt => opt.MapFrom(src => src.Products.Count(p => p.Status == ProductStatus.Published)))
+                .ForMember(dest => dest.SubCategories, opt => opt.MapFrom(src => src.SubCategories.Where(sc => sc.IsActive)));
+
+            // Brand mappings
+            CreateMap<Brand, BrandResponse>()
+                .ForMember(dest => dest.ProductCount, opt => opt.MapFrom(src => src.Products.Count(p => p.Status == ProductStatus.Published)));
+
+            // Review mappings
+            CreateMap<ProductReview, ProductReviewResponse>()
+                .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.UserId)); // In real app, you might get user name from user service
+
+            // Value object mappings
+            CreateMap<Dimensions, DimensionsResponse>();
+            CreateMap<Weight, WeightResponse>();
+        }
+    }
+}
+using AutoMapper;
+using Catalog_Service.src._01_Domain.Core.Entities;
+using Catalog_Service.src._01_Domain.Core.Primitives;
+using Catalog_Service.src._03_Endpoints.DTOs.Requests.Vendor;
+using Catalog_Service.src._03_Endpoints.DTOs.Responses.Vendor;
+
+namespace Catalog_Service.src._03_Endpoints.Mappers
+{
+    public class VendorMappingProfile : Profile
+    {
+        public VendorMappingProfile()
+        {
+            // Product mappings
+            CreateMap<Product, VendorProductResponse>()
+                .ForMember(dest => dest.BrandName, opt => opt.MapFrom(src => src.Brand.Name))
+                .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category.Name))
+                .ForMember(dest => dest.AverageRating, opt => opt.MapFrom(src => src.Reviews.Any() ? src.Reviews.Average(r => r.Rating) : 0))
+                .ForMember(dest => dest.TotalReviews, opt => opt.MapFrom(src => src.Reviews.Count))
+                .ForMember(dest => dest.Variants, opt => opt.MapFrom(src => src.Variants))
+                .ForMember(dest => dest.Images, opt => opt.MapFrom(src => src.Images))
+                .ForMember(dest => dest.Attributes, opt => opt.MapFrom(src => src.Attributes));
+
+            CreateMap<CreateProductRequest, Product>()
+                .ForMember(dest => dest.Price, opt => opt.MapFrom(src => Money.Create(src.Price, "USD")))
+                .ForMember(dest => dest.OriginalPrice, opt => opt.MapFrom(src => src.OriginalPrice.HasValue ?
+                    Money.Create(src.OriginalPrice.Value, "USD") : null))
+                .ForMember(dest => dest.Dimensions, opt => opt.MapFrom(src =>
+                    Dimensions.Create(src.Dimensions.Length, src.Dimensions.Width, src.Dimensions.Height, "cm")))
+                .ForMember(dest => dest.Weight, opt => opt.MapFrom(src =>
+                    Weight.Create(src.Weight, "kg")));
+
+            CreateMap<UpdateProductRequest, Product>()
+                .ForMember(dest => dest.Price, opt => opt.MapFrom(src => Money.Create(src.Price, "USD")))
+                .ForMember(dest => dest.OriginalPrice, opt => opt.MapFrom(src => src.OriginalPrice.HasValue ?
+                    Money.Create(src.OriginalPrice.Value, "USD") : null))
+                .ForMember(dest => dest.Dimensions, opt => opt.MapFrom(src =>
+                    Dimensions.Create(src.Dimensions.Length, src.Dimensions.Width, src.Dimensions.Height, "cm")))
+                .ForMember(dest => dest.Weight, opt => opt.MapFrom(src =>
+                    Weight.Create(src.Weight, "kg")));
+
+            // Product variant mappings
+            CreateMap<ProductVariant, VendorProductVariantResponse>();
+
+            CreateMap<CreateProductVariantRequest, ProductVariant>()
+                .ForMember(dest => dest.Price, opt => opt.MapFrom(src => Money.Create(src.Price, "USD")))
+                .ForMember(dest => dest.OriginalPrice, opt => opt.MapFrom(src => src.OriginalPrice.HasValue ?
+                    Money.Create(src.OriginalPrice.Value, "USD") : null))
+                .ForMember(dest => dest.Dimensions, opt => opt.MapFrom(src =>
+                    Dimensions.Create(src.Dimensions.Length, src.Dimensions.Width, src.Dimensions.Height, "cm")))
+                .ForMember(dest => dest.Weight, opt => opt.MapFrom(src =>
+                    Weight.Create(src.Weight, "kg")));
+
+            CreateMap<UpdateProductVariantRequest, ProductVariant>()
+                .ForMember(dest => dest.Price, opt => opt.MapFrom(src => Money.Create(src.Price, "USD")))
+                .ForMember(dest => dest.OriginalPrice, opt => opt.MapFrom(src => src.OriginalPrice.HasValue ?
+                    Money.Create(src.OriginalPrice.Value, "USD") : null))
+                .ForMember(dest => dest.Dimensions, opt => opt.MapFrom(src =>
+                    Dimensions.Create(src.Dimensions.Length, src.Dimensions.Width, src.Dimensions.Height, "cm")))
+                .ForMember(dest => dest.Weight, opt => opt.MapFrom(src =>
+                    Weight.Create(src.Weight, "kg")));
+
+            // Other mappings
+            CreateMap<ImageResource, VendorProductImageResponse>();
+            CreateMap<ProductAttribute, VendorProductAttributeResponse>();
+
+            // Value object mappings
+            CreateMap<Dimensions, VendorDimensionsResponse>();
+            CreateMap<Weight, VendorWeightResponse>();
+        }
+    }
+}using System.ComponentModel.DataAnnotations;
+
+namespace Catalog_Service.src._03_Endpoints.DTOs.Requests.Public
+{
+    public class CreateProductReviewRequest
+    {
+        [Required(ErrorMessage = "Product ID is required")]
+        public int ProductId { get; set; }
+
+        [Required(ErrorMessage = "Title is required")]
+        [StringLength(100, ErrorMessage = "Title cannot exceed 100 characters")]
+        public string Title { get; set; }
+
+        [Required(ErrorMessage = "Comment is required")]
+        [StringLength(1000, ErrorMessage = "Comment cannot exceed 1000 characters")]
+        public string Comment { get; set; }
+
+        [Required(ErrorMessage = "Rating is required")]
+        [Range(1, 5, ErrorMessage = "Rating must be between 1 and 5")]
+        public int Rating { get; set; }
+
+        public bool IsVerifiedPurchase { get; set; }
+    }
+}
+using System.ComponentModel.DataAnnotations;
+
+namespace Catalog_Service.src._03_Endpoints.DTOs.Requests.Public
+{
+    public class ProductSearchRequest
+    {
+        [StringLength(100, ErrorMessage = "Search term cannot exceed 100 characters")]
+        public string SearchTerm { get; set; }
+
+        public int? CategoryId { get; set; }
+
+        public int? BrandId { get; set; }
+
+        public decimal? MinPrice { get; set; }
+
+        public decimal? MaxPrice { get; set; }
+
+        public bool? InStock { get; set; }
+
+        public bool? IsFeatured { get; set; }
+
+        [Range(1, int.MaxValue, ErrorMessage = "Page number must be at least 1")]
+        public int PageNumber { get; set; } = 1;
+
+        [Range(1, 100, ErrorMessage = "Page size must be between 1 and 100")]
+        public int PageSize { get; set; } = 20;
+
+        public string SortBy { get; set; } = "relevance";
+
+        public bool SortAscending { get; set; } = false;
+    }
+}
+using System.ComponentModel.DataAnnotations;
+
+namespace Catalog_Service.src._03_Endpoints.DTOs.Requests.Vendor
+{
+    public class CreateProductRequest
+    {
+        [Required(ErrorMessage = "Product name is required")]
+        [StringLength(200, ErrorMessage = "Product name cannot exceed 200 characters")]
+        public string Name { get; set; }
+
+        [Required(ErrorMessage = "Product description is required")]
+        [StringLength(2000, ErrorMessage = "Description cannot exceed 2000 characters")]
+        public string Description { get; set; }
+
+        [Required(ErrorMessage = "Price is required")]
+        [Range(0.01, double.MaxValue, ErrorMessage = "Price must be greater than 0")]
+        public decimal Price { get; set; }
+
+        [Required(ErrorMessage = "SKU is required")]
+        [StringLength(50, ErrorMessage = "SKU cannot exceed 50 characters")]
+        public string Sku { get; set; }
+
+        [Required(ErrorMessage = "Brand ID is required")]
+        public int BrandId { get; set; }
+
+        [Required(ErrorMessage = "Category ID is required")]
+        public int CategoryId { get; set; }
+
+        [Required(ErrorMessage = "Weight is required")]
+        [Range(0.01, double.MaxValue, ErrorMessage = "Weight must be greater than 0")]
+        public decimal Weight { get; set; }
+
+        [Required(ErrorMessage = "Dimensions are required")]
+        public DimensionsRequest Dimensions { get; set; }
+
+        [StringLength(60, ErrorMessage = "Meta title cannot exceed 60 characters")]
+        public string MetaTitle { get; set; }
+
+        [StringLength(160, ErrorMessage = "Meta description cannot exceed 160 characters")]
+        public string MetaDescription { get; set; }
+
+        public string? ImageUrl { get; set; }
+        public decimal? OriginalPrice { get; set; }
+    }
+
+    public class DimensionsRequest
+    {
+        [Required(ErrorMessage = "Length is required")]
+        [Range(0.01, double.MaxValue, ErrorMessage = "Length must be greater than 0")]
+        public decimal Length { get; set; }
+
+        [Required(ErrorMessage = "Width is required")]
+        [Range(0.01, double.MaxValue, ErrorMessage = "Width must be greater than 0")]
+        public decimal Width { get; set; }
+
+        [Required(ErrorMessage = "Height is required")]
+        [Range(0.01, double.MaxValue, ErrorMessage = "Height must be greater than 0")]
+        public decimal Height { get; set; }
+    }
+}
+using System.ComponentModel.DataAnnotations;
+
+namespace Catalog_Service.src._03_Endpoints.DTOs.Requests.Vendor
+{
+    public class CreateProductVariantRequest
+    {
+        [Required(ErrorMessage = "Product ID is required")]
+        public int ProductId { get; set; }
+
+        [Required(ErrorMessage = "Variant name is required")]
+        [StringLength(100, ErrorMessage = "Variant name cannot exceed 100 characters")]
+        public string Name { get; set; }
+
+        [Required(ErrorMessage = "SKU is required")]
+        [StringLength(50, ErrorMessage = "SKU cannot exceed 50 characters")]
+        public string Sku { get; set; }
+
+        [Required(ErrorMessage = "Price is required")]
+        [Range(0.01, double.MaxValue, ErrorMessage = "Price must be greater than 0")]
+        public decimal Price { get; set; }
+
+        [Required(ErrorMessage = "Weight is required")]
+        [Range(0.01, double.MaxValue, ErrorMessage = "Weight must be greater than 0")]
+        public decimal Weight { get; set; }
+
+        [Required(ErrorMessage = "Dimensions are required")]
+        public DimensionsRequest Dimensions { get; set; }
+
+        public string? ImageUrl { get; set; }
+        public decimal? OriginalPrice { get; set; }
+    }
+}
+using System.ComponentModel.DataAnnotations;
+
+namespace Catalog_Service.src._03_Endpoints.DTOs.Requests.Vendor
+{
+    public class UpdateProductRequest
+    {
+        [Required(ErrorMessage = "Product ID is required")]
+        public int Id { get; set; }
+
+        [Required(ErrorMessage = "Product name is required")]
+        [StringLength(200, ErrorMessage = "Product name cannot exceed 200 characters")]
+        public string Name { get; set; }
+
+        [Required(ErrorMessage = "Product description is required")]
+        [StringLength(2000, ErrorMessage = "Description cannot exceed 2000 characters")]
+        public string Description { get; set; }
+
+        [Required(ErrorMessage = "Price is required")]
+        [Range(0.01, double.MaxValue, ErrorMessage = "Price must be greater than 0")]
+        public decimal Price { get; set; }
+
+        [Required(ErrorMessage = "SKU is required")]
+        [StringLength(50, ErrorMessage = "SKU cannot exceed 50 characters")]
+        public string Sku { get; set; }
+
+        [Required(ErrorMessage = "Brand ID is required")]
+        public int BrandId { get; set; }
+
+        [Required(ErrorMessage = "Category ID is required")]
+        public int CategoryId { get; set; }
+
+        [Required(ErrorMessage = "Weight is required")]
+        [Range(0.01, double.MaxValue, ErrorMessage = "Weight must be greater than 0")]
+        public decimal Weight { get; set; }
+
+        [Required(ErrorMessage = "Dimensions are required")]
+        public DimensionsRequest Dimensions { get; set; }
+
+        [StringLength(60, ErrorMessage = "Meta title cannot exceed 60 characters")]
+        public string MetaTitle { get; set; }
+
+        [StringLength(160, ErrorMessage = "Meta description cannot exceed 160 characters")]
+        public string MetaDescription { get; set; }
+
+        public string? ImageUrl { get; set; }
+        public decimal? OriginalPrice { get; set; }
+    }
+}
+using System.ComponentModel.DataAnnotations;
+
+namespace Catalog_Service.src._03_Endpoints.DTOs.Requests.Vendor
+{
+    public class UpdateProductVariantRequest
+    {
+        [Required(ErrorMessage = "Variant ID is required")]
+        public int Id { get; set; }
+
+        [Required(ErrorMessage = "Variant name is required")]
+        [StringLength(100, ErrorMessage = "Variant name cannot exceed 100 characters")]
+        public string Name { get; set; }
+
+        [Required(ErrorMessage = "SKU is required")]
+        [StringLength(50, ErrorMessage = "SKU cannot exceed 50 characters")]
+        public string Sku { get; set; }
+
+        [Required(ErrorMessage = "Price is required")]
+        [Range(0.01, double.MaxValue, ErrorMessage = "Price must be greater than 0")]
+        public decimal Price { get; set; }
+
+        [Required(ErrorMessage = "Weight is required")]
+        [Range(0.01, double.MaxValue, ErrorMessage = "Weight must be greater than 0")]
+        public decimal Weight { get; set; }
+
+        [Required(ErrorMessage = "Dimensions are required")]
+        public DimensionsRequest Dimensions { get; set; }
+
+        public string? ImageUrl { get; set; }
+        public decimal? OriginalPrice { get; set; }
+    }
+}
+using System.ComponentModel.DataAnnotations;
+
+namespace Catalog_Service.src._03_Endpoints.DTOs.Requests.Vendor
+{
+    public class VendorProductSearchRequest
+    {
+        [StringLength(100, ErrorMessage = "Search term cannot exceed 100 characters")]
+        public string SearchTerm { get; set; }
+
+        public int? CategoryId { get; set; }
+
+        public int? BrandId { get; set; }
+
+        public bool? IsActive { get; set; }
+
+        public decimal? MinPrice { get; set; }
+
+        public decimal? MaxPrice { get; set; }
+
+        public bool? InStock { get; set; }
+
+        [Range(1, int.MaxValue, ErrorMessage = "Page number must be at least 1")]
+        public int PageNumber { get; set; } = 1;
+
+        [Range(1, 100, ErrorMessage = "Page size must be between 1 and 100")]
+        public int PageSize { get; set; } = 20;
+
+        public string SortBy { get; set; } = "name";
+
+        public bool SortAscending { get; set; } = true;
+    }
+}
+namespace Catalog_Service.src._03_Endpoints.DTOs.Responses
+{
+    public class PagedResponse<T>
+    {
+        public IEnumerable<T> Items { get; set; }
+        public int TotalCount { get; set; }
+        public int PageNumber { get; set; }
+        public int PageSize { get; set; }
+        public int TotalPages => (int)Math.Ceiling((double)TotalCount / PageSize);
+        public bool HasPrevious => PageNumber > 1;
+        public bool HasNext => PageNumber < TotalPages;
+    }
+}
+using Catalog_Service.src._01_Domain.Core.Enums;
+
+namespace Catalog_Service.src._03_Endpoints.DTOs.Responses.Vendor
+{
+    public class VendorProductResponse
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public string Description { get; set; }
+        public decimal Price { get; set; }
+        public decimal? OriginalPrice { get; set; }
+        public string Sku { get; set; }
+        public string Slug { get; set; }
+        public ProductStatus Status { get; set; }
+        public int BrandId { get; set; }
+        public string BrandName { get; set; }
+        public int CategoryId { get; set; }
+        public string CategoryName { get; set; }
+        public int StockQuantity { get; set; }
+        public StockStatus StockStatus { get; set; }
+        public bool IsFeatured { get; set; }
+        public int ViewCount { get; set; }
+        public string ImageUrl { get; set; }
+        public VendorDimensionsResponse Dimensions { get; set; }
+        public VendorWeightResponse Weight { get; set; }
+        public double AverageRating { get; set; }
+        public int TotalReviews { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public DateTime? UpdatedAt { get; set; }
+        public DateTime? PublishedAt { get; set; }
+        public List<VendorProductVariantResponse> Variants { get; set; } = new();
+        public List<VendorProductImageResponse> Images { get; set; } = new();
+        public List<VendorProductAttributeResponse> Attributes { get; set; } = new();
+    }
+
+    public class VendorProductVariantResponse
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public string Sku { get; set; }
+        public decimal Price { get; set; }
+        public decimal? OriginalPrice { get; set; }
+        public int StockQuantity { get; set; }
+        public StockStatus StockStatus { get; set; }
+        public bool IsActive { get; set; }
+        public string ImageUrl { get; set; }
+        public VendorDimensionsResponse Dimensions { get; set; }
+        public VendorWeightResponse Weight { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public DateTime? UpdatedAt { get; set; }
+    }
+
+    public class VendorProductImageResponse
+    {
+        public int Id { get; set; }
+        public string OriginalFileName { get; set; }
+        public string FileExtension { get; set; }
+        public string PublicUrl { get; set; }
+        public long FileSize { get; set; }
+        public int Width { get; set; }
+        public int Height { get; set; }
+        public ImageType ImageType { get; set; }
+        public string AltText { get; set; }
+        public bool IsPrimary { get; set; }
+    }
+
+    public class VendorProductAttributeResponse
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public string Value { get; set; }
+        public bool IsVariantSpecific { get; set; }
+    }
+
+    public class VendorDimensionsResponse
+    {
+        public decimal Length { get; set; }
+        public decimal Width { get; set; }
+        public decimal Height { get; set; }
+    }
+
+    public class VendorWeightResponse
+    {
+        public decimal Value { get; set; }
+        public string Unit { get; set; }
+    }
+}
+namespace Catalog_Service.src._03_Endpoints.DTOs.Responses.Public
+{
+    public class BrandResponse
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public string Description { get; set; }
+        public string Slug { get; set; }
+        public string LogoUrl { get; set; }
+        public int ProductCount { get; set; }
+    }
+}
+namespace Catalog_Service.src._03_Endpoints.DTOs.Responses.Public
+{
+    public class CategoryResponse
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public string Description { get; set; }
+        public string Slug { get; set; }
+        public int DisplayOrder { get; set; }
+        public int? ParentCategoryId { get; set; }
+        public string ImageUrl { get; set; }
+        public int ProductCount { get; set; }
+        public List<CategoryResponse> SubCategories { get; set; } = new();
+    }
+}
+using Catalog_Service.src._01_Domain.Core.Enums;
+using static Catalog_Service.src._03_Endpoints.DTOs.Responses.Public.ProductVariantResponse;
+
+namespace Catalog_Service.src._03_Endpoints.DTOs.Responses.Public
+{
+    public class ProductResponse
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public string Description { get; set; }
+        public decimal Price { get; set; }
+        public decimal? OriginalPrice { get; set; }
+        public string Sku { get; set; }
+        public string Slug { get; set; }
+        public int BrandId { get; set; }
+        public string BrandName { get; set; }
+        public int CategoryId { get; set; }
+        public string CategoryName { get; set; }
+        public int StockQuantity { get; set; }
+        public StockStatus StockStatus { get; set; }
+        public bool IsFeatured { get; set; }
+        public string ImageUrl { get; set; }
+        public DimensionsResponse Dimensions { get; set; }
+        public WeightResponse Weight { get; set; }
+        public double AverageRating { get; set; }
+        public int TotalReviews { get; set; }
+        public List<ProductVariantResponse> Variants { get; set; } = new();
+        public List<ProductImageResponse> Images { get; set; } = new();
+        public List<ProductAttributeResponse> Attributes { get; set; } = new();
+    }
+
+    public class ProductVariantResponse
+    {
+        public int Id { get; set; }
+        public int ProductId { get; set; }
+        public string Name { get; set; }
+        public string Sku { get; set; }
+        public decimal Price { get; set; }
+        public decimal? OriginalPrice { get; set; }
+        public int StockQuantity { get; set; }
+        public StockStatus StockStatus { get; set; }
+        public bool IsActive { get; set; }
+        public string ImageUrl { get; set; }
+        public DimensionsResponse Dimensions { get; set; }
+        public WeightResponse Weight { get; set; }
+
+        public class ProductImageResponse
+        {
+            public int Id { get; set; }
+            public string PublicUrl { get; set; }
+            public string AltText { get; set; }
+            public bool IsPrimary { get; set; }
+            public int Width { get; set; }
+            public int Height { get; set; }
+        }
+
+        public class ProductAttributeResponse
+        {
+            public int Id { get; set; }
+            public string Name { get; set; }
+            public string Value { get; set; }
+        }
+
+        public class DimensionsResponse
+        {
+            public decimal Length { get; set; }
+            public decimal Width { get; set; }
+            public decimal Height { get; set; }
+        }
+
+        public class WeightResponse
+        {
+            public decimal Value { get; set; }
+            public string Unit { get; set; }
+        }
+    }
+}
+using Catalog_Service.src._01_Domain.Core.Enums;
+
+namespace Catalog_Service.src._03_Endpoints.DTOs.Responses.Public
+{
+    public class ProductReviewResponse
+    {
+        public int Id { get; set; }
+        public string Title { get; set; }
+        public string Comment { get; set; }
+        public int Rating { get; set; }
+        public ReviewStatus Status { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public bool IsVerifiedPurchase { get; set; }
+        public int HelpfulVotes { get; set; }
+        public string UserName { get; set; }
+    }
+}
+using Catalog_Service.src._03_Endpoints.DTOs.Requests.Public;
+using FluentValidation;
+
+namespace Catalog_Service.src.CrossCutting.Validation.Public
+{
+    public class CreateProductReviewValidator : AbstractValidator<CreateProductReviewRequest>
+    {
+        public CreateProductReviewValidator()
+        {
+            RuleFor(x => x.ProductId)
+                .GreaterThan(0).WithMessage("Valid product ID is required");
+
+            RuleFor(x => x.Title)
+                .NotEmpty().WithMessage("Review title is required")
+                .Length(5, 100).WithMessage("Title must be between 5 and 100 characters");
+
+            RuleFor(x => x.Comment)
+                .NotEmpty().WithMessage("Review comment is required")
+                .Length(20, 1000).WithMessage("Comment must be between 20 and 1000 characters");
+
+            RuleFor(x => x.Rating)
+                .InclusiveBetween(1, 5).WithMessage("Rating must be between 1 and 5");
+        }
+    }
+}
+using Catalog_Service.src._03_Endpoints.DTOs.Requests.Public;
+using FluentValidation;
+
+namespace Catalog_Service.src.CrossCutting.Validation.Public
+{
+    public class ProductSearchValidator : AbstractValidator<ProductSearchRequest>
+    {
+        public ProductSearchValidator()
+        {
+            RuleFor(x => x.PageNumber)
+                .GreaterThanOrEqualTo(1).WithMessage("Page number must be at least 1");
+
+            RuleFor(x => x.PageSize)
+                .InclusiveBetween(1, 100).WithMessage("Page size must be between 1 and 100");
+
+            RuleFor(x => x.MinPrice)
+                .GreaterThanOrEqualTo(0)
+                .When(x => x.MinPrice.HasValue)
+                .WithMessage("Minimum price must be non-negative");
+
+            RuleFor(x => x.MaxPrice)
+                .GreaterThanOrEqualTo(0)
+                .When(x => x.MaxPrice.HasValue)
+                .WithMessage("Maximum price must be non-negative");
+
+            RuleFor(x => x)
+                .Must(x => !x.MinPrice.HasValue || !x.MaxPrice.HasValue || x.MinPrice <= x.MaxPrice)
+                .WithMessage("Minimum price must be less than or equal to maximum price");
+
+            RuleFor(x => x.SearchTerm)
+                .MaximumLength(100)
+                .When(x => !string.IsNullOrEmpty(x.SearchTerm))
+                .WithMessage("Search term cannot exceed 100 characters");
+        }
+    }
+}
+using Catalog_Service.src._03_Endpoints.DTOs.Requests.Vendor;
+using FluentValidation;
+
+namespace Catalog_Service.src.CrossCutting.Validation.Vendor
+{
+    public class CreateProductValidator : AbstractValidator<CreateProductRequest>
+    {
+        public CreateProductValidator()
+        {
+            RuleFor(x => x.Name)
+                .NotEmpty().WithMessage("Product name is required")
+                .Length(2, 200).WithMessage("Product name must be between 2 and 200 characters");
+
+            RuleFor(x => x.Description)
+                .NotEmpty().WithMessage("Product description is required")
+                .Length(10, 2000).WithMessage("Description must be between 10 and 2000 characters");
+
+            RuleFor(x => x.Price)
+                .GreaterThan(0).WithMessage("Price must be greater than 0");
+
+            RuleFor(x => x.Sku)
+                .NotEmpty().WithMessage("SKU is required")
+                .Length(2, 50).WithMessage("SKU must be between 2 and 50 characters");
+
+            RuleFor(x => x.BrandId)
+                .GreaterThan(0).WithMessage("Valid brand ID is required");
+
+            RuleFor(x => x.CategoryId)
+                .GreaterThan(0).WithMessage("Valid category ID is required");
+
+            RuleFor(x => x.Weight)
+                .GreaterThan(0).WithMessage("Weight must be greater than 0");
+
+            RuleFor(x => x.Dimensions)
+                .NotNull().WithMessage("Dimensions are required")
+                .SetValidator(new DimensionsRequestValidator());
+
+            RuleFor(x => x.OriginalPrice)
+                .GreaterThan(x => x.Price)
+                .When(x => x.OriginalPrice.HasValue)
+                .WithMessage("Original price must be greater than current price");
+
+            RuleFor(x => x.MetaTitle)
+                .MaximumLength(60).WithMessage("Meta title cannot exceed 60 characters");
+
+            RuleFor(x => x.MetaDescription)
+                .MaximumLength(160).WithMessage("Meta description cannot exceed 160 characters");
+        }
+    }
+
+    public class DimensionsRequestValidator : AbstractValidator<DimensionsRequest>
+    {
+        public DimensionsRequestValidator()
+        {
+            RuleFor(x => x.Length)
+                .GreaterThan(0).WithMessage("Length must be greater than 0");
+
+            RuleFor(x => x.Width)
+                .GreaterThan(0).WithMessage("Width must be greater than 0");
+
+            RuleFor(x => x.Height)
+                .GreaterThan(0).WithMessage("Height must be greater than 0");
+        }
+    }
+}
+using Catalog_Service.src._03_Endpoints.DTOs.Requests.Vendor;
+using FluentValidation;
+
+namespace Catalog_Service.src.CrossCutting.Validation.Vendor
+{
+    public class CreateProductVariantValidator : AbstractValidator<CreateProductVariantRequest>
+    {
+        public CreateProductVariantValidator()
+        {
+            RuleFor(x => x.ProductId)
+                .GreaterThan(0).WithMessage("Valid product ID is required");
+
+            RuleFor(x => x.Name)
+                .NotEmpty().WithMessage("Variant name is required")
+                .Length(2, 100).WithMessage("Variant name must be between 2 and 100 characters");
+
+            RuleFor(x => x.Sku)
+                .NotEmpty().WithMessage("SKU is required")
+                .Length(2, 50).WithMessage("SKU must be between 2 and 50 characters");
+
+            RuleFor(x => x.Price)
+                .GreaterThan(0).WithMessage("Price must be greater than 0");
+
+            RuleFor(x => x.Weight)
+                .GreaterThan(0).WithMessage("Weight must be greater than 0");
+
+            RuleFor(x => x.Dimensions)
+                .NotNull().WithMessage("Dimensions are required")
+                .SetValidator(new DimensionsRequestValidator());
+
+            RuleFor(x => x.OriginalPrice)
+                .GreaterThan(x => x.Price)
+                .When(x => x.OriginalPrice.HasValue)
+                .WithMessage("Original price must be greater than current price");
+            RuleFor(x => x.Weight)
+            .NotEmpty().WithMessage("Weight is required.") // چک می‌کند که null نباشد
+            .GreaterThan(0).WithMessage("Weight must be positive."); // چک می‌کند که بزرگتر از صفر باشد
+        }
+    }
+}
+using Catalog_Service.src._03_Endpoints.DTOs.Requests.Vendor;
+using FluentValidation;
+
+namespace Catalog_Service.src.CrossCutting.Validation.Vendor
+{
+    public class UpdateProductValidator : AbstractValidator<UpdateProductRequest>
+    {
+        public UpdateProductValidator()
+        {
+            RuleFor(x => x.Id)
+                .GreaterThan(0).WithMessage("Invalid product ID");
+
+            RuleFor(x => x.Name)
+                .NotEmpty().WithMessage("Product name is required")
+                .Length(2, 200).WithMessage("Product name must be between 2 and 200 characters");
+
+            RuleFor(x => x.Description)
+                .NotEmpty().WithMessage("Product description is required")
+                .Length(10, 2000).WithMessage("Description must be between 10 and 2000 characters");
+
+            RuleFor(x => x.Price)
+                .GreaterThan(0).WithMessage("Price must be greater than 0");
+
+            RuleFor(x => x.Sku)
+                .NotEmpty().WithMessage("SKU is required")
+                .Length(2, 50).WithMessage("SKU must be between 2 and 50 characters");
+
+            RuleFor(x => x.BrandId)
+                .GreaterThan(0).WithMessage("Valid brand ID is required");
+
+            RuleFor(x => x.CategoryId)
+                .GreaterThan(0).WithMessage("Valid category ID is required");
+
+            RuleFor(x => x.Weight)
+                .GreaterThan(0).WithMessage("Weight must be greater than 0");
+
+            RuleFor(x => x.Dimensions)
+                .NotNull().WithMessage("Dimensions are required")
+                .SetValidator(new DimensionsRequestValidator());
+
+            RuleFor(x => x.OriginalPrice)
+                .GreaterThan(x => x.Price)
+                .When(x => x.OriginalPrice.HasValue)
+                .WithMessage("Original price must be greater than current price");
+
+            RuleFor(x => x.MetaTitle)
+                .MaximumLength(60).WithMessage("Meta title cannot exceed 60 characters");
+
+            RuleFor(x => x.MetaDescription)
+                .MaximumLength(160).WithMessage("Meta description cannot exceed 160 characters");
+        }
+    }
+}
+using Catalog_Service.src._03_Endpoints.DTOs.Requests.Vendor;
+using FluentValidation;
+
+namespace Catalog_Service.src.CrossCutting.Validation.Vendor
+{
+    public class UpdateProductVariantValidator : AbstractValidator<UpdateProductVariantRequest>
+    {
+        public UpdateProductVariantValidator()
+        {
+            RuleFor(x => x.Id)
+                .GreaterThan(0).WithMessage("Invalid variant ID");
+
+            RuleFor(x => x.Name)
+                .NotEmpty().WithMessage("Variant name is required")
+                .Length(2, 100).WithMessage("Variant name must be between 2 and 100 characters");
+
+            RuleFor(x => x.Sku)
+                .NotEmpty().WithMessage("SKU is required")
+                .Length(2, 50).WithMessage("SKU must be between 2 and 50 characters");
+
+            RuleFor(x => x.Price)
+                .GreaterThan(0).WithMessage("Price must be greater than 0");
+
+            RuleFor(x => x.Weight)
+                .GreaterThan(0).WithMessage("Weight must be greater than 0");
+
+            RuleFor(x => x.Dimensions)
+                .NotNull().WithMessage("Dimensions are required")
+                .SetValidator(new DimensionsRequestValidator());
+
+            RuleFor(x => x.OriginalPrice)
+                .GreaterThan(x => x.Price)
+                .When(x => x.OriginalPrice.HasValue)
+                .WithMessage("Original price must be greater than current price");
+        }
+    }
+}
+namespace Catalog_Service.src.CrossCutting.Utilities
+{
+    public static class SlugHelper
+    {
+        public static string GenerateSlug(string phrase)
+        {
+            if (string.IsNullOrWhiteSpace(phrase))
+                return string.Empty;
+
+            var s = phrase.ToLowerInvariant();
+            s = s.Replace(" ", "-");
+            s = s.Replace("_", "-");
+            s = System.Text.RegularExpressions.Regex.Replace(s, @"[^a-z0-9\s-]", "");
+            s = System.Text.RegularExpressions.Regex.Replace(s, @"\s+", " ").Trim();
+            s = s.Replace(" ", "-");
+            s = System.Text.RegularExpressions.Regex.Replace(s, @"-+", "-");
+
+            return s;
+        }
+
+        public static string EnsureUniqueSlug(string baseSlug, Func<string, Task<bool>> uniquenessChecker)
+        {
+            if (string.IsNullOrWhiteSpace(baseSlug))
+                return string.Empty;
+
+            var slug = baseSlug;
+            var counter = 1;
+
+            while (!uniquenessChecker(slug).Result)
+            {
+                slug = $"{baseSlug}-{counter}";
+                counter++;
+            }
+
+            return slug;
+        }
+    }
+}
+namespace Catalog_Service.src.CrossCutting.Utilities
+{
+    public static class PaginationHelper
+    {
+        public static PagedResult<T> CreatePagedResult<T>(
+            IEnumerable<T> items,
+            int totalCount,
+            int pageNumber,
+            int pageSize)
+        {
+            var totalPages = (int)Math.Ceiling((double)totalCount / pageSize);
+
+            return new PagedResult<T>
+            {
+                Items = items,
+                TotalCount = totalCount,
+                PageNumber = pageNumber,
+                PageSize = pageSize,
+                TotalPages = totalPages,
+                HasPreviousPage = pageNumber > 1,
+                HasNextPage = pageNumber < totalPages
+            };
+        }
+
+        public static IQueryable<T> Paginate<T>(this IQueryable<T> query, int pageNumber, int pageSize)
+        {
+            if (pageNumber < 1)
+                pageNumber = 1;
+
+            if (pageSize < 1)
+                pageSize = 10;
+
+            return query.Skip((pageNumber - 1) * pageSize).Take(pageSize);
+        }
+
+        public static IEnumerable<T> Paginate<T>(this IEnumerable<T> query, int pageNumber, int pageSize)
+        {
+            if (pageNumber < 1)
+                pageNumber = 1;
+
+            if (pageSize < 1)
+                pageSize = 10;
+
+            return query.Skip((pageNumber - 1) * pageSize).Take(pageSize);
+        }
+    }
+
+    public class PagedResult<T>
+    {
+        public IEnumerable<T> Items { get; set; }
+        public int TotalCount { get; set; }
+        public int PageNumber { get; set; }
+        public int PageSize { get; set; }
+        public int TotalPages { get; set; }
+        public bool HasPreviousPage { get; set; }
+        public bool HasNextPage { get; set; }
+    }
+}
+using System.Drawing;
+using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
+using System.IO;
+
+namespace Catalog_Service.src.CrossCutting.Utilities
+{
+    public static class ImageProcessor
+    {
+        public static async Task<byte[]> ResizeImageAsync(byte[] imageData, int maxWidth, int maxHeight, int quality = 75)
+        {
+            using (var inputStream = new MemoryStream(imageData))
+            using (var outputStream = new MemoryStream())
+            {
+                using (var image = Image.FromStream(inputStream))
+                {
+                    var ratioX = (double)maxWidth / image.Width;
+                    var ratioY = (double)maxHeight / image.Height;
+                    var ratio = Math.Min(ratioX, ratioY);
+
+                    var newWidth = (int)(image.Width * ratio);
+                    var newHeight = (int)(image.Height * ratio);
+
+                    using (var thumbnail = new Bitmap(newWidth, newHeight))
+                    {
+                        using (var graphic = Graphics.FromImage(thumbnail))
+                        {
+                            graphic.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                            graphic.SmoothingMode = SmoothingMode.HighQuality;
+                            graphic.PixelOffsetMode = PixelOffsetMode.HighQuality;
+
+                            graphic.DrawImage(image, 0, 0, newWidth, newHeight);
+                        }
+
+                        var encoderParameters = new EncoderParameters(1);
+                        encoderParameters.Param[0] = new EncoderParameter(Encoder.Quality, quality);
+
+                        var imageFormat = GetImageFormat(image.RawFormat);
+                        var encoder = GetEncoder(imageFormat);
+                        thumbnail.Save(outputStream, encoder, encoderParameters);
+                    }
+                }
+
+                return outputStream.ToArray();
+            }
+        }
+
+        public static async Task<byte[]> ConvertToJpegAsync(byte[] imageData, int quality = 75)
+        {
+            using (var inputStream = new MemoryStream(imageData))
+            using (var outputStream = new MemoryStream())
+            {
+                using (var image = Image.FromStream(inputStream))
+                {
+                    var encoderParameters = new EncoderParameters(1);
+                    encoderParameters.Param[0] = new EncoderParameter(Encoder.Quality, quality);
+
+                    var jpegEncoder = GetEncoder(ImageFormat.Jpeg);
+                    image.Save(outputStream, jpegEncoder, encoderParameters);
+                }
+
+                return outputStream.ToArray();
+            }
+        }
+
+        public static bool IsImage(byte[] imageData)
+        {
+            try
+            {
+                using (var stream = new MemoryStream(imageData))
+                {
+                    using (var image = Image.FromStream(stream))
+                    {
+                        return true;
+                    }
+                }
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        private static ImageCodecInfo GetEncoder(ImageFormat format)
+        {
+            var codecs = ImageCodecInfo.GetImageDecoders();
+            foreach (var codec in codecs)
+            {
+                if (codec.FormatID == format.Guid)
+                {
+                    return codec;
+                }
+            }
+            return null;
+        }
+
+        private static ImageFormat GetImageFormat(ImageFormat rawFormat)
+        {
+            if (rawFormat.Equals(ImageFormat.Jpeg) || rawFormat.Equals(ImageFormat.Jpeg))
+                return ImageFormat.Jpeg;
+            if (rawFormat.Equals(ImageFormat.Png))
+                return ImageFormat.Png;
+            if (rawFormat.Equals(ImageFormat.Gif))
+                return ImageFormat.Gif;
+            if (rawFormat.Equals(ImageFormat.Bmp))
+                return ImageFormat.Bmp;
+
+            return ImageFormat.Jpeg;
+        }
+    }
+}namespace Catalog_Service.src.CrossCutting.Utilities
+{
+    public interface IDateTimeProvider
+    {
+        DateTime Now { get; }
+        DateTime UtcNow { get; }
+    }
+
+    public class DateTimeProvider : IDateTimeProvider
+    {
+        public DateTime Now => DateTime.Now;
+        public DateTime UtcNow => DateTime.UtcNow;
+    }
+}
+using Catalog_Service.src._01_Domain.Core.Contracts.Repositories;
+using Catalog_Service.src.CrossCutting.Security.PolicyRequirements;
+using Microsoft.AspNetCore.Authorization;
+
+namespace Catalog_Service.src.CrossCutting.Security.Handlers
+{
+    public class ProductOwnerHandler : AuthorizationHandler<ProductOwnerRequirement>
+    {
+        private readonly IProductRepository _productRepository;
+
+        public ProductOwnerHandler(IProductRepository productRepository)
+        {
+            _productRepository = productRepository;
+        }
+
+        protected override async Task HandleRequirementAsync(
+            AuthorizationHandlerContext context,
+            ProductOwnerRequirement requirement)
+        {
+            var userId = context.User.FindFirst("sub")?.Value;
+            var userRole = context.User.FindFirst("role")?.Value;
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                context.Fail();
+                return;
+            }
+
+            // Admins can access any product
+            if (userRole == RoleConstants.Administrator)
+            {
+                context.Succeed(requirement);
+                return;
+            }
+
+            // Get the product
+            var product = await _productRepository.GetByIdAsync(requirement.ProductId);
+            if (product == null)
+            {
+                context.Fail();
+                return;
+            }
+
+            // Check if the user is the owner of the product through the brand
+            // Since Brand doesn't have VendorId, we'll check if the user has permission to manage products
+            if (userRole == RoleConstants.Vendor && context.User.HasClaim(c => c.Type == "permission" && c.Value == PermissionConstants.UpdateProduct))
+            {
+                context.Succeed(requirement);
+                return;
+            }
+
+            context.Fail();
+        }
+    }
+}
+using Catalog_Service.src.CrossCutting.Security.PolicyRequirements;
+using Microsoft.AspNetCore.Authorization;
+
+namespace Catalog_Service.src.CrossCutting.Security.Handlers
+{
+    public class VendorAccessHandler : AuthorizationHandler<VendorRequirement>
+    {
+        protected override Task HandleRequirementAsync(
+            AuthorizationHandlerContext context,
+            VendorRequirement requirement)
+        {
+            var userRole = context.User.FindFirst("role")?.Value;
+
+            if (userRole == RoleConstants.Administrator || userRole == RoleConstants.Vendor)
+            {
+                context.Succeed(requirement);
+            }
+            else
+            {
+                context.Fail();
+            }
+
+            return Task.CompletedTask;
+        }
+    }
+}
+using Catalog_Service.src.CrossCutting.Security.PolicyRequirements;
+using Microsoft.AspNetCore.Authorization;
+
+namespace Catalog_Service.src.CrossCutting.Security
+{
+    public static class AuthorizationPolicies
+    {
+        public const string AdminPolicy = "AdminPolicy";
+        public const string VendorPolicy = "VendorPolicy";
+        public const string ProductOwnerPolicy = "ProductOwnerPolicy";
+        public const string CanManageProducts = "CanManageProducts";
+        public const string CanManageCategories = "CanManageCategories";
+        public const string CanManageBrands = "CanManageBrands";
+        public const string CanViewProducts = "CanViewProducts";
+        public const string CanCreateReview = "CanCreateReview";
+
+        public static void Configure(AuthorizationOptions options)
+        {
+            options.AddPolicy(AdminPolicy, policy =>
+                policy.RequireRole(RoleConstants.Administrator));
+
+            options.AddPolicy(VendorPolicy, policy =>
+                policy.RequireRole(RoleConstants.Vendor));
+
+            options.AddPolicy(ProductOwnerPolicy, policy =>
+                policy.Requirements.Add(new ProductOwnerRequirement(0))); // Will be replaced with actual product ID
+
+            options.AddPolicy(CanManageProducts, policy =>
+                policy.RequireRole(RoleConstants.Administrator, RoleConstants.Vendor));
+
+            options.AddPolicy(CanManageCategories, policy =>
+                policy.RequireRole(RoleConstants.Administrator));
+
+            options.AddPolicy(CanManageBrands, policy =>
+                policy.RequireRole(RoleConstants.Administrator));
+
+            options.AddPolicy(CanViewProducts, policy =>
+                policy.RequireRole(RoleConstants.Administrator, RoleConstants.Vendor, RoleConstants.Customer));
+
+            options.AddPolicy(CanCreateReview, policy =>
+                policy.RequireRole(RoleConstants.Customer));
+        }
+    }
+}
+namespace Catalog_Service.src.CrossCutting.Security
+{
+    public static class PermissionConstants
+    {
+        // Product Permissions
+        public const string CreateProduct = "products:create";
+        public const string ReadProduct = "products:read";
+        public const string UpdateProduct = "products:update";
+        public const string DeleteProduct = "products:delete";
+
+        // Category Permissions
+        public const string CreateCategory = "categories:create";
+        public const string ReadCategory = "categories:read";
+        public const string UpdateCategory = "categories:update";
+        public const string DeleteCategory = "categories:delete";
+
+        // Brand Permissions
+        public const string CreateBrand = "brands:create";
+        public const string ReadBrand = "brands:read";
+        public const string UpdateBrand = "brands:update";
+        public const string DeleteBrand = "brands:delete";
+
+        // Review Permissions
+        public const string CreateReview = "reviews:create";
+        public const string ReadReview = "reviews:read";
+        public const string UpdateReview = "reviews:update";
+        public const string DeleteReview = "reviews:delete";
+        public const string ApproveReview = "reviews:approve";
+    }
+}
+namespace Catalog_Service.src.CrossCutting.Security
+{
+    public static class RoleConstants
+    {
+        public const string Administrator = "Administrator";
+        public const string Vendor = "Vendor";
+        public const string Customer = "Customer";
+        public const string Guest = "Guest";
+    }
+}
+namespace Catalog_Service.src.CrossCutting.Exceptions
+{
+    public class BusinessRuleException : Exception
+    {
+        public BusinessRuleException() : base("A business rule was violated.")
+        {
+        }
+
+        public BusinessRuleException(string message) : base(message)
+        {
+        }
+
+        public BusinessRuleException(string message, Exception innerException) : base(message, innerException)
+        {
+        }
+
+        public BusinessRuleException(string ruleName, string message)
+            : base($"Business rule '{ruleName}' was violated. {message}")
+        {
+            RuleName = ruleName;
+        }
+
+        public string RuleName { get; }
+    }
+}
+namespace Catalog_Service.src.CrossCutting.Exceptions
+{
+    public class DuplicateEntityException : Exception
+    {
+        public DuplicateEntityException() : base("A duplicate entity was detected.")
+        {
+        }
+
+        public DuplicateEntityException(string message) : base(message)
+        {
+        }
+
+        public DuplicateEntityException(string message, Exception innerException) : base(message, innerException)
+        {
+        }
+
+        public DuplicateEntityException(string entityType, string identifier)
+            : base($"A {entityType} with identifier '{identifier}' already exists.")
+        {
+            EntityType = entityType;
+            Identifier = identifier;
+        }
+
+        public string EntityType { get; }
+        public string Identifier { get; }
+    }
+}
+namespace Catalog_Service.src.CrossCutting.Exceptions
+{
+    public class InvalidImageException : Exception
+    {
+        public InvalidImageException() : base("The provided image is invalid.")
+        {
+        }
+
+        public InvalidImageException(string message) : base(message)
+        {
+        }
+
+        public InvalidImageException(string message, Exception innerException) : base(message, innerException)
+        {
+        }
+
+        public InvalidImageException(string fileName, string reason)
+            : base($"The image '{fileName}' is invalid. {reason}")
+        {
+            FileName = fileName;
+            Reason = reason;
+        }
+
+        public string FileName { get; }
+        public string Reason { get; }
+    }
+}
+namespace Catalog_Service.src.CrossCutting.Exceptions
+{
+    public class NotFoundException : Exception
+    {
+        public NotFoundException() : base("The requested resource was not found.")
+        {
+        }
+
+        public NotFoundException(string message) : base(message)
+        {
+        }
+
+        public NotFoundException(string message, Exception innerException) : base(message, innerException)
+        {
+        }
+
+        public NotFoundException(string resourceName, object key)
+            : base($"Resource '{resourceName}' with key '{key}' was not found.")
+        {
+            ResourceName = resourceName;
+            Key = key;
+        }
+
+        public string ResourceName { get; }
+        public object Key { get; }
+    }
+}
+namespace Catalog_Service.src.CrossCutting.Exceptions
+{
+    public class ServiceUnavailableException : Exception
+    {
+        public ServiceUnavailableException() : base("The service is currently unavailable.")
+        {
+        }
+
+        public ServiceUnavailableException(string message) : base(message)
+        {
+        }
+
+        public ServiceUnavailableException(string message, Exception innerException) : base(message, innerException)
+        {
+        }
+
+        public ServiceUnavailableException(string serviceName, string reason)
+            : base($"Service '{serviceName}' is unavailable. {reason}")
+        {
+            ServiceName = serviceName;
+            Reason = reason;
+        }
+
+        public ServiceUnavailableException(string serviceName, string reason, TimeSpan? retryAfter = null)
+            : base($"Service '{serviceName}' is unavailable. {reason}")
+        {
+            ServiceName = serviceName;
+            Reason = reason;
+            RetryAfter = retryAfter;
+        }
+
+        public string ServiceName { get; }
+        public string Reason { get; }
+        public TimeSpan? RetryAfter { get; }
+    }
+}
+namespace Catalog_Service.src.CrossCutting.Exceptions
+{
+    public class UnauthorizedAccessException : Exception
+    {
+        public UnauthorizedAccessException() : base("Access is denied.")
+        {
+        }
+
+        public UnauthorizedAccessException(string message) : base(message)
+        {
+        }
+
+        public UnauthorizedAccessException(string message, Exception innerException) : base(message, innerException)
+        {
+        }
+
+        public UnauthorizedAccessException(string resource, string action)
+            : base($"Access denied to '{resource}' for action '{action}'.")
+        {
+            Resource = resource;
+            Action = action;
+        }
+
+        public UnauthorizedAccessException(string resource, string action, string userId)
+            : base($"User '{userId}' is not authorized to perform action '{action}' on resource '{resource}'.")
+        {
+            Resource = resource;
+            Action = action;
+            UserId = userId;
+        }
+
+        public string Resource { get; }
+        public string Action { get; }
+        public string UserId { get; }
+    }
+}
+namespace Catalog_Service.src.CrossCutting.Exceptions
+{
+    public class ServiceUnavailableException : Exception
+    {
+        public ServiceUnavailableException() : base("The service is currently unavailable.")
+        {
+        }
+
+        public ServiceUnavailableException(string message) : base(message)
+        {
+        }
+
+        public ServiceUnavailableException(string message, Exception innerException) : base(message, innerException)
+        {
+        }
+
+        public ServiceUnavailableException(string serviceName, string reason)
+            : base($"Service '{serviceName}' is unavailable. {reason}")
+        {
+            ServiceName = serviceName;
+            Reason = reason;
+        }
+
+        public ServiceUnavailableException(string serviceName, string reason, TimeSpan? retryAfter = null)
+            : base($"Service '{serviceName}' is unavailable. {reason}")
+        {
+            ServiceName = serviceName;
+            Reason = reason;
+            RetryAfter = retryAfter;
+        }
+
+        public string ServiceName { get; }
+        public string Reason { get; }
+        public TimeSpan? RetryAfter { get; }
+    }
+}
+ با توجه به تمامی کلاس هایی که فرستادم برات این کنترلر هارو برام درست کن و کامل وبی نقص مطابق پروژه واقعی من از ابتدا بفرست و این کنترلر ها بدون خطا اماده اجرا باشند. ممنونم . Vendor/
+│   │   │   ├── VendorProductController.cs
+│   │   │   ├── VendorProductVariantController.cs
+│   │   │   └── VendorProductReviewController.cs

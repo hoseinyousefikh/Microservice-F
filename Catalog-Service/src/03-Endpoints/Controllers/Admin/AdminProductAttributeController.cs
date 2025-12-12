@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Catalog_Service.src._01_Domain.Core.Contracts.Services;
+using Catalog_Service.src._03_Endpoints.DTOs.Responses.Admin;
 using Catalog_Service.src.CrossCutting.Security;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -29,7 +30,7 @@ namespace Catalog_Service.src._03_Endpoints.Controllers.Admin
         public async Task<IActionResult> GetProductAttributes(int productId)
         {
             var attributes = await _productAttributeService.GetByProductIdAsync(productId);
-            var response = _mapper.Map<IEnumerable<AdminProductAttributeResponse>>(attributes);
+            var response = _mapper.Map<IEnumerable<ProductAttributeResponse>>(attributes);
             return Ok(response);
         }
 
@@ -42,7 +43,7 @@ namespace Catalog_Service.src._03_Endpoints.Controllers.Admin
                 return NotFound();
             }
 
-            var response = _mapper.Map<AdminProductAttributeResponse>(attribute);
+            var response = _mapper.Map<ProductAttributeResponse>(attribute);
             return Ok(response);
         }
 
@@ -54,7 +55,7 @@ namespace Catalog_Service.src._03_Endpoints.Controllers.Admin
                 request.Name,
                 request.Value);
 
-            var response = _mapper.Map<AdminProductAttributeResponse>(attribute);
+            var response = _mapper.Map<ProductAttributeResponse>(attribute);
             return CreatedAtAction(nameof(GetProductAttribute), new { id = response.Id }, response);
         }
 

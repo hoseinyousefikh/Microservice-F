@@ -32,6 +32,9 @@ namespace Catalog_Service.src.CrossCutting.Validation.Vendor
                 .GreaterThan(x => x.Price)
                 .When(x => x.OriginalPrice.HasValue)
                 .WithMessage("Original price must be greater than current price");
+            RuleFor(x => x.Weight)
+            .NotEmpty().WithMessage("Weight is required.") // چک می‌کند که null نباشد
+            .GreaterThan(0).WithMessage("Weight must be positive."); // چک می‌کند که بزرگتر از صفر باشد
         }
     }
 }

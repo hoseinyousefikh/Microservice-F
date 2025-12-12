@@ -37,6 +37,11 @@ namespace Catalog_Service.src._03_Endpoints.Mappers
             // Value object mappings
             CreateMap<Dimensions, DimensionsResponse>();
             CreateMap<Weight, WeightResponse>();
+            CreateMap<ProductReview, AdminProductReviewResponse>()
+               .ForMember(dest => dest.ProductName, opt => opt.MapFrom(src => src.Product.Name))
+               .ForMember(dest => dest.HasImages, opt => opt.MapFrom(src => src.Images.Any()))
+               .ForMember(dest => dest.ReplyCount, opt => opt.MapFrom(src => src.Replies.Count));
         }
     }
-}
+    }
+

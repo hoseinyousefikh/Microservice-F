@@ -65,5 +65,6 @@ namespace Catalog_Service.src._01_Domain.Core.Contracts.Repositories
         Task<int> GetTotalProductsCountAsync(int categoryId, CancellationToken cancellationToken = default);
         Task<int> GetActiveProductsCountAsync(int categoryId, CancellationToken cancellationToken = default);
         Task<int> GetTotalSubCategoriesCountAsync(int categoryId, CancellationToken cancellationToken = default);
+        Task<List<Category>> GetAllWithSubCategoriesAsync(CancellationToken cancellationToken = default);
     }
 }

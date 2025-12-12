@@ -115,6 +115,38 @@ namespace Catalog_Service.src._01_Domain.Services
 
             _logger.LogInformation("Updated category with ID {CategoryId}", id);
         }
+        public async Task<IEnumerable<Category>> GetCategoryTreeAsync(CancellationToken cancellationToken = default)
+        {
+            var allCategories = await _categoryRepository.GetAllWithSubCategoriesAsync(cancellationToken);
+
+            var categoryLookup = allCategories.ToDictionary(c => c.Id);
+
+            var rootCategories = new List<Category>();
+
+            foreach (var category in allCategories)
+            {
+              
+                if (category.ParentCategoryId.HasValue)
+                {
+                  
+                    if (categoryLookup.TryGetValue(category.ParentCategoryId.Value, out var parentCategory))
+                    {
+                     
+                        if (!parentCategory.SubCategories.Any(sc => sc.Id == category.Id))
+                        {
+                            
+                            parentCategory.AddSubCategory(category);
+                        }
+                    }
+                }
+                else 
+                {
+                    rootCategories.Add(category);
+                }
+            }
+
+            return rootCategories;
+        }
 
         public async Task DeleteAsync(int id, CancellationToken cancellationToken = default)
         {

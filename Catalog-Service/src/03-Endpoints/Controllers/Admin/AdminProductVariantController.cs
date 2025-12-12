@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
 using Catalog_Service.src._01_Domain.Core.Contracts.Services;
 using Catalog_Service.src._01_Domain.Core.Primitives;
-using Catalog_Service.src._03_Endpoints.DTOs.Requests.Vendor;
+using Catalog_Service.src._03_Endpoints.DTOs.Requests.Vendor; // یا Admin اگر DTOهای مخصوص ادمین دارید
+using Catalog_Service.src._03_Endpoints.DTOs.Responses.Admin; // <-- این را اضافه کنید
 using Catalog_Service.src.CrossCutting.Security;
+using Catalog_Service.src.CrossCutting.Validation.Admin; // <-- این را اضافه کنید
 using Catalog_Service.src.CrossCutting.Validation.Vendor;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -32,7 +34,7 @@ namespace Catalog_Service.src._03_Endpoints.Controllers.Admin
         public async Task<IActionResult> GetProductVariants(int productId)
         {
             var variants = await _productVariantService.GetByProductIdAsync(productId);
-            var response = _mapper.Map<IEnumerable<AdminProductVariantResponse>>(variants);
+            var response = _mapper.Map<IEnumerable<ProductVariantResponse>>(variants);
             return Ok(response);
         }
 
@@ -45,7 +47,7 @@ namespace Catalog_Service.src._03_Endpoints.Controllers.Admin
                 return NotFound();
             }
 
-            var response = _mapper.Map<AdminProductVariantResponse>(variant);
+            var response = _mapper.Map<ProductVariantResponse>(variant);
             return Ok(response);
         }
 
@@ -64,13 +66,13 @@ namespace Catalog_Service.src._03_Endpoints.Controllers.Admin
                 request.ProductId,
                 request.Sku,
                 request.Name,
-                request.Price,
+                _mapper.Map<Money>(request.Price), 
                 _mapper.Map<Dimensions>(request.Dimensions),
-                new Weight(request.Weight, "kg"),
+                Weight.Create(request.Weight, "kg"),
                 request.ImageUrl,
-                request.OriginalPrice);
+                _mapper.Map<Money>(request.OriginalPrice));
 
-            var response = _mapper.Map<AdminProductVariantResponse>(variant);
+            var response = _mapper.Map<ProductVariantResponse>(variant);
             return CreatedAtAction(nameof(GetProductVariant), new { id = response.Id }, response);
         }
 
@@ -88,10 +90,10 @@ namespace Catalog_Service.src._03_Endpoints.Controllers.Admin
             await _productVariantService.UpdateAsync(
                 id,
                 request.Name,
-                request.Price,
-                request.OriginalPrice,
+                _mapper.Map<Money>(request.Price),
+               _mapper.Map<Money?>(request.OriginalPrice),
                 _mapper.Map<Dimensions>(request.Dimensions),
-                new Weight(request.Weight, "kg"),
+                Weight.Create(request.Weight, "kg"),
                 request.ImageUrl);
 
             return NoContent();
