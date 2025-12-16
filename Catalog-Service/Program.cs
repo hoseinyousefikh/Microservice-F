@@ -1,4 +1,6 @@
 ﻿using Catalog_Service.src._02_Infrastructure.Data.Db;
+using Catalog_Service.src.CrossCutting.Middleware;
+using Catalog_Service.src.CrossCutting.Security.PolicyRequirements;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi;
@@ -80,8 +82,8 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 });
 
 //// 5. افزودن سرویس‌های دامنه و زیرساخت
-//builder.Services.AddDomainServices();
-//builder.Services.AddInfrastructureServices(builder.Configuration);
+builder.Services.AddDomainServices();
+builder.Services.AddInfrastructureServices(builder.Configuration);
 
 // 6. پیکربندی احراز هویت JWT
 builder.Services.AddAuthentication(options =>
@@ -105,25 +107,25 @@ builder.Services.AddAuthentication(options =>
 });
 
 // 7. پیکربندی احراز هویت سرویس‌ها (API Key)
-//builder.Services.AddServiceAuthentication();
+builder.Services.AddServiceAuthentication();
 
 // 8. پیکربندی Authorization با سیاست‌های سفارشی
-//builder.Services.AddAuthorization(options =>
-//{
-//    options.AddPolicy("AdminOnly", policy =>
-//        policy.RequireRole("Admin", "SuperAdmin"));
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("AdminOnly", policy =>
+        policy.RequireRole("Admin", "SuperAdmin"));
 
-//    options.AddPolicy("VendorOnly", policy =>
-//        policy.RequireRole("Vendor"));
+    options.AddPolicy("VendorOnly", policy =>
+        policy.RequireRole("Vendor"));
 
-//    options.AddPolicy("ProductOwner", policy =>
-//        policy.Requirements.Add(new CatalogService.CrossCutting.Security.PolicyRequirements.ProductOwnerRequirement()));
-//});
+    options.AddPolicy("ProductOwner", policy =>
+        policy.Requirements.Add(new ProductOwnerRequirement()));
+});
 
-//// 9. افزودن سرویس‌های اعتبارسنجی (FluentValidation)
-//builder.Services.AddFluentValidationAutoValidation();
-//builder.Services.AddFluentValidationClientsideAdapters();
-//builder.Services.AddValidatorsFromAssemblyContaining<Program>();
+// 9. افزودن سرویس‌های اعتبارسنجی (FluentValidation)
+builder.Services.AddFluentValidationAutoValidation();
+builder.Services.AddFluentValidationClientsideAdapters();
+builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 
 // 10. پیکربندی CORS
 builder.Services.AddCors(options =>
@@ -174,20 +176,15 @@ if (app.Environment.IsDevelopment())
 // 15. افزودن Middleware به ترتیب صحیح
 app.UseHttpsRedirection();
 
-// Middleware برای مدیریت خطاها
-//app.UseMiddleware<CatalogService.CrossCutting.Middleware.ErrorHandlingMiddleware>();
+app.UseMiddleware<ErrorHandlingMiddleware>();
 
-// Middleware برای Correlation ID
-//app.UseMiddleware<CatalogService.CrossCutting.Middleware.CorrelationIdMiddleware>();
+app.UseMiddleware<CorrelationIdMiddleware>();
 
-// Middleware برای لاگینگ درخواست‌ها
-//app.UseMiddleware<CatalogService.CrossCutting.Middleware.RequestLoggingMiddleware>();
+app.UseMiddleware<RequestLoggingMiddleware>();
 
-// Middleware برای محدودیت نرخ درخواست
-//app.UseMiddleware<CatalogService.CrossCutting.Middleware.RateLimitingMiddleware>();
+app.UseMiddleware<RateLimitingMiddleware>();
 
-// Middleware برای معیارهای عملکرد
-//app.UseMiddleware<CatalogService.CrossCutting.Middleware.PerformanceMetricsMiddleware>();
+app.UseMiddleware<PerformanceMetricsMiddleware>();
 
 app.UseCors("AllowAll");
 
