@@ -1,4 +1,9 @@
-﻿using Catalog_Service.src._01_Domain.Core.Contracts.Repositories;
+﻿// File: ServiceCollectionExtensions.cs
+using System.Text.Json;
+using Microsoft.AspNetCore.Mvc;
+using Catalog_Service.src.CrossCutting.Validation;
+using FluentValidation;
+using Catalog_Service.src._01_Domain.Core.Contracts.Repositories;
 using Catalog_Service.src._01_Domain.Core.Contracts.Services;
 using Catalog_Service.src._01_Domain.Services;
 using Catalog_Service.src._02_Infrastructure.Caching;
@@ -10,35 +15,22 @@ using Catalog_Service.src._02_Infrastructure.Security;
 using Catalog_Service.src._03_Endpoints.Mappers;
 using Catalog_Service.src.CrossCutting.Security;
 using Catalog_Service.src.CrossCutting.Validation.Admin;
-using FluentValidation;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
+using Microsoft.Extensions.Options;
 using StackExchange.Redis;
-using Microsoft.EntityFrameworkCore.SqlServer;
+using System.Security.Principal;
+using System.Text.Encodings.Web;
+
 namespace Catalog_Service.src.CrossCutting.Extensions
 {
     public static class ServiceCollectionExtensions
     {
-        public static IServiceCollection AddCatalogServices(this IServiceCollection services, IConfiguration configuration)
+        public static IServiceCollection AddDomainServices(this IServiceCollection services)
         {
-            // Register DbContext
-            // Register DbContext
-            services.AddDbContext<AppDbContext>(options =>
-                options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")),
-                ServiceLifetime.Scoped);
-
-            // Register Repositories
-            services.AddScoped<IProductRepository, ProductRepository>();
-            services.AddScoped<ICategoryRepository, CategoryRepository>();
-            services.AddScoped<IBrandRepository, BrandRepository>();
-            services.AddScoped<IImageRepository, ImageRepository>();
-            services.AddScoped<IProductVariantRepository, ProductVariantRepository>();
-            services.AddScoped<IProductAttributeRepository, ProductAttributeRepository>();
-            services.AddScoped<IProductReviewRepository, ProductReviewRepository>();
-            services.AddScoped<IProductTagRepository, ProductTagRepository>();
-
-            // Register Services
             services.AddScoped<IProductService, ProductService>();
             services.AddScoped<ICategoryService, CategoryService>();
             services.AddScoped<IBrandService, BrandService>();
@@ -49,12 +41,30 @@ namespace Catalog_Service.src.CrossCutting.Extensions
             services.AddScoped<IProductTagService, ProductTagService>();
             services.AddScoped<ISlugService, SlugService>();
 
-            // Register Caching
+            services.AddCustomValidation();
+
+            return services;
+        }
+
+        public static IServiceCollection AddInfrastructureServices(this IServiceCollection services, IConfiguration configuration)
+        {
+            services.AddDbContext<AppDbContext>(options =>
+                options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")),
+                ServiceLifetime.Scoped);
+
+            services.AddScoped<IProductRepository, ProductRepository>();
+            services.AddScoped<ICategoryRepository, CategoryRepository>();
+            services.AddScoped<IBrandRepository, BrandRepository>();
+            services.AddScoped<IImageRepository, ImageRepository>();
+            services.AddScoped<IProductVariantRepository, ProductVariantRepository>();
+            services.AddScoped<IProductAttributeRepository, ProductAttributeRepository>();
+            services.AddScoped<IProductReviewRepository, ProductReviewRepository>();
+            services.AddScoped<IProductTagRepository, ProductTagRepository>();
+
             services.AddSingleton<IConnectionMultiplexer>(sp =>
                 ConnectionMultiplexer.Connect(configuration.GetConnectionString("Redis")));
             services.AddScoped<ICacheService, RedisCacheService>();
 
-            // Register File Storage
             services.Configure<FileStorageOptions>(configuration.GetSection("FileStorage"));
             services.AddScoped<IFileStorage, LocalFileStorage>();
 
@@ -67,16 +77,13 @@ namespace Catalog_Service.src.CrossCutting.Extensions
                 services.AddScoped<IFileStorage, AzureBlobStorage>();
             }
 
-            // Register External Services
             services.AddHttpClient<IInventoryServiceClient, InventoryServiceClient>();
             services.AddHttpClient<IPricingServiceClient, PricingServiceClient>();
 
-            // Register Security Services
             services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
             services.AddScoped<IKeyManagementService, KeyManagementService>();
             services.AddScoped<ApiKeyValidator>();
 
-            // Register Authentication
             services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -97,16 +104,11 @@ namespace Catalog_Service.src.CrossCutting.Extensions
                 };
             });
 
-            // Register Authorization
             services.AddAuthorization(options =>
             {
                 AuthorizationPolicies.Configure(options);
             });
 
-            // Register Validators
-            services.AddValidatorsFromAssemblyContaining<CreateCategoryValidator>();
-
-            // Register AutoMapper
             services.AddAutoMapper(cfg =>
             {
                 cfg.AddProfile<AdminMappingProfile>();
@@ -114,15 +116,42 @@ namespace Catalog_Service.src.CrossCutting.Extensions
                 cfg.AddProfile<PublicMappingProfile>();
             });
 
+            // این متد را می‌توان چندین بار فراخوانی کرد، اما Health Check ها فقط یک بار اضافه خواهند شد
+            services.AddCatalogHealthChecks(configuration);
+
             return services;
         }
 
+        public static IServiceCollection AddServiceAuthentication(this IServiceCollection services)
+        {
+            services.AddAuthentication("ApiKey")
+                .AddScheme<ApiKeyAuthenticationOptions, ApiKeyAuthenticationHandler>("ApiKey", options => { });
+
+            return services;
+        }
+
+        // --- کد اصلاح شده با نام منحصر به فرد ---
         public static IServiceCollection AddCatalogHealthChecks(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddHealthChecks()
-                .AddSqlServer(configuration.GetConnectionString("DefaultConnection"))
-                .AddRedis(configuration.GetConnectionString("Redis"))
+                // نام "catalog-db" را برای SQL Server مشخص می‌کنیم
+                .AddSqlServer(configuration.GetConnectionString("DefaultConnection"), name: "catalog-db")
+                // نام "catalog-redis" را برای Redis مشخص می‌کنیم تا از تکراری جلوگیری شود
+                .AddRedis(configuration.GetConnectionString("Redis"), name: "catalog-redis")
                 .AddCheck<ExternalServicesHealthCheck>("External Services");
+
+            return services;
+        }
+
+        public static IServiceCollection AddCustomValidation(this IServiceCollection services)
+        {
+            services.AddValidatorsFromAssemblyContaining<CreateCategoryValidator>();
+            services.AddTransient<IValidatorFactory, CustomValidatorFactory>();
+            services.AddMvc(options =>
+            {
+                options.Filters.Add<CustomValidationFilter>();
+                options.Filters.Add<CustomClientValidationDataFilter>();
+            });
 
             return services;
         }
@@ -145,18 +174,74 @@ namespace Catalog_Service.src.CrossCutting.Extensions
         {
             try
             {
-                // Check Inventory Service
-                var inventoryStatus = await _inventoryServiceClient.GetInventoryStatusAsync(1, cancellationToken);
-
-                // Check Pricing Service
-                var pricingStatus = await _pricingServiceClient.GetProductPriceAsync(1, cancellationToken);
-
+                await _inventoryServiceClient.GetInventoryStatusAsync(1, cancellationToken);
+                await _pricingServiceClient.GetProductPriceAsync(1, cancellationToken);
                 return HealthCheckResult.Healthy("External services are healthy");
             }
             catch (Exception ex)
             {
                 return HealthCheckResult.Unhealthy("External services are unhealthy", ex);
             }
+        }
+    }
+
+    public class ApiKeyAuthenticationOptions : AuthenticationSchemeOptions
+    {
+        public const string DefaultScheme = "ApiKey";
+        public string Scheme => DefaultScheme;
+        public string ApiKeyHeaderName { get; set; } = "X-API-KEY";
+    }
+
+    public class ApiKeyAuthenticationHandler : AuthenticationHandler<ApiKeyAuthenticationOptions>
+    {
+        private readonly ApiKeyValidator _apiKeyValidator;
+
+        public ApiKeyAuthenticationHandler(
+            IOptionsMonitor<ApiKeyAuthenticationOptions> options,
+            ILoggerFactory logger,
+            UrlEncoder encoder,
+            ISystemClock clock,
+            ApiKeyValidator apiKeyValidator) : base(options, logger, encoder, clock)
+        {
+            _apiKeyValidator = apiKeyValidator;
+        }
+
+        private static System.Security.Claims.Claim CreateClaim(string type, string value)
+        {
+            return new System.Security.Claims.Claim(type, value);
+        }
+
+        protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
+        {
+            if (!Request.Headers.TryGetValue(Options.ApiKeyHeaderName, out var apiKeyValues))
+            {
+                return AuthenticateResult.NoResult();
+            }
+
+            var apiKey = apiKeyValues.FirstOrDefault();
+            if (string.IsNullOrWhiteSpace(apiKey))
+            {
+                return AuthenticateResult.NoResult();
+            }
+
+            var validationResult = await _apiKeyValidator.ValidateAsync(apiKey);
+            if (!validationResult.IsValid)
+            {
+                return AuthenticateResult.Fail("Invalid API Key");
+            }
+
+            var claims = new[]
+            {
+                CreateClaim(System.Security.Claims.ClaimTypes.Name, validationResult.ServiceName),
+                CreateClaim(System.Security.Claims.ClaimTypes.Role, "Service")
+            };
+
+            var identity = new System.Security.Claims.ClaimsIdentity(claims, Scheme.Name);
+            var principal = new System.Security.Claims.ClaimsPrincipal(identity);
+
+            var ticket = new AuthenticationTicket(principal, Scheme.Name);
+
+            return AuthenticateResult.Success(ticket);
         }
     }
 }

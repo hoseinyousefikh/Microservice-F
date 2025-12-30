@@ -23,7 +23,6 @@ namespace Catalog_Service.src._02_Infrastructure.Security
 
         public async Task InvokeAsync(HttpContext context)
         {
-            // Skip authentication for health checks and other public endpoints
             if (IsPublicEndpoint(context.Request.Path))
             {
                 await _next(context);
@@ -32,7 +31,6 @@ namespace Catalog_Service.src._02_Infrastructure.Security
 
             var isAuthenticated = false;
 
-            // Try JWT authentication first
             var authHeader = context.Request.Headers["Authorization"].FirstOrDefault();
             if (!string.IsNullOrEmpty(authHeader) && authHeader.StartsWith("Bearer "))
             {
@@ -47,18 +45,31 @@ namespace Catalog_Service.src._02_Infrastructure.Security
                 }
             }
 
-            // If JWT failed, try API key authentication
             if (!isAuthenticated)
             {
-                if (await _apiKeyValidator.ValidateAsync(context.Request))
+                // --- کد اصلاح شده ---
+                // کلید API را از هدر استخراج کرده و به صورت رشته به متد ValidateAsync پاس می‌دهیم
+                if (context.Request.Headers.TryGetValue("X-API-Key", out var apiKeyValues))
                 {
-                    // Create a simple identity for API key authentication
-                    var claims = new[] { new Claim(ClaimTypes.Role, "Service") };
-                    var identity = new ClaimsIdentity(claims, "ApiKey");
-                    context.User = new ClaimsPrincipal(identity);
-                    isAuthenticated = true;
-                    _logger.LogDebug("Service authenticated via API key");
+                    var apiKey = apiKeyValues.FirstOrDefault();
+                    if (!string.IsNullOrWhiteSpace(apiKey))
+                    {
+                        var validationResult = await _apiKeyValidator.ValidateAsync(apiKey);
+                        if (validationResult.IsValid)
+                        {
+                            var claims = new[]
+                            {
+                                new Claim(ClaimTypes.Name, validationResult.ServiceName),
+                                new Claim(ClaimTypes.Role, "Service")
+                            };
+                            var identity = new ClaimsIdentity(claims, "ApiKey");
+                            context.User = new ClaimsPrincipal(identity);
+                            isAuthenticated = true;
+                            _logger.LogDebug("Service authenticated via API key");
+                        }
+                    }
                 }
+                // --- پایان کد اصلاح شده ---
             }
 
             if (!isAuthenticated)
@@ -74,7 +85,6 @@ namespace Catalog_Service.src._02_Infrastructure.Security
 
         private bool IsPublicEndpoint(string path)
         {
-            // Define public endpoints that don't require authentication
             var publicEndpoints = new[]
             {
                 "/health",

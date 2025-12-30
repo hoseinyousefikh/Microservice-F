@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using Catalog_Service.src._01_Domain.Core.Contracts.Services;
 using Catalog_Service.src._03_Endpoints.DTOs.Responses.Public;
-using Catalog_Service.src.CrossCutting.Exceptions;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Catalog_Service.src._03_Endpoints.Controllers.Public
@@ -36,8 +35,11 @@ namespace Catalog_Service.src._03_Endpoints.Controllers.Public
         public async Task<ActionResult<BrandResponse>> GetBrand(int id, CancellationToken cancellationToken)
         {
             var brand = await _brandService.GetByIdAsync(id, cancellationToken);
-            if (brand == null || !brand.IsActive)
-                throw new NotFoundException("Brand", id);
+
+            if (brand == null)
+            {
+                return NotFound(new { message = $"Brand with ID {id} not found." });
+            }
 
             var brandResponse = _mapper.Map<BrandResponse>(brand);
             return Ok(brandResponse);
@@ -49,9 +51,12 @@ namespace Catalog_Service.src._03_Endpoints.Controllers.Public
             [FromQuery] int count,
             CancellationToken cancellationToken)
         {
-            var brand = await _brandService.GetByIdAsync(id, cancellationToken);
-            if (brand == null || !brand.IsActive)
-                throw new NotFoundException("Brand", id);
+            // ابتدا بررسی می‌کنیم که آیا برند وجود دارد یا خیر
+            var brandExists = await _brandService.ExistsAsync(id, cancellationToken);
+            if (!brandExists)
+            {
+                return NotFound(new { message = $"Brand with ID {id} not found." });
+            }
 
             var products = await _productService.GetByBrandAsync(id, cancellationToken);
             var productResponses = _mapper.Map<IEnumerable<ProductResponse>>(products.Take(count));

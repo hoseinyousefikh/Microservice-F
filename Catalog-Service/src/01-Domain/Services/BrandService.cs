@@ -25,24 +25,24 @@ namespace Catalog_Service.src._01_Domain.Services
             _logger = logger;
         }
 
-        public async Task<Brand> GetByIdAsync(int id, CancellationToken cancellationToken = default)
+        public async Task<Brand?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
         {
             var brand = await _brandRepository.GetByIdAsync(id, cancellationToken);
             if (brand == null)
             {
                 _logger.LogWarning("Brand with ID {BrandId} not found", id);
-                throw new NotFoundException($"Brand with ID {id} not found");
+                return null;
             }
             return brand;
         }
 
-        public async Task<Brand> GetBySlugAsync(string slug, CancellationToken cancellationToken = default)
+        public async Task<Brand?> GetBySlugAsync(string slug, CancellationToken cancellationToken = default)
         {
             var brand = await _brandRepository.GetBySlugAsync(Slug.FromString(slug), cancellationToken);
             if (brand == null)
             {
                 _logger.LogWarning("Brand with slug {BrandSlug} not found", slug);
-                throw new NotFoundException($"Brand with slug {slug} not found");
+                return null;
             }
             return brand;
         }
@@ -59,20 +59,16 @@ namespace Catalog_Service.src._01_Domain.Services
 
         public async Task<Brand> CreateAsync(string name, string description, string? logoUrl = null, string? websiteUrl = null, string? metaTitle = null, string? metaDescription = null, CancellationToken cancellationToken = default)
         {
-            // Validate inputs
             if (string.IsNullOrWhiteSpace(name))
                 throw new ArgumentException("Brand name is required", nameof(name));
 
-            // Create brand
             var brand = new Brand(name, description, logoUrl, websiteUrl, metaTitle, metaDescription);
 
-            // Generate and set slug
             var slug = await _slugService.CreateUniqueSlugForBrandAsync(
                 title: name,
                 cancellationToken: cancellationToken
             ); brand.SetSlug(slug);
 
-            // Add to repository
             brand = await _brandRepository.AddAsync(brand, cancellationToken);
             await _brandRepository.SaveChangesAsync(cancellationToken);
 
@@ -83,15 +79,16 @@ namespace Catalog_Service.src._01_Domain.Services
         public async Task UpdateAsync(int id, string name, string description, string? logoUrl = null, string? websiteUrl = null, string? metaTitle = null, string? metaDescription = null, CancellationToken cancellationToken = default)
         {
             var brand = await GetByIdAsync(id, cancellationToken);
+            if (brand == null)
+            {
+                throw new NotFoundException($"Brand with ID {id} not found for update.");
+            }
 
-            // Validate inputs
             if (string.IsNullOrWhiteSpace(name))
                 throw new ArgumentException("Brand name is required", nameof(name));
 
-            // Update brand details
             brand.UpdateDetails(name, description, logoUrl, websiteUrl, metaTitle, metaDescription);
 
-            // Update slug if name changed
             if (brand.Name != name)
             {
                 var slug = await _slugService.CreateUniqueSlugForBrandAsync(name, id, cancellationToken);
@@ -107,8 +104,11 @@ namespace Catalog_Service.src._01_Domain.Services
         public async Task DeleteAsync(int id, CancellationToken cancellationToken = default)
         {
             var brand = await GetByIdAsync(id, cancellationToken);
+            if (brand == null)
+            {
+                throw new NotFoundException($"Brand with ID {id} not found for delete.");
+            }
 
-            // Check if brand has products
             if (await _brandRepository.HasProductsAsync(id, cancellationToken))
                 throw new BusinessRuleException("Cannot delete brand that has products");
 
@@ -130,7 +130,6 @@ namespace Catalog_Service.src._01_Domain.Services
 
         public async Task<IEnumerable<Product>> GetProductsAsync(int brandId, CancellationToken cancellationToken = default)
         {
-            // Check if brand exists
             var brand = await _brandRepository.GetByIdAsync(brandId, cancellationToken);
             if (brand == null)
                 throw new NotFoundException($"Brand with ID {brandId} not found");
@@ -140,7 +139,6 @@ namespace Catalog_Service.src._01_Domain.Services
 
         public async Task<int> GetProductsCountAsync(int brandId, CancellationToken cancellationToken = default)
         {
-            // Check if brand exists
             var brand = await _brandRepository.GetByIdAsync(brandId, cancellationToken);
             if (brand == null)
                 throw new NotFoundException($"Brand with ID {brandId} not found");
@@ -150,7 +148,6 @@ namespace Catalog_Service.src._01_Domain.Services
 
         public async Task<bool> HasProductsAsync(int brandId, CancellationToken cancellationToken = default)
         {
-            // Check if brand exists
             var brand = await _brandRepository.GetByIdAsync(brandId, cancellationToken);
             if (brand == null)
                 throw new NotFoundException($"Brand with ID {brandId} not found");
@@ -160,12 +157,20 @@ namespace Catalog_Service.src._01_Domain.Services
 
         public async Task ActivateAsync(int id, CancellationToken cancellationToken = default)
         {
+            if (!await ExistsAsync(id, cancellationToken))
+            {
+                throw new NotFoundException($"Brand with ID {id} not found for activation.");
+            }
             await _brandRepository.ActivateAsync(id, cancellationToken);
             _logger.LogInformation("Activated brand with ID {BrandId}", id);
         }
 
         public async Task DeactivateAsync(int id, CancellationToken cancellationToken = default)
         {
+            if (!await ExistsAsync(id, cancellationToken))
+            {
+                throw new NotFoundException($"Brand with ID {id} not found for deactivation.");
+            }
             await _brandRepository.DeactivateAsync(id, cancellationToken);
             _logger.LogInformation("Deactivated brand with ID {BrandId}", id);
         }
@@ -173,6 +178,10 @@ namespace Catalog_Service.src._01_Domain.Services
         public async Task SetSlugAsync(int id, string title, CancellationToken cancellationToken = default)
         {
             var brand = await GetByIdAsync(id, cancellationToken);
+            if (brand == null)
+            {
+                throw new NotFoundException($"Brand with ID {id} not found for slug update.");
+            }
             var slug = await _slugService.CreateUniqueSlugForBrandAsync(title, id, cancellationToken);
             brand.SetSlug(slug);
             _brandRepository.Update(brand);
@@ -182,7 +191,6 @@ namespace Catalog_Service.src._01_Domain.Services
 
         public async Task<decimal> GetAveragePriceAsync(int brandId, CancellationToken cancellationToken = default)
         {
-            // Check if brand exists
             var brand = await _brandRepository.GetByIdAsync(brandId, cancellationToken);
             if (brand == null)
                 throw new NotFoundException($"Brand with ID {brandId} not found");
@@ -192,7 +200,6 @@ namespace Catalog_Service.src._01_Domain.Services
 
         public async Task<int> GetTotalViewCountAsync(int brandId, CancellationToken cancellationToken = default)
         {
-            // Check if brand exists
             var brand = await _brandRepository.GetByIdAsync(brandId, cancellationToken);
             if (brand == null)
                 throw new NotFoundException($"Brand with ID {brandId} not found");
@@ -202,7 +209,6 @@ namespace Catalog_Service.src._01_Domain.Services
 
         public async Task<int> GetTotalReviewsCountAsync(int brandId, CancellationToken cancellationToken = default)
         {
-            // Check if brand exists
             var brand = await _brandRepository.GetByIdAsync(brandId, cancellationToken);
             if (brand == null)
                 throw new NotFoundException($"Brand with ID {brandId} not found");
@@ -212,7 +218,6 @@ namespace Catalog_Service.src._01_Domain.Services
 
         public async Task<double> GetAverageRatingAsync(int brandId, CancellationToken cancellationToken = default)
         {
-            // Check if brand exists
             var brand = await _brandRepository.GetByIdAsync(brandId, cancellationToken);
             if (brand == null)
                 throw new NotFoundException($"Brand with ID {brandId} not found");

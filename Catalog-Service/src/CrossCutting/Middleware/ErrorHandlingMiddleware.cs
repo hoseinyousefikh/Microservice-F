@@ -1,4 +1,6 @@
 ﻿using System.Net;
+using System.Text.Json;
+using Catalog_Service.src.CrossCutting.Exceptions;
 
 namespace Catalog_Service.src.CrossCutting.Middleware
 {
@@ -21,35 +23,46 @@ namespace Catalog_Service.src.CrossCutting.Middleware
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "An unhandled exception occurred");
+                // اگر پاسخ شروع شده بود، فقط لاگ می‌کنیم
+                if (context.Response.HasStarted)
+                {
+                    _logger.LogError(ex, "An error occurred after the response started.");
+                    return;
+                }
+
+                _logger.LogError(ex, "An unhandled exception occurred.");
                 await HandleExceptionAsync(context, ex);
             }
         }
 
         private static async Task HandleExceptionAsync(HttpContext context, Exception exception)
         {
+            // --- کد اصلاح شده ---
+            // نام کامل کلاس سفارشی برای جلوگیری از ابهام استفاده شده است
+            var statusCode = exception switch
+            {
+                Catalog_Service.src.CrossCutting.Exceptions.NotFoundException => HttpStatusCode.NotFound,
+                Catalog_Service.src.CrossCutting.Exceptions.UnauthorizedAccessException => HttpStatusCode.Unauthorized,
+                Catalog_Service.src.CrossCutting.Exceptions.BusinessRuleException => HttpStatusCode.BadRequest,
+                Catalog_Service.src.CrossCutting.Exceptions.DuplicateEntityException => HttpStatusCode.Conflict,
+                Catalog_Service.src.CrossCutting.Exceptions.InvalidImageException => HttpStatusCode.BadRequest,
+                Catalog_Service.src.CrossCutting.Exceptions.ServiceUnavailableException => HttpStatusCode.ServiceUnavailable,
+                _ => HttpStatusCode.InternalServerError
+            };
+            // --- پایان کد اصلاح شده ---
+
+            context.Response.StatusCode = (int)statusCode;
             context.Response.ContentType = "application/json";
 
-            var response = exception switch
+            var errorResponse = new
             {
-                Catalog_Service.src.CrossCutting.Exceptions.NotFoundException =>
-                    new { StatusCode = (int)HttpStatusCode.NotFound, Message = exception.Message },
-                Catalog_Service.src.CrossCutting.Exceptions.UnauthorizedAccessException =>
-                    new { StatusCode = (int)HttpStatusCode.Unauthorized, Message = exception.Message },
-                Catalog_Service.src.CrossCutting.Exceptions.BusinessRuleException =>
-                    new { StatusCode = (int)HttpStatusCode.BadRequest, Message = exception.Message },
-                Catalog_Service.src.CrossCutting.Exceptions.DuplicateEntityException =>
-                    new { StatusCode = (int)HttpStatusCode.Conflict, Message = exception.Message },
-                Catalog_Service.src.CrossCutting.Exceptions.InvalidImageException =>
-                    new { StatusCode = (int)HttpStatusCode.BadRequest, Message = exception.Message },
-                Catalog_Service.src.CrossCutting.Exceptions.ServiceUnavailableException =>
-                    new { StatusCode = (int)HttpStatusCode.ServiceUnavailable, Message = exception.Message },
-                _ => new { StatusCode = (int)HttpStatusCode.InternalServerError, Message = "An internal server error occurred" }
+                StatusCode = (int)statusCode,
+                Message = exception.Message
             };
 
-            context.Response.StatusCode = response.StatusCode;
-
-            await context.Response.WriteAsJsonAsync(response);
+            // از JsonSerializer برای سریالایز کردن استفاده می‌کنیم تا از وابستگی WriteAsJsonAsync کمتر کنیم
+            var jsonResponse = JsonSerializer.Serialize(errorResponse);
+            await context.Response.WriteAsync(jsonResponse);
         }
     }
 }

@@ -1,12 +1,12 @@
-﻿using Catalog_Service.src._02_Infrastructure.Data.Db;
-using Catalog_Service.src.CrossCutting.Middleware;
+﻿using Microsoft.AspNetCore.Diagnostics;
+using Catalog_Service.src._02_Infrastructure.Data.Db;
+using Catalog_Service.src.CrossCutting.Extensions;
 using Catalog_Service.src.CrossCutting.Security.PolicyRequirements;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.OpenApi;
 using Microsoft.OpenApi.Models;
 using Serilog;
 using System.Reflection;
+using Catalog_Service.src.CrossCutting.Exceptions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -61,73 +61,19 @@ builder.Services.AddSwaggerGen(options =>
         }
     });
 
-    // افزودن فایل XML برای مستندات
     var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
     var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
     options.IncludeXmlComments(xmlPath);
 });
 
-// 4. پیکربندی پایگاه داده
-builder.Services.AddDbContext<AppDbContext>(options =>
-{
-    options.UseSqlServer(
-        builder.Configuration.GetConnectionString("DefaultConnection"),
-        sqlOptions =>
-        {
-            sqlOptions.EnableRetryOnFailure(
-                maxRetryCount: 3,
-                maxRetryDelay: TimeSpan.FromSeconds(5),
-                errorNumbersToAdd: null);
-        });
-});
-
-//// 5. افزودن سرویس‌های دامنه و زیرساخت
+// 4. افزودن سرویس‌های دامنه و زیرساخت
 builder.Services.AddDomainServices();
 builder.Services.AddInfrastructureServices(builder.Configuration);
 
-// 6. پیکربندی احراز هویت JWT
-builder.Services.AddAuthentication(options =>
-{
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-})
-.AddJwtBearer(options =>
-{
-    options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
-    {
-        ValidateIssuer = true,
-        ValidateAudience = true,
-        ValidateLifetime = true,
-        ValidateIssuerSigningKey = true,
-        ValidIssuer = builder.Configuration["Jwt:Issuer"],
-        ValidAudience = builder.Configuration["Jwt:Audience"],
-        IssuerSigningKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(
-            System.Text.Encoding.UTF8.GetBytes(builder.Configuration["Jwt:SecretKey"]))
-    };
-});
-
-// 7. پیکربندی احراز هویت سرویس‌ها (API Key)
+// 5. پیکربندی احراز هویت سرویس‌ها (API Key)
 builder.Services.AddServiceAuthentication();
 
-// 8. پیکربندی Authorization با سیاست‌های سفارشی
-builder.Services.AddAuthorization(options =>
-{
-    options.AddPolicy("AdminOnly", policy =>
-        policy.RequireRole("Admin", "SuperAdmin"));
-
-    options.AddPolicy("VendorOnly", policy =>
-        policy.RequireRole("Vendor"));
-
-    options.AddPolicy("ProductOwner", policy =>
-        policy.Requirements.Add(new ProductOwnerRequirement()));
-});
-
-// 9. افزودن سرویس‌های اعتبارسنجی (FluentValidation)
-builder.Services.AddFluentValidationAutoValidation();
-builder.Services.AddFluentValidationClientsideAdapters();
-builder.Services.AddValidatorsFromAssemblyContaining<Program>();
-
-// 10. پیکربندی CORS
+// 6. پیکربندی CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
@@ -138,16 +84,10 @@ builder.Services.AddCors(options =>
     });
 });
 
-// 11. افزودن Health Checks
-builder.Services.AddHealthChecks()
-    .AddDbContextCheck<AppDbContext>()
-    .AddRedis(builder.Configuration["Redis:ConnectionString"])
-    .AddElasticsearch(builder.Configuration["Elasticsearch:Url"]);
-
-// 12. افزودن Response Caching
+// 7. افزودن Response Caching
 builder.Services.AddResponseCaching();
 
-// 13. افزودن Http Client برای سرویس‌های خارجی
+// 8. افزودن Http Client برای سرویس‌های خارجی
 builder.Services.AddHttpClient("InventoryService", client =>
 {
     client.BaseAddress = new Uri(builder.Configuration["ExternalServices:InventoryService:BaseUrl"]);
@@ -160,9 +100,10 @@ builder.Services.AddHttpClient("PricingService", client =>
     client.DefaultRequestHeaders.Add("Accept", "application/json");
 });
 
+
 var app = builder.Build();
 
-// 14. پیکربندی Middleware pipeline
+// 9. پیکربندی Middleware pipeline
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -173,33 +114,64 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-// 15. افزودن Middleware به ترتیب صحیح
+// 10. افزودن Middleware به ترتیب صحیح
 app.UseHttpsRedirection();
 
-app.UseMiddleware<ErrorHandlingMiddleware>();
+// --- این بخش بسیار مهم است. آن را دقیقاً به همین شکل کپی کنید ---
+app.UseExceptionHandler(errorApp =>
+{
+    errorApp.Run(async context =>
+    {
+        var exception = context.Features.Get<IExceptionHandlerFeature>()?.Error;
+        if (exception == null) return;
 
-app.UseMiddleware<CorrelationIdMiddleware>();
+        var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
+        logger.LogError(exception, "An unhandled exception occurred.");
 
-app.UseMiddleware<RequestLoggingMiddleware>();
+        string errorMessage;
+        int statusCode;
 
-app.UseMiddleware<RateLimitingMiddleware>();
+        switch (exception)
+        {
+            case Catalog_Service.src.CrossCutting.Exceptions.NotFoundException:
+                statusCode = 404;
+                errorMessage = exception.Message;
+                break;
+            case Catalog_Service.src.CrossCutting.Exceptions.UnauthorizedAccessException:
+                statusCode = 401;
+                errorMessage = exception.Message;
+                break;
+            case Catalog_Service.src.CrossCutting.Exceptions.BusinessRuleException:
+                statusCode = 400;
+                errorMessage = exception.Message;
+                break;
+            default:
+                statusCode = 500;
+                errorMessage = "An internal server error occurred.";
+                break;
+        }
 
-app.UseMiddleware<PerformanceMetricsMiddleware>();
+        context.Response.StatusCode = statusCode;
+        context.Response.ContentType = "application/json";
+        await context.Response.WriteAsJsonAsync(new { message = errorMessage });
+    });
+});
+// --- پایان بخش مهم ---
+
 
 app.UseCors("AllowAll");
-
 app.UseResponseCaching();
 
 app.UseAuthentication();
 app.UseAuthorization();
 
-// 16. افزودن Health Checks endpoint
+// 11. افزودن Health Checks endpoint
 app.MapHealthChecks("/health");
 
-// 17. افزودن Endpoints
+// 12. افزودن Endpoints
 app.MapControllers();
 
-// 18. اجرای برنامه
+// 13. اجرای برنامه
 try
 {
     Log.Information("Starting CatalogService");
