@@ -129,7 +129,15 @@ namespace Catalog_Service.src._02_Infrastructure.Configuration
 
             builder.HasIndex(p => new { p.StockStatus, p.StockQuantity })
                 .HasDatabaseName("IX_Product_StockStatus_StockQuantity");
+            // در فایل ProductConfiguration.cs
 
+            builder.Property(p => p.Price)
+                .HasConversion(
+                    // تبدیل Money به decimal برای ذخیره در دیتابیس
+                    money => money.Amount,
+                    // تبدیل decimal به Money برای خواندن از دیتابیس
+                    amount => Money.Create(amount, "IRR")
+                );
             // تنظیمات پیش‌فرض برای مقادیر اختیاری
             builder.Property(p => p.MetaTitle).HasDefaultValue(null);
             builder.Property(p => p.MetaDescription).HasDefaultValue(null);

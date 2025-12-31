@@ -200,11 +200,10 @@ namespace Catalog_Service.src._01_Domain.Services
             // Check if brand exists
             var brand = await _brandRepository.GetByIdAsync(brandId, cancellationToken);
             if (brand == null)
-                throw new NotFoundException($"Brand with ID {brandId} not found");
+                throw new Catalog_Service.src.CrossCutting.Exceptions.NotFoundException($"Brand with ID {brandId} not found");
 
             return await _productRepository.GetByBrandAsync(brandId, cancellationToken);
         }
-
         public async Task<IEnumerable<Product>> GetByPriceRangeAsync(Money minPrice, Money maxPrice, CancellationToken cancellationToken = default)
         {
             if (minPrice == null || maxPrice == null || minPrice.Amount > maxPrice.Amount)

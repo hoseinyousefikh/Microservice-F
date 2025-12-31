@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Catalog_Service.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251130194218_init")]
+    [Migration("20251231193016_init")]
     partial class init
     {
         /// <inheritdoc />
@@ -213,6 +213,9 @@ namespace Catalog_Service.Migrations
                     b.Property<int?>("ProductId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("ProductReviewId")
+                        .HasColumnType("int");
+
                     b.Property<int?>("ProductVariantId")
                         .HasColumnType("int");
 
@@ -248,6 +251,8 @@ namespace Catalog_Service.Migrations
 
                     b.HasIndex("ProductId")
                         .HasDatabaseName("IX_ImageResource_ProductId");
+
+                    b.HasIndex("ProductReviewId");
 
                     b.HasIndex("ProductVariantId")
                         .HasDatabaseName("IX_ImageResource_ProductVariantId");
@@ -517,6 +522,38 @@ namespace Catalog_Service.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Catalog_Service.src._01_Domain.Core.Entities.ProductReviewReply", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Comment")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("ProductReviewId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductReviewId");
+
+                    b.ToTable("ProductReviewReplies");
+                });
+
             modelBuilder.Entity("Catalog_Service.src._01_Domain.Core.Entities.ProductTag", b =>
                 {
                     b.Property<int>("Id")
@@ -651,6 +688,10 @@ namespace Catalog_Service.Migrations
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Restrict);
 
+                    b.HasOne("Catalog_Service.src._01_Domain.Core.Entities.ProductReview", null)
+                        .WithMany("Images")
+                        .HasForeignKey("ProductReviewId");
+
                     b.HasOne("Catalog_Service.src._01_Domain.Core.Entities.ProductVariant", null)
                         .WithMany()
                         .HasForeignKey("ProductVariantId")
@@ -765,6 +806,17 @@ namespace Catalog_Service.Migrations
                     b.Navigation("Product");
                 });
 
+            modelBuilder.Entity("Catalog_Service.src._01_Domain.Core.Entities.ProductReviewReply", b =>
+                {
+                    b.HasOne("Catalog_Service.src._01_Domain.Core.Entities.ProductReview", "ProductReview")
+                        .WithMany("Replies")
+                        .HasForeignKey("ProductReviewId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ProductReview");
+                });
+
             modelBuilder.Entity("Catalog_Service.src._01_Domain.Core.Entities.ProductTag", b =>
                 {
                     b.HasOne("Catalog_Service.src._01_Domain.Core.Entities.Product", "Product")
@@ -870,6 +922,13 @@ namespace Catalog_Service.Migrations
                     b.Navigation("Tags");
 
                     b.Navigation("Variants");
+                });
+
+            modelBuilder.Entity("Catalog_Service.src._01_Domain.Core.Entities.ProductReview", b =>
+                {
+                    b.Navigation("Images");
+
+                    b.Navigation("Replies");
                 });
 
             modelBuilder.Entity("Catalog_Service.src._01_Domain.Core.Entities.ProductVariant", b =>

@@ -154,69 +154,77 @@ namespace Catalog_Service.src._02_Infrastructure.Data.Repositories
         }
 
         public async Task<(IEnumerable<Product> Products, int TotalCount)> GetPagedAsync(
-            int pageNumber,
-            int pageSize,
-            string searchTerm = null,
-            int? categoryId = null,
-            int? brandId = null,
-            ProductStatus? status = null,
-            decimal? minPrice = null,
-            decimal? maxPrice = null,
-            string sortBy = null,
-            bool sortAscending = true,
-            CancellationToken cancellationToken = default)
+       int pageNumber,
+       int pageSize,
+       string searchTerm = null,
+       int? categoryId = null,
+       int? brandId = null,
+       ProductStatus? status = null,
+       decimal? minPrice = null,
+       decimal? maxPrice = null,
+       string sortBy = null,
+       bool sortAscending = true,
+       CancellationToken cancellationToken = default)
         {
-            var query = _dbContext.Products
+            // مرحله ۱: ساخت کوئری پایه با فیلترهای قابل ترجمه برای دیتابیس
+            var dbQuery = _dbContext.Products
                 .Include(p => p.Brand)
                 .Include(p => p.Category)
+                .Include(p => p.Reviews)
                 .AsQueryable();
 
-            // Apply filters
             if (!string.IsNullOrWhiteSpace(searchTerm))
             {
-                query = query.Where(p => p.Name.Contains(searchTerm) || p.Description.Contains(searchTerm));
+                dbQuery = dbQuery.Where(p => p.Name.Contains(searchTerm) || p.Description.Contains(searchTerm));
             }
 
             if (categoryId.HasValue)
             {
-                query = query.Where(p => p.CategoryId == categoryId.Value);
+                dbQuery = dbQuery.Where(p => p.CategoryId == categoryId.Value);
             }
 
             if (brandId.HasValue)
             {
-                query = query.Where(p => p.BrandId == brandId.Value);
+                dbQuery = dbQuery.Where(p => p.BrandId == brandId.Value);
             }
 
             if (status.HasValue)
             {
-                query = query.Where(p => p.Status == status.Value);
+                dbQuery = dbQuery.Where(p => p.Status == status.Value);
             }
+
+            // مرحله ۲: خواندن نتایج فیلتر شده از دیتابیس به حافظه
+            var filteredProductsFromDb = await dbQuery.ToListAsync(cancellationToken);
+
+            // مرحله ۳: اعمال فیلتر قیمت و مرتب‌سازی در حافظه
+            IEnumerable<Product> finalQuery = filteredProductsFromDb;
 
             if (minPrice.HasValue)
             {
-                query = query.Where(p => p.Price.Amount >= minPrice.Value);
+                finalQuery = finalQuery.Where(p => p.Price.Amount >= minPrice.Value);
             }
 
             if (maxPrice.HasValue)
             {
-                query = query.Where(p => p.Price.Amount <= maxPrice.Value);
+                finalQuery = finalQuery.Where(p => p.Price.Amount <= maxPrice.Value);
             }
 
-            // Apply sorting
-            query = sortBy switch
+            // حالا مرتب‌سازی را در حافظه انجام دهید
+            finalQuery = sortBy switch
             {
-                "name" => sortAscending ? query.OrderBy(p => p.Name) : query.OrderByDescending(p => p.Name),
-                "price" => sortAscending ? query.OrderBy(p => p.Price.Amount) : query.OrderByDescending(p => p.Price.Amount),
-                "date" => sortAscending ? query.OrderBy(p => p.CreatedAt) : query.OrderByDescending(p => p.CreatedAt),
-                "rating" => sortAscending ? query.OrderBy(p => p.Reviews.Average(r => r.Rating)) : query.OrderByDescending(p => p.Reviews.Average(r => r.Rating)),
-                _ => query.OrderByDescending(p => p.CreatedAt)
+                "name" => sortAscending ? finalQuery.OrderBy(p => p.Name) : finalQuery.OrderByDescending(p => p.Name),
+                "price" => sortAscending ? finalQuery.OrderBy(p => p.Price.Amount) : finalQuery.OrderByDescending(p => p.Price.Amount),
+                "date" => sortAscending ? finalQuery.OrderBy(p => p.CreatedAt) : finalQuery.OrderByDescending(p => p.CreatedAt),
+                "rating" => sortAscending ?
+                    finalQuery.OrderBy(p => p.Reviews.Any() ? p.Reviews.Average(r => r.Rating) : 0) :
+                    finalQuery.OrderByDescending(p => p.Reviews.Any() ? p.Reviews.Average(r => r.Rating) : 0),
+                _ => finalQuery.OrderByDescending(p => p.CreatedAt)
             };
 
-            var totalCount = await query.CountAsync(cancellationToken);
-            var products = await query
+            var totalCount = finalQuery.Count();
+            var products = finalQuery
                 .Skip((pageNumber - 1) * pageSize)
-                .Take(pageSize)
-                .ToListAsync(cancellationToken);
+                .Take(pageSize);
 
             return (products, totalCount);
         }

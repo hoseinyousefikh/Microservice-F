@@ -200,6 +200,29 @@ namespace Catalog_Service.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "ProductReviewReplies",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    ProductReviewId = table.Column<int>(type: "int", nullable: false),
+                    UserId = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Comment = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ProductReviewReplies", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ProductReviewReplies_ProductReviews_ProductReviewId",
+                        column: x => x.ProductReviewId,
+                        principalTable: "ProductReviews",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "ImageResources",
                 columns: table => new
                 {
@@ -220,6 +243,7 @@ namespace Catalog_Service.Migrations
                     BrandId = table.Column<int>(type: "int", nullable: true),
                     CategoryId = table.Column<int>(type: "int", nullable: true),
                     ProductId = table.Column<int>(type: "int", nullable: true),
+                    ProductReviewId = table.Column<int>(type: "int", nullable: true),
                     ProductVariantId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
@@ -238,6 +262,11 @@ namespace Catalog_Service.Migrations
                         principalTable: "Categories",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_ImageResources_ProductReviews_ProductReviewId",
+                        column: x => x.ProductReviewId,
+                        principalTable: "ProductReviews",
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_ImageResources_ProductVariants_ProductVariantId",
                         column: x => x.ProductVariantId,
@@ -347,6 +376,11 @@ namespace Catalog_Service.Migrations
                 column: "ProductVariantId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_ImageResources_ProductReviewId",
+                table: "ImageResources",
+                column: "ProductReviewId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_ProductAttribute_Name",
                 table: "ProductAttributes",
                 column: "Name");
@@ -365,6 +399,11 @@ namespace Catalog_Service.Migrations
                 name: "IX_ProductAttribute_ProductVariantId",
                 table: "ProductAttributes",
                 column: "ProductVariantId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ProductReviewReplies_ProductReviewId",
+                table: "ProductReviewReplies",
+                column: "ProductReviewId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ProductReview_IsVerifiedPurchase",
@@ -507,13 +546,16 @@ namespace Catalog_Service.Migrations
                 name: "ProductAttributes");
 
             migrationBuilder.DropTable(
-                name: "ProductReviews");
+                name: "ProductReviewReplies");
 
             migrationBuilder.DropTable(
                 name: "ProductTags");
 
             migrationBuilder.DropTable(
                 name: "ProductVariants");
+
+            migrationBuilder.DropTable(
+                name: "ProductReviews");
 
             migrationBuilder.DropTable(
                 name: "Products");
