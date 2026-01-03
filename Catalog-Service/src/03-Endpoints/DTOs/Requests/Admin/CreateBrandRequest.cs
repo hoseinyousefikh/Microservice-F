@@ -10,7 +10,7 @@ namespace Catalog_Service.src._03_Endpoints.DTOs.Requests.Admin
 
         [StringLength(500, ErrorMessage = "Description cannot exceed 500 characters")]
         public string Description { get; set; }
-
+        public string? WebsiteUrl { get; set; }
         [Url(ErrorMessage = "Invalid logo URL format")]
         public string LogoUrl { get; set; }
 

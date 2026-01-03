@@ -66,12 +66,16 @@ builder.Services.AddSwaggerGen(options =>
     options.IncludeXmlComments(xmlPath);
 });
 
-// 4. افزودن سرویس‌های دامنه و زیرساخت
+
+// *** این بخش بسیار مهم است - ترتیب فراخوانی اصلاح شد ***
+
+// 4. *** ابتدا احراز هویت را پیکربندی کنید ***
+builder.Services.AddAppAuthentication(builder.Configuration);
+
+// 5. *** سپس سرویس‌های زیرساخت را اضافه کنید (شامل AddAuthorization) ***
 builder.Services.AddDomainServices();
 builder.Services.AddInfrastructureServices(builder.Configuration);
 
-// 5. پیکربندی احراز هویت سرویس‌ها (API Key)
-builder.Services.AddServiceAuthentication();
 
 // 6. پیکربندی CORS
 builder.Services.AddCors(options =>

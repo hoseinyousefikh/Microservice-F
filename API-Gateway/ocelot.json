@@ -41,7 +41,7 @@
       }
     },
     {
-      "DownstreamPathTemplate": "/api/admin/brands/{everything}",
+      "DownstreamPathTemplate": "/api/admin/AdminBrand/{everything}",
       "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
         {
@@ -49,7 +49,7 @@
           "Port": 7070
         }
       ],
-      "UpstreamPathTemplate": "/catalog-service/api/admin/brands/{everything}",
+      "UpstreamPathTemplate": "/catalog-service/api/admin/AdminBrand/{everything}",
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
       "AuthenticationOptions": {
         "AuthenticationProviderKey": "Bearer",
@@ -57,7 +57,7 @@
       }
     },
     {
-      "DownstreamPathTemplate": "/api/admin/categories/{everything}",
+      "DownstreamPathTemplate": "/api/admin/AdminCategory/{everything}",
       "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
         {
@@ -73,7 +73,7 @@
       }
     },
     {
-      "DownstreamPathTemplate": "/api/admin/product-attributes/{everything}",
+      "DownstreamPathTemplate": "/api/admin/AdminProductAttribute/{everything}",
       "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
         {
@@ -89,7 +89,7 @@
       }
     },
     {
-      "DownstreamPathTemplate": "/api/admin/products/{everything}",
+      "DownstreamPathTemplate": "/api/admin/AdminProduct/{everything}",
       "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
         {
@@ -105,7 +105,7 @@
       }
     },
     {
-      "DownstreamPathTemplate": "/api/admin/product-reviews/{everything}",
+      "DownstreamPathTemplate": "/api/admin/AdminProductReview/{everything}",
       "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
         {
@@ -121,7 +121,7 @@
       }
     },
     {
-      "DownstreamPathTemplate": "/api/admin/product-variants/{everything}",
+      "DownstreamPathTemplate": "/api/admin/AdminProductVariant/{everything}",
       "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
         {
@@ -137,7 +137,7 @@
       }
     },
     {
-      "DownstreamPathTemplate": "/api/public/brands/{everything}",
+      "DownstreamPathTemplate": "/api/public/PublicBrand/{everything}",
       "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
         {
@@ -149,7 +149,7 @@
       "UpstreamHttpMethod": [ "GET" ]
     },
     {
-      "DownstreamPathTemplate": "/api/public/categories/{everything}",
+      "DownstreamPathTemplate": "/api/public/PublicCategory/{everything}",
       "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
         {
@@ -161,7 +161,7 @@
       "UpstreamHttpMethod": [ "GET" ]
     },
     {
-      "DownstreamPathTemplate": "/api/public/products/{everything}",
+      "DownstreamPathTemplate": "/api/public/PublicProduct/{everything}",
       "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
         {
@@ -173,7 +173,7 @@
       "UpstreamHttpMethod": [ "GET", "POST" ]
     },
     {
-      "DownstreamPathTemplate": "/api/public/reviews/{everything}",
+      "DownstreamPathTemplate": "/api/public/PublicReview/{everything}",
       "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
         {
@@ -185,7 +185,7 @@
       "UpstreamHttpMethod": [ "GET", "POST" ]
     },
     {
-      "DownstreamPathTemplate": "/api/vendor/products/{everything}",
+      "DownstreamPathTemplate": "/api/vendor/VendorProduct/{everything}",
       "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
         {
@@ -201,7 +201,7 @@
       }
     },
     {
-      "DownstreamPathTemplate": "/api/vendor/products/{productId}/reviews/{everything}",
+      "DownstreamPathTemplate": "/api/vendor/VendorProduct/{productId}/reviews/{everything}",
       "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
         {
@@ -217,7 +217,7 @@
       }
     },
     {
-      "DownstreamPathTemplate": "/api/vendor/products/{productId}/variants/{everything}",
+      "DownstreamPathTemplate": "/api/vendor/VendorProduct/{productId}/variants/{everything}",
       "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
         {

@@ -1,8 +1,4 @@
 ﻿// File: ServiceCollectionExtensions.cs
-using System.Text.Json;
-using Microsoft.AspNetCore.Mvc;
-using Catalog_Service.src.CrossCutting.Validation;
-using FluentValidation;
 using Catalog_Service.src._01_Domain.Core.Contracts.Repositories;
 using Catalog_Service.src._01_Domain.Core.Contracts.Services;
 using Catalog_Service.src._01_Domain.Services;
@@ -14,16 +10,21 @@ using Catalog_Service.src._02_Infrastructure.FileStorage;
 using Catalog_Service.src._02_Infrastructure.Security;
 using Catalog_Service.src._03_Endpoints.Mappers;
 using Catalog_Service.src.CrossCutting.Security;
+using Catalog_Service.src.CrossCutting.Validation;
 using Catalog_Service.src.CrossCutting.Validation.Admin;
+using FluentValidation;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Options;
 using StackExchange.Redis;
+using System.Security.Claims;
 using System.Security.Principal;
 using System.Text.Encodings.Web;
+using System.Text.Json;
 
 namespace Catalog_Service.src.CrossCutting.Extensions
 {
@@ -84,25 +85,7 @@ namespace Catalog_Service.src.CrossCutting.Extensions
             services.AddScoped<IKeyManagementService, KeyManagementService>();
             services.AddScoped<ApiKeyValidator>();
 
-            services.AddAuthentication(options =>
-            {
-                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            })
-            .AddJwtBearer(options =>
-            {
-                options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
-                {
-                    ValidateIssuer = true,
-                    ValidateAudience = true,
-                    ValidateLifetime = true,
-                    ValidateIssuerSigningKey = true,
-                    ValidIssuer = configuration["JwtSettings:Issuer"],
-                    ValidAudience = configuration["JwtSettings:Audience"],
-                    IssuerSigningKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(
-                        System.Text.Encoding.UTF8.GetBytes(configuration["JwtSettings:SecretKey"]))
-                };
-            });
+            // بخش AddAuthentication از اینجا حذف شد
 
             services.AddAuthorization(options =>
             {
@@ -122,14 +105,37 @@ namespace Catalog_Service.src.CrossCutting.Extensions
             return services;
         }
 
-        public static IServiceCollection AddServiceAuthentication(this IServiceCollection services)
+        // *** این متد جدید برای پیکربندی یکپارچه احراز هویت اضافه شده است ***
+        public static IServiceCollection AddAppAuthentication(this IServiceCollection services, IConfiguration configuration)
         {
-            services.AddAuthentication("ApiKey")
-                .AddScheme<ApiKeyAuthenticationOptions, ApiKeyAuthenticationHandler>("ApiKey", options => { });
+            services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer("Bearer", options =>
+            {
+                options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = configuration["JwtSettings:Issuer"],
+                    ValidAudience = configuration["JwtSettings:Audience"],
+                    IssuerSigningKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(
+                        System.Text.Encoding.UTF8.GetBytes(configuration["JwtSettings:SecretKey"])),
+
+                    // *** این دو خط کلیدی هستند ***
+                    // این دو خط به Catalog-Service میگویند که از نام‌های استاندارد مایکروسافت استفاده کند
+                    RoleClaimType = ClaimTypes.Role,
+                    NameClaimType = ClaimTypes.Name
+                };
+            })
+            .AddScheme<ApiKeyAuthenticationOptions, ApiKeyAuthenticationHandler>("ApiKey", options => { });
 
             return services;
         }
-
         // --- کد اصلاح شده با نام منحصر به فرد ---
         public static IServiceCollection AddCatalogHealthChecks(this IServiceCollection services, IConfiguration configuration)
         {

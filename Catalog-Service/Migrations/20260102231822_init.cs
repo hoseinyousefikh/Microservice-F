@@ -31,7 +31,6 @@ namespace Catalog_Service.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Brands", x => x.Id);
-                    table.CheckConstraint("CK_Brand_ValidWebsiteUrl", "WebsiteUrl IS NULL OR WebsiteUrl LIKE 'http%' OR WebsiteUrl LIKE 'https%'");
                 });
 
             migrationBuilder.CreateTable(

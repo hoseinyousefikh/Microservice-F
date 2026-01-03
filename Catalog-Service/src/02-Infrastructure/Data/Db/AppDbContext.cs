@@ -6,8 +6,13 @@ using Catalog_Service.src._02_Infrastructure.Configuration;
 using Catalog_Service.src._02_Infrastructure.Data.Converters;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.Extensions.Logging; // این using را اضافه کنید
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection.Emit;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Catalog_Service.src._02_Infrastructure.Data.Db
 {
@@ -235,6 +240,7 @@ namespace Catalog_Service.src._02_Infrastructure.Data.Db
                 .HasDatabaseName("IX_ProductReview_Status");
         }
 
+        // *** این متد را با نسخه تشخیصی جایگزین کنید ***
         public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
             // مدیریت خودکار Timestamp برای موجودیت‌ها
@@ -243,7 +249,36 @@ namespace Catalog_Service.src._02_Infrastructure.Data.Db
             // پردازش رویدادهای دامنه
             await ProcessDomainEventsAsync(cancellationToken);
 
-            return await base.SaveChangesAsync(cancellationToken);
+            // *** بخش تشخیصی برای پیدا کردن مشکل CHECK Constraint ***
+            var logger = this.GetService<ILogger<AppDbContext>>();
+            var addedOrModifiedEntries = ChangeTracker.Entries()
+                .Where(e => e.State == EntityState.Added || e.State == EntityState.Modified);
+
+            foreach (var entry in addedOrModifiedEntries)
+            {
+                if (entry.Entity is Brand brandEntity)
+                {
+                    var websiteUrlProperty = entry.Property("WebsiteUrl");
+                    var websiteUrlValue = websiteUrlProperty.CurrentValue?.ToString() ?? "NULL";
+                    logger.LogWarning("DIAGNOSTIC: Attempting to save Brand '{BrandName}' with WebsiteUrl: '{WebsiteUrl}'", brandEntity.Name, websiteUrlValue);
+                }
+            }
+            // *** پایان بخش تشخیصی ***
+
+            try
+            {
+                return await base.SaveChangesAsync(cancellationToken);
+            }
+            catch (DbUpdateException ex)
+            {
+                logger.LogError(ex, "Database update failed. See inner exception for details.");
+                // می‌توانید جزئیات بیشتری از خطا را اینجا لاگ کنید
+                if (ex.InnerException != null)
+                {
+                    logger.LogError("Inner Exception: {InnerExceptionMessage}", ex.InnerException.Message);
+                }
+                throw; // دوباره خطا را پرتاب کنید تا به لایه بالاتر برسد
+            }
         }
 
         private void UpdateTimestamps()

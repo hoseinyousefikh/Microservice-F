@@ -81,10 +81,7 @@ namespace Catalog_Service.Migrations
                         .IsUnique()
                         .HasDatabaseName("IX_Brand_Slug");
 
-                    b.ToTable("Brands", null, t =>
-                        {
-                            t.HasCheckConstraint("CK_Brand_ValidWebsiteUrl", "WebsiteUrl IS NULL OR WebsiteUrl LIKE 'http%' OR WebsiteUrl LIKE 'https%'");
-                        });
+                    b.ToTable("Brands", (string)null);
                 });
 
             modelBuilder.Entity("Catalog_Service.src._01_Domain.Core.Entities.Category", b =>

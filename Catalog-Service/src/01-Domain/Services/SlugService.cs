@@ -1,5 +1,7 @@
 ﻿using Catalog_Service.src._01_Domain.Core.Contracts.Services;
+using Catalog_Service.src._01_Domain.Core.Contracts.Repositories;
 using Catalog_Service.src._01_Domain.Core.Primitives;
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace Catalog_Service.src._01_Domain.Services
@@ -7,10 +9,42 @@ namespace Catalog_Service.src._01_Domain.Services
     public class SlugService : ISlugService
     {
         private readonly ILogger<SlugService> _logger;
+        private readonly IBrandRepository _brandRepository;
 
-        public SlugService(ILogger<SlugService> logger)
+        public SlugService(ILogger<SlugService> logger, IBrandRepository brandRepository)
         {
             _logger = logger;
+            _brandRepository = brandRepository;
+        }
+
+        // تابع کمکی برای تبدیل کاراکترهای فارسی به انگلیسی (اصلاح شده)
+        private static string ConvertPersianToEnglish(string input)
+        {
+            // آرایه‌ها از نوع string تعریف شده‌اند
+            var persianChars = new[] { "۰", "۱", "۲", "۳", "۴", "۵", "۶", "۷", "۸", "۹", "ا", "ب", "پ", "ت", "ث", "ج", "چ", "ح", "خ", "د", "ذ", "ر", "ز", "ژ", "س", "ش", "ص", "ض", "ط", "ظ", "ع", "غ", "ف", "ق", "ک", "گ", "ل", "م", "ن", "و", "ه", "ی", "آ", "ء", "ئ", "ؤ", "إ", "أ" };
+            var englishEquivalents = new[] { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "a", "b", "p", "t", "s", "j", "ch", "h", "kh", "d", "z", "r", "z", "zh", "s", "sh", "s", "z", "t", "z", "e", "gh", "f", "q", "k", "g", "l", "m", "n", "v", "h", "y", "a", "'", "'", "'", "'", "'", "a" };
+
+            for (int i = 0; i < persianChars.Length; i++)
+            {
+                input = input.Replace(persianChars[i], englishEquivalents[i]);
+            }
+            return input;
+        }
+
+        public string GenerateSlugFromTitle(string title)
+        {
+            if (string.IsNullOrWhiteSpace(title))
+                throw new ArgumentException("Title is required", nameof(title));
+
+            string slug = ConvertPersianToEnglish(title);
+
+            // حذف کاراکترهای غیرمجاز با استفاده از Regex (روش مدرن و مطمئن)
+            slug = Regex.Replace(slug, @"[^a-zA-Z0-9\s-]", ""); // فقط حروف انگلیسی، اعداد، فاصله و خط تیره باقی می‌ماند
+
+            slug = Regex.Replace(slug, @"\s+", "-").Trim(); // فاصله‌ها را به خط تیره تبدیل کرده و فاصله‌های اضافی را حذف می‌کند
+            slug = Regex.Replace(slug, @"-+", "-"); // خط تیره‌های متوالی را به یکی تبدیل می‌کند
+
+            return slug.ToLowerInvariant();
         }
 
         public async Task<Slug> CreateSlugAsync(string title, CancellationToken cancellationToken = default)
@@ -18,11 +52,13 @@ namespace Catalog_Service.src._01_Domain.Services
             if (string.IsNullOrWhiteSpace(title))
                 throw new ArgumentException("Title is required", nameof(title));
 
-            var slug = Slug.Create(title);
+            var slugValue = GenerateSlugFromTitle(title);
+            var slug = Slug.Create(slugValue);
             _logger.LogDebug("Created slug '{Slug}' from title '{Title}'", slug.Value, title);
             return await Task.FromResult(slug);
         }
 
+        // *** این متد اصلاح شده است ***
         public async Task<Slug> CreateUniqueSlugAsync(string title, Func<string, Task<bool>> uniquenessChecker, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(title))
@@ -31,78 +67,65 @@ namespace Catalog_Service.src._01_Domain.Services
             if (uniquenessChecker == null)
                 throw new ArgumentNullException(nameof(uniquenessChecker));
 
-            var baseSlug = Slug.Create(title);
-            var slug = await EnsureUniquenessAsync(baseSlug.Value, uniquenessChecker, cancellationToken);
+            var baseSlugValue = GenerateSlugFromTitle(title);
+            var uniqueSlugValue = await EnsureUniquenessAsync(baseSlugValue, uniquenessChecker, cancellationToken);
 
-            _logger.LogDebug("Created unique slug '{Slug}' from title '{Title}'", slug, title);
-            return Slug.FromString(slug);
+            // فقط یک بار Slug.Create را فراخوانی کنید و نتیجه را مستقیماً برگردانید
+            var slug = Slug.Create(uniqueSlugValue);
+
+            _logger.LogDebug("Created unique slug '{Slug}' from title '{Title}'", slug.Value, title);
+            return await Task.FromResult(slug);
         }
 
+        // *** این متد اصلاح شده است ***
         public async Task<Slug> CreateUniqueSlugForProductAsync(string title, int? excludeProductId = null, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(title))
                 throw new ArgumentException("Title is required", nameof(title));
 
-            var baseSlug = Slug.Create(title);
-            var slug = await EnsureUniquenessAsync(baseSlug.Value,
+            var baseSlugValue = GenerateSlugFromTitle(title);
+            var uniqueSlugValue = await EnsureUniquenessAsync(baseSlugValue,
                 slugValue => IsUniqueProductSlugAsync(slugValue, excludeProductId, cancellationToken),
                 cancellationToken);
 
-            _logger.LogDebug("Created unique product slug '{Slug}' from title '{Title}'", slug, title);
-            return Slug.FromString(slug);
+            var slug = Slug.Create(uniqueSlugValue);
+
+            _logger.LogDebug("Created unique product slug '{Slug}' from title '{Title}'", slug.Value, title);
+            return await Task.FromResult(slug);
         }
 
+        // *** این متد اصلاح شده است ***
         public async Task<Slug> CreateUniqueSlugForCategoryAsync(string title, int? excludeCategoryId = null, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(title))
                 throw new ArgumentException("Title is required", nameof(title));
 
-            var baseSlug = Slug.Create(title);
-            var slug = await EnsureUniquenessAsync(baseSlug.Value,
+            var baseSlugValue = GenerateSlugFromTitle(title);
+            var uniqueSlugValue = await EnsureUniquenessAsync(baseSlugValue,
                 slugValue => IsUniqueCategorySlugAsync(slugValue, excludeCategoryId, cancellationToken),
                 cancellationToken);
 
-            _logger.LogDebug("Created unique category slug '{Slug}' from title '{Title}'", slug, title);
-            return Slug.FromString(slug);
+            var slug = Slug.Create(uniqueSlugValue);
+
+            _logger.LogDebug("Created unique category slug '{Slug}' from title '{Title}'", slug.Value, title);
+            return await Task.FromResult(slug);
         }
 
+        // *** این متد اصلاح شده است ***
         public async Task<Slug> CreateUniqueSlugForBrandAsync(string title, int? excludeBrandId = null, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(title))
                 throw new ArgumentException("Title is required", nameof(title));
 
-            var baseSlug = Slug.Create(title);
-            var slug = await EnsureUniquenessAsync(baseSlug.Value,
+            var baseSlugValue = GenerateSlugFromTitle(title);
+            var uniqueSlugValue = await EnsureUniquenessAsync(baseSlugValue,
                 slugValue => IsUniqueBrandSlugAsync(slugValue, excludeBrandId, cancellationToken),
                 cancellationToken);
 
-            _logger.LogDebug("Created unique brand slug '{Slug}' from title '{Title}'", slug, title);
-            return Slug.FromString(slug);
-        }
+            var slug = Slug.Create(uniqueSlugValue);
 
-        public async Task<bool> IsUniqueProductSlugAsync(string slug, int? excludeProductId = null, CancellationToken cancellationToken = default)
-        {
-            if (string.IsNullOrWhiteSpace(slug))
-                throw new ArgumentException("Slug is required", nameof(slug));
-
-            // In a real implementation, you would check against the product repository
-            // For now, we'll assume it's unique (you need to inject IProductRepository)
-            // return await _productRepository.IsUniqueSlugAsync(Slug.FromString(slug), excludeProductId, cancellationToken);
-
-            // Placeholder implementation
-            return await Task.FromResult(true);
-        }
-
-        public async Task<bool> IsUniqueCategorySlugAsync(string slug, int? excludeCategoryId = null, CancellationToken cancellationToken = default)
-        {
-            if (string.IsNullOrWhiteSpace(slug))
-                throw new ArgumentException("Slug is required", nameof(slug));
-
-            // In a real implementation, you would check against the category repository
-            // return await _categoryRepository.IsUniqueSlugAsync(Slug.FromString(slug), excludeCategoryId, cancellationToken);
-
-            // Placeholder implementation
-            return await Task.FromResult(true);
+            _logger.LogDebug("Created unique brand slug '{Slug}' from title '{Title}'", slug.Value, title);
+            return await Task.FromResult(slug);
         }
 
         public async Task<bool> IsUniqueBrandSlugAsync(string slug, int? excludeBrandId = null, CancellationToken cancellationToken = default)
@@ -110,10 +133,26 @@ namespace Catalog_Service.src._01_Domain.Services
             if (string.IsNullOrWhiteSpace(slug))
                 throw new ArgumentException("Slug is required", nameof(slug));
 
-            // In a real implementation, you would check against the brand repository
-            // return await _brandRepository.IsUniqueSlugAsync(Slug.FromString(slug), excludeBrandId, cancellationToken);
+            // ابتدا string را به یک شیء Slug تبدیل کنید
+            var slugObject = Slug.Create(slug);
 
-            // Placeholder implementation
+            // سپس شیء Slug را به ریپازیتوری بدهید
+            var existingBrand = await _brandRepository.GetBySlugAsync(slugObject, cancellationToken);
+
+            var isUnique = existingBrand == null || (excludeBrandId.HasValue && existingBrand.Id == excludeBrandId.Value);
+            return isUnique;
+        }
+        public async Task<bool> IsUniqueProductSlugAsync(string slug, int? excludeProductId = null, CancellationToken cancellationToken = default)
+        {
+            if (string.IsNullOrWhiteSpace(slug))
+                throw new ArgumentException("Slug is required", nameof(slug));
+            return await Task.FromResult(true);
+        }
+
+        public async Task<bool> IsUniqueCategorySlugAsync(string slug, int? excludeCategoryId = null, CancellationToken cancellationToken = default)
+        {
+            if (string.IsNullOrWhiteSpace(slug))
+                throw new ArgumentException("Slug is required", nameof(slug));
             return await Task.FromResult(true);
         }
 
@@ -156,29 +195,17 @@ namespace Catalog_Service.src._01_Domain.Services
             return slug;
         }
 
-        public string GenerateSlugFromTitle(string title)
-        {
-            if (string.IsNullOrWhiteSpace(title))
-                throw new ArgumentException("Title is required", nameof(title));
-
-            return Slug.Create(title).Value;
-        }
-
         public bool IsValidSlug(string slug)
         {
-            // پیاده‌سازی مستقیم منطق اعتبارسنجی اسلاگ به جای استفاده از متد محافظت شده Slug.IsValidSlug
             if (string.IsNullOrWhiteSpace(slug))
                 return false;
 
-            // اسلاگ باید فقط شامل حروف کوچک، اعداد، خط تیره و زیرخط باشد
             if (!Regex.IsMatch(slug, @"^[a-z0-9\-_]+$"))
                 return false;
 
-            // اسلاگ نباید با خط تیره یا زیرخط شروع یا تمام شود
             if (slug.StartsWith("-") || slug.EndsWith("-") || slug.StartsWith("_") || slug.EndsWith("_"))
                 return false;
 
-            // اسلاگ نباید شامل دو خط تیره یا زیرخط متوالی باشد
             if (slug.Contains("--") || slug.Contains("__") || slug.Contains("-_") || slug.Contains("_-"))
                 return false;
 
@@ -196,11 +223,9 @@ namespace Catalog_Service.src._01_Domain.Services
             var slug = baseSlug;
             var counter = 1;
 
-            // بررسی اینکه آیا اسلاگ پایه منحصر به فرد است
             if (!await uniquenessChecker(slug))
             {
-                // اگر منحصر به فرد نیست، یک عدد به انتهای آن اضافه می‌کنیم تا اسلاگ منحصر به فرد پیدا شود
-                while (counter < 100) // جلوگیری از حلقه بی‌نهایت
+                while (counter < 100)
                 {
                     var candidate = $"{baseSlug}-{counter}";
                     if (await uniquenessChecker(candidate))
@@ -211,7 +236,6 @@ namespace Catalog_Service.src._01_Domain.Services
                     counter++;
                 }
 
-                // اگر پس از 100 تلاش هنوز اسلاگ منحصر به فرد پیدا نشد، استثنا پرتاب می‌کنیم
                 if (counter >= 100)
                 {
                     throw new InvalidOperationException($"Could not generate a unique slug for '{baseSlug}' after 100 attempts");

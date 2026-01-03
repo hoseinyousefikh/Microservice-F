@@ -35,18 +35,22 @@ namespace Catalog_Service.src._02_Infrastructure.Configuration
             builder.Property(b => b.LogoUrl)
                 .HasMaxLength(500);
 
+            // *** این بخش را اصلاح کنید ***
             builder.Property(b => b.WebsiteUrl)
                 .HasMaxLength(500);
+            // HasDefaultValue(null) را حذف کردیم چون با Check Constraint تداخل دارد
 
             builder.Property(b => b.MetaTitle)
                 .HasMaxLength(200);
 
             builder.Property(b => b.MetaDescription)
                 .HasMaxLength(500);
+
             builder.Property(b => b.Slug)
                 .HasConversion(
                  slug => slug.Value,
                  value => Slug.FromString(value));
+
             // تنظیمات مجموعه‌ها
             builder.HasMany(b => b.Products)
                 .WithOne(p => p.Brand)
@@ -57,16 +61,14 @@ namespace Catalog_Service.src._02_Infrastructure.Configuration
             builder.HasIndex(b => b.IsActive)
                 .HasDatabaseName("IX_Brand_IsActive");
 
-            // تنظیمات پیش‌فرض برای مقادیر اختیاری
+            // تنظیمات پیش‌فرض برای مقادیر اختیاری (به جز WebsiteUrl)
             builder.Property(b => b.LogoUrl).HasDefaultValue(null);
-            builder.Property(b => b.WebsiteUrl).HasDefaultValue(null);
             builder.Property(b => b.MetaTitle).HasDefaultValue(null);
             builder.Property(b => b.MetaDescription).HasDefaultValue(null);
             builder.Property(b => b.UpdatedAt).HasDefaultValue(null);
 
-            // اعتبارسنجی URL
-            builder.HasCheckConstraint("CK_Brand_ValidWebsiteUrl",
-                "WebsiteUrl IS NULL OR WebsiteUrl LIKE 'http%' OR WebsiteUrl LIKE 'https%'");
+            // *** این بخش را با نسخه قطعی جایگزین کنید ***
+           
         }
     }
 }

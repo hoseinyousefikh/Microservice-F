@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Catalog_Service.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251231193016_init")]
+    [Migration("20260102231822_init")]
     partial class init
     {
         /// <inheritdoc />
@@ -84,10 +84,7 @@ namespace Catalog_Service.Migrations
                         .IsUnique()
                         .HasDatabaseName("IX_Brand_Slug");
 
-                    b.ToTable("Brands", null, t =>
-                        {
-                            t.HasCheckConstraint("CK_Brand_ValidWebsiteUrl", "WebsiteUrl IS NULL OR WebsiteUrl LIKE 'http%' OR WebsiteUrl LIKE 'https%'");
-                        });
+                    b.ToTable("Brands", (string)null);
                 });
 
             modelBuilder.Entity("Catalog_Service.src._01_Domain.Core.Entities.Category", b =>

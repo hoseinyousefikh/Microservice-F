@@ -35,6 +35,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Remove", "Remove", "{A12DDC
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IdentityService", "IdentityService\IdentityService.csproj", "{B064A984-303A-42BA-9918-C36E3F2A0684}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MarketHub.Gateway", "MarketHub.Gateway\MarketHub.Gateway.csproj", "{CF22AD94-D3CB-418F-8007-8D854B422C0B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -85,6 +87,10 @@ Global
 		{B064A984-303A-42BA-9918-C36E3F2A0684}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B064A984-303A-42BA-9918-C36E3F2A0684}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B064A984-303A-42BA-9918-C36E3F2A0684}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CF22AD94-D3CB-418F-8007-8D854B422C0B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CF22AD94-D3CB-418F-8007-8D854B422C0B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CF22AD94-D3CB-418F-8007-8D854B422C0B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CF22AD94-D3CB-418F-8007-8D854B422C0B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -105,6 +111,7 @@ Global
 		{8D43DF04-6FBC-4709-9EF1-1AFEBCAFE5A8} = {F6882574-FC6E-4388-A0DC-57E1B1FD3509}
 		{A12DDC0C-289D-40B1-BFB0-82DF0037D6F8} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{B064A984-303A-42BA-9918-C36E3F2A0684} = {CF275DC5-14D4-4704-8C23-220399D2B411}
+		{CF22AD94-D3CB-418F-8007-8D854B422C0B} = {CF275DC5-14D4-4704-8C23-220399D2B411}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {CE5E4472-A596-4661-BE80-EABC1C5B637C}
