@@ -47,7 +47,7 @@ namespace Catalog_Service.src._01_Domain.Services
             return await _imageRepository.GetAllAsync(cancellationToken);
         }
 
-        public async Task<ImageResource> CreateAsync(string originalFileName, string fileExtension, string storagePath, string publicUrl, long fileSize, int width, int height, ImageType imageType, string? altText = null, bool isPrimary = false, CancellationToken cancellationToken = default)
+        public async Task<ImageResource> CreateAsync(string originalFileName, string fileExtension, string storagePath, string publicUrl, long fileSize, int width, int height, ImageType imageType, string createdByUserId, string? altText = null, bool isPrimary = false, CancellationToken cancellationToken = default)
         {
             // Validate inputs
             if (string.IsNullOrWhiteSpace(originalFileName))
@@ -68,8 +68,11 @@ namespace Catalog_Service.src._01_Domain.Services
             if (width <= 0 || height <= 0)
                 throw new ArgumentException("Image dimensions must be greater than zero");
 
+            if (string.IsNullOrWhiteSpace(createdByUserId))
+                throw new ArgumentException("CreatedByUserId is required", nameof(createdByUserId));
+
             // Create image
-            var image = new ImageResource(originalFileName, fileExtension, storagePath, publicUrl, fileSize, width, height, imageType, altText, isPrimary);
+            var image = new ImageResource(originalFileName, fileExtension, storagePath, publicUrl, fileSize, width, height, imageType, createdByUserId, altText, isPrimary);
 
             // Add to repository
             image = await _imageRepository.AddAsync(image, cancellationToken);
@@ -226,7 +229,7 @@ namespace Catalog_Service.src._01_Domain.Services
             return await _imageRepository.GetPagedAsync(pageNumber, pageSize, imageType, entityId, onlyPrimary, cancellationToken);
         }
 
-        public async Task<ImageResource> UploadProductImageAsync(int productId, Stream imageStream, string originalFileName, string? altText = null, bool isPrimary = false, CancellationToken cancellationToken = default)
+        public async Task<ImageResource> UploadProductImageAsync(int productId, Stream imageStream, string originalFileName, string createdByUserId, string? altText = null, bool isPrimary = false, CancellationToken cancellationToken = default)
         {
             // Check if product exists
             var product = await _productRepository.GetByIdAsync(productId, cancellationToken);
@@ -248,7 +251,7 @@ namespace Catalog_Service.src._01_Domain.Services
             const int width = 800;
             const int height = 600;
 
-            var image = await CreateAsync(originalFileName, fileExtension, storagePath, publicUrl, fileSize, width, height, ImageType.Product, altText, isPrimary, cancellationToken);
+            var image = await CreateAsync(originalFileName, fileExtension, storagePath, publicUrl, fileSize, width, height, ImageType.Product, createdByUserId, altText, isPrimary, cancellationToken);
 
             // Set shadow property for product
             // This will be handled by the repository
@@ -263,21 +266,21 @@ namespace Catalog_Service.src._01_Domain.Services
             return image;
         }
 
-        public async Task<ImageResource> UploadCategoryImageAsync(int categoryId, Stream imageStream, string originalFileName, string? altText = null, bool isPrimary = false, CancellationToken cancellationToken = default)
+        public async Task<ImageResource> UploadCategoryImageAsync(int categoryId, Stream imageStream, string originalFileName, string createdByUserId, string? altText = null, bool isPrimary = false, CancellationToken cancellationToken = default)
         {
             // Similar implementation to UploadProductImageAsync but for categories
             // Implementation omitted for brevity
             throw new NotImplementedException();
         }
 
-        public async Task<ImageResource> UploadBrandImageAsync(int brandId, Stream imageStream, string originalFileName, string? altText = null, bool isPrimary = false, CancellationToken cancellationToken = default)
+        public async Task<ImageResource> UploadBrandImageAsync(int brandId, Stream imageStream, string originalFileName, string createdByUserId, string? altText = null, bool isPrimary = false, CancellationToken cancellationToken = default)
         {
             // Similar implementation to UploadProductImageAsync but for brands
             // Implementation omitted for brevity
             throw new NotImplementedException();
         }
 
-        public async Task<ImageResource> UploadProductVariantImageAsync(int productVariantId, Stream imageStream, string originalFileName, string? altText = null, bool isPrimary = false, CancellationToken cancellationToken = default)
+        public async Task<ImageResource> UploadProductVariantImageAsync(int productVariantId, Stream imageStream, string originalFileName, string createdByUserId, string? altText = null, bool isPrimary = false, CancellationToken cancellationToken = default)
         {
             // Similar implementation to UploadProductImageAsync but for product variants
             // Implementation omitted for brevity

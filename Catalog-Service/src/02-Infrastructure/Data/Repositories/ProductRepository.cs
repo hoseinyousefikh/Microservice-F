@@ -20,9 +20,12 @@ namespace Catalog_Service.src._02_Infrastructure.Data.Repositories
             _dbContext = dbContext;
         }
 
+        // در کلاس ProductRepository
         public async Task<Product> GetByIdAsync(int id, CancellationToken cancellationToken = default)
         {
+            // استفاده از IgnoreQueryFilters برای غیرفعال کردن موقت فیلترهای سراسری
             return await _dbContext.Products
+                .IgnoreQueryFilters() // <-- این خط کلیدی است
                 .Include(p => p.Brand)
                 .Include(p => p.Category)
                 .Include(p => p.Images)
@@ -33,8 +36,10 @@ namespace Catalog_Service.src._02_Infrastructure.Data.Repositories
                 .FirstOrDefaultAsync(p => p.Id == id, cancellationToken);
         }
 
-        public async Task<Product> GetBySkuAsync(string sku, CancellationToken cancellationToken = default)
+        // *** این متد اصلاح شده است ***
+        public async Task<Product?> GetBySkuAsync(string sku, CancellationToken cancellationToken = default)
         {
+            // اگر محصولی پیدا نشود، به طور خودکار null برمی‌گرداند
             return await _dbContext.Products
                 .Include(p => p.Brand)
                 .Include(p => p.Category)
@@ -261,6 +266,7 @@ namespace Catalog_Service.src._02_Infrastructure.Data.Repositories
             return await _dbContext.Products.AnyAsync(p => p.Id == id, cancellationToken);
         }
 
+        // *** این متد صحیح است و نیازی به تغییر ندارد ***
         public async Task<bool> ExistsBySkuAsync(string sku, CancellationToken cancellationToken = default)
         {
             return await _dbContext.Products.AnyAsync(p => p.Sku == sku, cancellationToken);

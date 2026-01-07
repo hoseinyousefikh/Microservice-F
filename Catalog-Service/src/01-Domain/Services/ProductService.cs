@@ -55,15 +55,9 @@ namespace Catalog_Service.src._01_Domain.Services
             return product;
         }
 
-        public async Task<Product> GetBySkuAsync(string sku, CancellationToken cancellationToken = default)
+        public async Task<Product?> GetBySkuAsync(string sku, CancellationToken cancellationToken = default)
         {
-            var product = await _productRepository.GetBySkuAsync(sku, cancellationToken);
-            if (product == null)
-            {
-                _logger.LogWarning("Product with SKU {ProductSku} not found", sku);
-                throw new NotFoundException($"Product with SKU {sku} not found");
-            }
-            return product;
+            return await _productRepository.GetBySkuAsync(sku, cancellationToken);
         }
 
         public async Task<Product> GetBySlugAsync(string slug, CancellationToken cancellationToken = default)
@@ -82,7 +76,7 @@ namespace Catalog_Service.src._01_Domain.Services
             return await _productRepository.GetAllAsync(cancellationToken);
         }
 
-        public async Task<Product> CreateAsync(string name, string description, Money price, int brandId, int categoryId, string sku, Dimensions dimensions, Weight weight, string? metaTitle = null, string? metaDescription = null, CancellationToken cancellationToken = default)
+        public async Task<Product> CreateAsync(string name, string description, Money price, int brandId, int categoryId, string sku, Dimensions dimensions, Weight weight, string createdByUserId, string? metaTitle = null, string? metaDescription = null, CancellationToken cancellationToken = default)
         {
             // Validate inputs
             if (string.IsNullOrWhiteSpace(name))
@@ -93,6 +87,9 @@ namespace Catalog_Service.src._01_Domain.Services
 
             if (string.IsNullOrWhiteSpace(sku))
                 throw new ArgumentException("Product SKU is required", nameof(sku));
+
+            if (string.IsNullOrWhiteSpace(createdByUserId))
+                throw new ArgumentException("CreatedByUserId is required", nameof(createdByUserId));
 
             // Check if brand exists
             var brand = await _brandRepository.GetByIdAsync(brandId, cancellationToken);
@@ -109,10 +106,10 @@ namespace Catalog_Service.src._01_Domain.Services
                 throw new DuplicateEntityException($"Product with SKU {sku} already exists");
 
             // Create product
-            var product = new Product(name, description, price, brandId, categoryId, sku, dimensions, weight, metaTitle, metaDescription);
+            var product = new Product(name, description, price, brandId, categoryId, sku, dimensions, weight, createdByUserId, metaTitle, metaDescription);
 
             // Generate and set slug
-            var slug = await _slugService.CreateUniqueSlugForBrandAsync(
+            var slug = await _slugService.CreateUniqueSlugForProductAsync(
                 title: name,
                 cancellationToken: cancellationToken
             ); product.SetSlug(slug);
@@ -180,6 +177,11 @@ namespace Catalog_Service.src._01_Domain.Services
             return await _productRepository.ExistsAsync(id, cancellationToken);
         }
 
+        public async Task<bool> ExistsBySkuAsync(string sku, CancellationToken cancellationToken = default)
+        {
+            return await _productRepository.ExistsBySkuAsync(sku, cancellationToken);
+        }
+
         public async Task<(IEnumerable<Product> Products, int TotalCount)> GetPagedAsync(int pageNumber, int pageSize, string searchTerm = null, int? categoryId = null, int? brandId = null, ProductStatus? status = null, decimal? minPrice = null, decimal? maxPrice = null, string sortBy = null, bool sortAscending = true, CancellationToken cancellationToken = default)
         {
             return await _productRepository.GetPagedAsync(pageNumber, pageSize, searchTerm, categoryId, brandId, status, minPrice, maxPrice, sortBy, sortAscending, cancellationToken);
@@ -224,6 +226,7 @@ namespace Catalog_Service.src._01_Domain.Services
 
         public async Task<IEnumerable<Product>> GetBestSellingProductsAsync(int count, CancellationToken cancellationToken = default)
         {
+            // در یک پیاده‌سازی واقعی، این متد باید با داده‌های فروش کار کند
             return await _productRepository.GetBestSellingProductsAsync(count, cancellationToken);
         }
 
@@ -350,11 +353,15 @@ namespace Catalog_Service.src._01_Domain.Services
             _logger.LogInformation("Deactivated product variant with ID {VariantId}", variantId);
         }
 
-        public async Task<ImageResource> AddImageAsync(int productId, string originalFileName, string fileExtension, string storagePath, string publicUrl, long fileSize, int width, int height, ImageType imageType, string? altText = null, bool isPrimary = false, CancellationToken cancellationToken = default)
+        public async Task<ImageResource> AddImageAsync(int productId, string originalFileName, string fileExtension, string storagePath, string publicUrl, long fileSize, int width, int height, ImageType imageType, string createdByUserId, string? altText = null, bool isPrimary = false, CancellationToken cancellationToken = default)
         {
             var product = await GetByIdAsync(productId, cancellationToken);
 
-            var image = new ImageResource(originalFileName, fileExtension, storagePath, publicUrl, fileSize, width, height, imageType, altText, isPrimary);
+            // Validate createdByUserId
+            if (string.IsNullOrWhiteSpace(createdByUserId))
+                throw new ArgumentException("CreatedByUserId is required", nameof(createdByUserId));
+
+            var image = new ImageResource(originalFileName, fileExtension, storagePath, publicUrl, fileSize, width, height, imageType, createdByUserId, altText, isPrimary);
 
             // Set shadow property for product
             // This will be handled by the repository
@@ -371,7 +378,6 @@ namespace Catalog_Service.src._01_Domain.Services
             _logger.LogInformation("Added image with ID {ImageId} to product with ID {ProductId}", image.Id, productId);
             return image;
         }
-
         public async Task UpdateImageAsync(int imageId, string? altText = null, bool? isPrimary = null, CancellationToken cancellationToken = default)
         {
             var image = await _imageRepository.GetByIdAsync(imageId, cancellationToken);
@@ -438,6 +444,7 @@ namespace Catalog_Service.src._01_Domain.Services
             _logger.LogInformation("Updated product attribute with ID {AttributeId}", attributeId);
         }
 
+        // *** این متد جدید اضافه شده است ***
         public async Task DeleteAttributeAsync(int attributeId, CancellationToken cancellationToken = default)
         {
             var attribute = await _productAttributeRepository.GetByIdAsync(attributeId, cancellationToken);
@@ -520,6 +527,7 @@ namespace Catalog_Service.src._01_Domain.Services
             _logger.LogInformation("Updated product review with ID {ReviewId}", reviewId);
         }
 
+        // *** یکی از متدهای DeleteReviewAsync حذف شد ***
         public async Task DeleteReviewAsync(int reviewId, CancellationToken cancellationToken = default)
         {
             var review = await _productReviewRepository.GetByIdAsync(reviewId, cancellationToken);

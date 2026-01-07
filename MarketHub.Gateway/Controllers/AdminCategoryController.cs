@@ -1,10 +1,15 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Json;
+using System.Text.Json;
+using System.Threading.Tasks;
 
 namespace MarketHub.Gateway.Controllers
 {
     [ApiController]
-    [Route("api/admin/categories")]
+    [Route("api/admin/categories")] // مسیر در Gateway
     [Authorize] // The AdminPolicy is enforced by the downstream service
     public class AdminCategoryController : ControllerBase
     {
@@ -57,7 +62,8 @@ namespace MarketHub.Gateway.Controllers
                 () => {
                     var client = _httpClientFactory.CreateClient();
                     AddAuthorizationHeader(client);
-                    return client.GetAsync($"{CatalogServiceBaseUrl}/api/admin/categories");
+                    // اصلاح مسیر: از AdminCategory استفاده می‌کنیم
+                    return client.GetAsync($"{CatalogServiceBaseUrl}/api/admin/AdminCategory");
                 },
                 "Get all admin categories"
             );
@@ -70,7 +76,8 @@ namespace MarketHub.Gateway.Controllers
                 () => {
                     var client = _httpClientFactory.CreateClient();
                     AddAuthorizationHeader(client);
-                    return client.GetAsync($"{CatalogServiceBaseUrl}/api/admin/categories/{id}");
+                    // اصلاح مسیر
+                    return client.GetAsync($"{CatalogServiceBaseUrl}/api/admin/AdminCategory/{id}");
                 },
                 "Get admin category by ID"
             );
@@ -83,7 +90,8 @@ namespace MarketHub.Gateway.Controllers
                 () => {
                     var client = _httpClientFactory.CreateClient();
                     AddAuthorizationHeader(client);
-                    return client.GetAsync($"{CatalogServiceBaseUrl}/api/admin/categories/tree");
+                    // اصلاح مسیر
+                    return client.GetAsync($"{CatalogServiceBaseUrl}/api/admin/AdminCategory/tree");
                 },
                 "Get admin category tree"
             );
@@ -96,7 +104,8 @@ namespace MarketHub.Gateway.Controllers
                 () => {
                     var client = _httpClientFactory.CreateClient();
                     AddAuthorizationHeader(client);
-                    return client.PostAsJsonAsync($"{CatalogServiceBaseUrl}/api/admin/categories", request);
+                    // اصلاح مسیر
+                    return client.PostAsJsonAsync($"{CatalogServiceBaseUrl}/api/admin/AdminCategory", request);
                 },
                 "Create category"
             );
@@ -109,7 +118,8 @@ namespace MarketHub.Gateway.Controllers
                 () => {
                     var client = _httpClientFactory.CreateClient();
                     AddAuthorizationHeader(client);
-                    return client.PutAsJsonAsync($"{CatalogServiceBaseUrl}/api/admin/categories/{id}", request);
+                    // اصلاح مسیر
+                    return client.PutAsJsonAsync($"{CatalogServiceBaseUrl}/api/admin/AdminCategory/{id}", request);
                 },
                 "Update category"
             );
@@ -122,7 +132,8 @@ namespace MarketHub.Gateway.Controllers
                 () => {
                     var client = _httpClientFactory.CreateClient();
                     AddAuthorizationHeader(client);
-                    return client.DeleteAsync($"{CatalogServiceBaseUrl}/api/admin/categories/{id}");
+                    // اصلاح مسیر
+                    return client.DeleteAsync($"{CatalogServiceBaseUrl}/api/admin/AdminCategory/{id}");
                 },
                 "Delete category"
             );
@@ -135,7 +146,8 @@ namespace MarketHub.Gateway.Controllers
                 () => {
                     var client = _httpClientFactory.CreateClient();
                     AddAuthorizationHeader(client);
-                    return client.PostAsync($"{CatalogServiceBaseUrl}/api/admin/categories/{id}/activate", null);
+                    // اصلاح مسیر
+                    return client.PostAsync($"{CatalogServiceBaseUrl}/api/admin/AdminCategory/{id}/activate", null);
                 },
                 "Activate category"
             );
@@ -148,7 +160,8 @@ namespace MarketHub.Gateway.Controllers
                 () => {
                     var client = _httpClientFactory.CreateClient();
                     AddAuthorizationHeader(client);
-                    return client.PostAsync($"{CatalogServiceBaseUrl}/api/admin/categories/{id}/deactivate", null);
+                    // اصلاح مسیر
+                    return client.PostAsync($"{CatalogServiceBaseUrl}/api/admin/AdminCategory/{id}/deactivate", null);
                 },
                 "Deactivate category"
             );
@@ -161,11 +174,11 @@ namespace MarketHub.Gateway.Controllers
                 () => {
                     var client = _httpClientFactory.CreateClient();
                     AddAuthorizationHeader(client);
-                    return client.PostAsJsonAsync($"{CatalogServiceBaseUrl}/api/admin/categories/{id}/move", request);
+                    // اصلاح مسیر
+                    return client.PostAsJsonAsync($"{CatalogServiceBaseUrl}/api/admin/AdminCategory/{id}/move", request);
                 },
                 "Move category"
             );
         }
     }
 }
-

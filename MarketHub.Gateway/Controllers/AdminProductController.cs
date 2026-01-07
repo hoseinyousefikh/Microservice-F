@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace MarketHub.Gateway.Controllers
 {
     [ApiController]
-    [Route("api/admin/products")]
+    [Route("api/admin/products")] // مسیر در Gateway
     [Authorize]
     public class AdminProductController : ControllerBase
     {
@@ -55,10 +55,12 @@ namespace MarketHub.Gateway.Controllers
         {
             var queryString = Request.QueryString.ToUriComponent();
             return await ForwardRequest(
-                () => {
+                () =>
+                {
                     var client = _httpClientFactory.CreateClient();
                     AddAuthorizationHeader(client);
-                    return client.GetAsync($"{CatalogServiceBaseUrl}/api/admin/products{queryString}");
+                    // اصلاح مسیر: از AdminProduct استفاده می‌کنیم
+                    return client.GetAsync($"{CatalogServiceBaseUrl}/api/admin/AdminProduct{queryString}");
                 },
                 "Get all admin products"
             );
@@ -68,10 +70,12 @@ namespace MarketHub.Gateway.Controllers
         public async Task<IActionResult> GetProduct(int id)
         {
             return await ForwardRequest(
-                () => {
+                () =>
+                {
                     var client = _httpClientFactory.CreateClient();
                     AddAuthorizationHeader(client);
-                    return client.GetAsync($"{CatalogServiceBaseUrl}/api/admin/products/{id}");
+                    // اصلاح مسیر
+                    return client.GetAsync($"{CatalogServiceBaseUrl}/api/admin/AdminProduct/{id}");
                 },
                 "Get admin product by ID"
             );
@@ -81,10 +85,12 @@ namespace MarketHub.Gateway.Controllers
         public async Task<IActionResult> CreateProduct([FromBody] object request)
         {
             return await ForwardRequest(
-                () => {
+                () =>
+                {
                     var client = _httpClientFactory.CreateClient();
                     AddAuthorizationHeader(client);
-                    return client.PostAsJsonAsync($"{CatalogServiceBaseUrl}/api/admin/products", request);
+                    // اصلاح مسیر
+                    return client.PostAsJsonAsync($"{CatalogServiceBaseUrl}/api/admin/AdminProduct", request);
                 },
                 "Create product"
             );
@@ -94,10 +100,12 @@ namespace MarketHub.Gateway.Controllers
         public async Task<IActionResult> UpdateProduct(int id, [FromBody] object request)
         {
             return await ForwardRequest(
-                () => {
+                () =>
+                {
                     var client = _httpClientFactory.CreateClient();
                     AddAuthorizationHeader(client);
-                    return client.PutAsJsonAsync($"{CatalogServiceBaseUrl}/api/admin/products/{id}", request);
+                    // اصلاح مسیر
+                    return client.PutAsJsonAsync($"{CatalogServiceBaseUrl}/api/admin/AdminProduct/{id}", request);
                 },
                 "Update product"
             );
@@ -107,10 +115,12 @@ namespace MarketHub.Gateway.Controllers
         public async Task<IActionResult> DeleteProduct(int id)
         {
             return await ForwardRequest(
-                () => {
+                () =>
+                {
                     var client = _httpClientFactory.CreateClient();
                     AddAuthorizationHeader(client);
-                    return client.DeleteAsync($"{CatalogServiceBaseUrl}/api/admin/products/{id}");
+                    // اصلاح مسیر
+                    return client.DeleteAsync($"{CatalogServiceBaseUrl}/api/admin/AdminProduct/{id}");
                 },
                 "Delete product"
             );
@@ -120,10 +130,12 @@ namespace MarketHub.Gateway.Controllers
         public async Task<IActionResult> PublishProduct(int id)
         {
             return await ForwardRequest(
-                () => {
+                () =>
+                {
                     var client = _httpClientFactory.CreateClient();
                     AddAuthorizationHeader(client);
-                    return client.PostAsync($"{CatalogServiceBaseUrl}/api/admin/products/{id}/publish", null);
+                    // اصلاح مسیر
+                    return client.PostAsync($"{CatalogServiceBaseUrl}/api/admin/AdminProduct/{id}/publish", null);
                 },
                 "Publish product"
             );
@@ -133,10 +145,12 @@ namespace MarketHub.Gateway.Controllers
         public async Task<IActionResult> UnpublishProduct(int id)
         {
             return await ForwardRequest(
-                () => {
+                () =>
+                {
                     var client = _httpClientFactory.CreateClient();
                     AddAuthorizationHeader(client);
-                    return client.PostAsync($"{CatalogServiceBaseUrl}/api/admin/products/{id}/unpublish", null);
+                    // اصلاح مسیر
+                    return client.PostAsync($"{CatalogServiceBaseUrl}/api/admin/AdminProduct/{id}/unpublish", null);
                 },
                 "Unpublish product"
             );
@@ -146,10 +160,12 @@ namespace MarketHub.Gateway.Controllers
         public async Task<IActionResult> ArchiveProduct(int id)
         {
             return await ForwardRequest(
-                () => {
+                () =>
+                {
                     var client = _httpClientFactory.CreateClient();
                     AddAuthorizationHeader(client);
-                    return client.PostAsync($"{CatalogServiceBaseUrl}/api/admin/products/{id}/archive", null);
+                    // اصلاح مسیر
+                    return client.PostAsync($"{CatalogServiceBaseUrl}/api/admin/AdminProduct/{id}/archive", null);
                 },
                 "Archive product"
             );
@@ -159,10 +175,12 @@ namespace MarketHub.Gateway.Controllers
         public async Task<IActionResult> SetAsFeatured(int id)
         {
             return await ForwardRequest(
-                () => {
+                () =>
+                {
                     var client = _httpClientFactory.CreateClient();
                     AddAuthorizationHeader(client);
-                    return client.PostAsync($"{CatalogServiceBaseUrl}/api/admin/products/{id}/feature", null);
+                    // اصلاح مسیر
+                    return client.PostAsync($"{CatalogServiceBaseUrl}/api/admin/AdminProduct/{id}/feature", null);
                 },
                 "Set product as featured"
             );
@@ -172,10 +190,12 @@ namespace MarketHub.Gateway.Controllers
         public async Task<IActionResult> RemoveFromFeatured(int id)
         {
             return await ForwardRequest(
-                () => {
+                () =>
+                {
                     var client = _httpClientFactory.CreateClient();
                     AddAuthorizationHeader(client);
-                    return client.DeleteAsync($"{CatalogServiceBaseUrl}/api/admin/products/{id}/feature");
+                    // اصلاح مسیر
+                    return client.DeleteAsync($"{CatalogServiceBaseUrl}/api/admin/AdminProduct/{id}/feature");
                 },
                 "Remove product from featured"
             );

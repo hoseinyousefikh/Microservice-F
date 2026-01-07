@@ -67,10 +67,20 @@ namespace Catalog_Service.src._03_Endpoints.Controllers.Admin
                 return BadRequest(validationResult.Errors);
             }
 
+            // Try to get the user ID from standard 'NameIdentifier' claim first, then fallback to 'sub'
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value
+                         ?? User.FindFirst("sub")?.Value;
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized("User ID not found in token.");
+            }
+
             var category = await _categoryService.CreateAsync(
                 request.Name,
                 request.Description,
                 request.DisplayOrder,
+                userId, // Pass the extracted user ID
                 request.ParentCategoryId,
                 request.ImageUrl,
                 request.MetaTitle,
@@ -96,8 +106,8 @@ namespace Catalog_Service.src._03_Endpoints.Controllers.Admin
                 request.Name,
                 request.Description,
                 request.DisplayOrder,
-                request.ImageUrl,       
-                request.MetaTitle,     
+                request.ImageUrl,
+                request.MetaTitle,
                 request.MetaDescription);
 
             return NoContent();

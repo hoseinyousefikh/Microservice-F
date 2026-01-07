@@ -17,6 +17,7 @@ namespace Catalog_Service.src._01_Domain.Core.Entities
         public DateTime CreatedAt { get; private set; }
         public DateTime? UpdatedAt { get; private set; }
         public bool IsPrimary { get; private set; }
+        public string CreatedByUserId { get; private set; }
 
         // For EF Core
         protected ImageResource() { }
@@ -30,6 +31,7 @@ namespace Catalog_Service.src._01_Domain.Core.Entities
             int width,
             int height,
             ImageType imageType,
+            string createdByUserId,
             string? altText = null,
             bool isPrimary = false)
         {
@@ -41,6 +43,7 @@ namespace Catalog_Service.src._01_Domain.Core.Entities
             Width = width;
             Height = height;
             ImageType = imageType;
+            CreatedByUserId = createdByUserId;
             AltText = altText;
             CreatedAt = DateTime.UtcNow;
             IsPrimary = isPrimary;

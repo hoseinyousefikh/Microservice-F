@@ -9,7 +9,7 @@ namespace Catalog_Service.src._01_Domain.Core.Contracts.Services
         Task<Category> GetBySlugAsync(string slug, CancellationToken cancellationToken = default);
         Task<IEnumerable<Category>> GetAllAsync(CancellationToken cancellationToken = default);
         Task<IEnumerable<Category>> GetActiveCategoriesAsync(CancellationToken cancellationToken = default);
-        Task<Category> CreateAsync(string name, string description, int displayOrder, int? parentCategoryId = null, string? imageUrl = null, string? metaTitle = null, string? metaDescription = null, CancellationToken cancellationToken = default);
+        Task<Category> CreateAsync(string name, string description, int displayOrder, string createdByUserId, int? parentCategoryId = null, string? imageUrl = null, string? metaTitle = null, string? metaDescription = null, CancellationToken cancellationToken = default);
         Task UpdateAsync(int id, string name, string description, int displayOrder, string? imageUrl = null, string? metaTitle = null, string? metaDescription = null, CancellationToken cancellationToken = default);
         Task DeleteAsync(int id, CancellationToken cancellationToken = default);
         Task<bool> ExistsAsync(int id, CancellationToken cancellationToken = default);

@@ -8,7 +8,7 @@ namespace Catalog_Service.src._01_Domain.Core.Contracts.Services
         // متدهای اصلی CRUD
         Task<ImageResource> GetByIdAsync(int id, CancellationToken cancellationToken = default);
         Task<IEnumerable<ImageResource>> GetAllAsync(CancellationToken cancellationToken = default);
-        Task<ImageResource> CreateAsync(string originalFileName, string fileExtension, string storagePath, string publicUrl, long fileSize, int width, int height, ImageType imageType, string? altText = null, bool isPrimary = false, CancellationToken cancellationToken = default);
+        Task<ImageResource> CreateAsync(string originalFileName, string fileExtension, string storagePath, string publicUrl, long fileSize, int width, int height, ImageType imageType, string createdByUserId, string? altText = null, bool isPrimary = false, CancellationToken cancellationToken = default);
         Task UpdateAsync(int id, string? altText = null, bool? isPrimary = null, CancellationToken cancellationToken = default);
         Task DeleteAsync(int id, CancellationToken cancellationToken = default);
         Task<bool> ExistsAsync(int id, CancellationToken cancellationToken = default);
@@ -32,10 +32,10 @@ namespace Catalog_Service.src._01_Domain.Core.Contracts.Services
         Task<(IEnumerable<ImageResource> Images, int TotalCount)> GetPagedAsync(int pageNumber, int pageSize, ImageType? imageType = null, int? entityId = null, bool onlyPrimary = false, CancellationToken cancellationToken = default);
 
         // متدهای آپلود و پردازش تصویر
-        Task<ImageResource> UploadProductImageAsync(int productId, Stream imageStream, string originalFileName, string? altText = null, bool isPrimary = false, CancellationToken cancellationToken = default);
-        Task<ImageResource> UploadCategoryImageAsync(int categoryId, Stream imageStream, string originalFileName, string? altText = null, bool isPrimary = false, CancellationToken cancellationToken = default);
-        Task<ImageResource> UploadBrandImageAsync(int brandId, Stream imageStream, string originalFileName, string? altText = null, bool isPrimary = false, CancellationToken cancellationToken = default);
-        Task<ImageResource> UploadProductVariantImageAsync(int productVariantId, Stream imageStream, string originalFileName, string? altText = null, bool isPrimary = false, CancellationToken cancellationToken = default);
+        Task<ImageResource> UploadProductImageAsync(int productId, Stream imageStream, string originalFileName, string createdByUserId, string? altText = null, bool isPrimary = false, CancellationToken cancellationToken = default);
+        Task<ImageResource> UploadCategoryImageAsync(int categoryId, Stream imageStream, string originalFileName, string createdByUserId, string? altText = null, bool isPrimary = false, CancellationToken cancellationToken = default);
+        Task<ImageResource> UploadBrandImageAsync(int brandId, Stream imageStream, string originalFileName, string createdByUserId, string? altText = null, bool isPrimary = false, CancellationToken cancellationToken = default);
+        Task<ImageResource> UploadProductVariantImageAsync(int productVariantId, Stream imageStream, string originalFileName, string createdByUserId, string? altText = null, bool isPrimary = false, CancellationToken cancellationToken = default);
 
         // متدهای برای حذف گروهی
         Task RemoveAllProductImagesAsync(int productId, CancellationToken cancellationToken = default);

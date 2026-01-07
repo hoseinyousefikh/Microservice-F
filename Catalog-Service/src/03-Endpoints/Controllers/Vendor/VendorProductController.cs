@@ -99,11 +99,21 @@ namespace Catalog_Service.src._03_Endpoints.Controllers.Vendor
         {
             await _createProductValidator.ValidateAndThrowAsync(request, cancellationToken);
 
-            // Check if SKU already exists
-            var existingProduct = await _productService.GetBySkuAsync(request.Sku, cancellationToken);
-            if (existingProduct != null)
-                throw new DuplicateEntityException("Product", request.Sku);
+            // Check if SKU already exists using the service method
+            if (await _productService.ExistsBySkuAsync(request.Sku, cancellationToken))
+            {
+                throw new DuplicateEntityException($"A product with SKU '{request.Sku}' already exists.");
+            }
 
+            // Get the user ID from the JWT token
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value
+                         ?? User.FindFirst("sub")?.Value;
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized("User ID not found in token.");
+            }
+
+            // The CreateAsync method in ProductService handles slug generation automatically.
             var product = await _productService.CreateAsync(
                 request.Name,
                 request.Description,
@@ -113,31 +123,14 @@ namespace Catalog_Service.src._03_Endpoints.Controllers.Vendor
                 request.Sku,
                 Dimensions.Create(request.Dimensions.Length, request.Dimensions.Width, request.Dimensions.Height, "cm"),
                 Weight.Create(request.Weight, "kg"),
+                userId,
                 request.MetaTitle,
                 request.MetaDescription,
                 cancellationToken);
 
-            // Set image if provided
-            if (!string.IsNullOrEmpty(request.ImageUrl))
-            {
-                await _imageService.CreateAsync(
-                    "product-image",
-                    "jpg",
-                    "product-images",
-                    request.ImageUrl,
-                    0, // fileSize
-                    800, // width
-                    600, // height
-                    ImageType.Product,
-                    null, // altText
-                    true, // isPrimary
-                    cancellationToken);
-            }
-
             // Set original price if provided
             if (request.OriginalPrice.HasValue)
             {
-                // Update the product with original price
                 await _productService.UpdateAsync(
                     product.Id,
                     product.Name,
@@ -168,10 +161,12 @@ namespace Catalog_Service.src._03_Endpoints.Controllers.Vendor
                 throw new NotFoundException("Product", id);
 
             // Check if SKU already exists for another product
-            var existingProduct = await _productService.GetBySkuAsync(request.Sku, cancellationToken);
-            if (existingProduct != null && existingProduct.Id != id)
-                throw new DuplicateEntityException("Product", request.Sku);
+            if (await _productService.ExistsBySkuAsync(request.Sku, cancellationToken) && product.Sku != request.Sku)
+            {
+                throw new DuplicateEntityException($"A product with SKU '{request.Sku}' already exists.");
+            }
 
+            // Update product details. The UpdateAsync method in ProductService handles slug update if the name changes.
             await _productService.UpdateAsync(
                 id,
                 request.Name,
@@ -273,6 +268,7 @@ namespace Catalog_Service.src._03_Endpoints.Controllers.Vendor
             if (product == null)
                 throw new NotFoundException("Product", id);
 
+            // Use the service method which handles slug generation and uniqueness
             await _productService.SetSlugAsync(id, request.Title, cancellationToken);
             return NoContent();
         }

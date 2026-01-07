@@ -22,6 +22,10 @@ namespace Catalog_Service.src._02_Infrastructure.Configuration
             builder.Property(c => c.Description)
                 .HasMaxLength(1000);
 
+            builder.Property(c => c.CreatedByUserId)
+                .IsRequired()
+                .HasMaxLength(450);
+
             builder.Property(c => c.DisplayOrder)
                 .IsRequired();
 
@@ -49,12 +53,14 @@ namespace Catalog_Service.src._02_Infrastructure.Configuration
                 .WithMany(c => c.SubCategories)
                 .HasForeignKey(c => c.ParentCategoryId)
                 .OnDelete(DeleteBehavior.Restrict);
+
             // در CategoryConfiguration.cs - داخل متد Configure
             builder.Property(c => c.Slug)
                 .HasConversion(
                     slug => slug.Value,
                     value => Slug.FromString(value))
                 .HasMaxLength(200);
+
             // تنظیمات مجموعه‌ها
             builder.HasMany(c => c.Products)
                 .WithOne(p => p.Category)

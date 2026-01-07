@@ -66,16 +66,12 @@ builder.Services.AddSwaggerGen(options =>
     options.IncludeXmlComments(xmlPath);
 });
 
-
-// *** این بخش بسیار مهم است - ترتیب فراخوانی اصلاح شد ***
-
 // 4. *** ابتدا احراز هویت را پیکربندی کنید ***
 builder.Services.AddAppAuthentication(builder.Configuration);
 
 // 5. *** سپس سرویس‌های زیرساخت را اضافه کنید (شامل AddAuthorization) ***
 builder.Services.AddDomainServices();
 builder.Services.AddInfrastructureServices(builder.Configuration);
-
 
 // 6. پیکربندی CORS
 builder.Services.AddCors(options =>
@@ -104,7 +100,6 @@ builder.Services.AddHttpClient("PricingService", client =>
     client.DefaultRequestHeaders.Add("Accept", "application/json");
 });
 
-
 var app = builder.Build();
 
 // 9. پیکربندی Middleware pipeline
@@ -121,47 +116,9 @@ if (app.Environment.IsDevelopment())
 // 10. افزودن Middleware به ترتیب صحیح
 app.UseHttpsRedirection();
 
-// --- این بخش بسیار مهم است. آن را دقیقاً به همین شکل کپی کنید ---
-app.UseExceptionHandler(errorApp =>
-{
-    errorApp.Run(async context =>
-    {
-        var exception = context.Features.Get<IExceptionHandlerFeature>()?.Error;
-        if (exception == null) return;
-
-        var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
-        logger.LogError(exception, "An unhandled exception occurred.");
-
-        string errorMessage;
-        int statusCode;
-
-        switch (exception)
-        {
-            case Catalog_Service.src.CrossCutting.Exceptions.NotFoundException:
-                statusCode = 404;
-                errorMessage = exception.Message;
-                break;
-            case Catalog_Service.src.CrossCutting.Exceptions.UnauthorizedAccessException:
-                statusCode = 401;
-                errorMessage = exception.Message;
-                break;
-            case Catalog_Service.src.CrossCutting.Exceptions.BusinessRuleException:
-                statusCode = 400;
-                errorMessage = exception.Message;
-                break;
-            default:
-                statusCode = 500;
-                errorMessage = "An internal server error occurred.";
-                break;
-        }
-
-        context.Response.StatusCode = statusCode;
-        context.Response.ContentType = "application/json";
-        await context.Response.WriteAsJsonAsync(new { message = errorMessage });
-    });
-});
-// --- پایان بخش مهم ---
-
+// *** این بخش بسیار مهم است. از متد الحاقی سفارشی خود استفاده کنید ***
+app.UseCatalogMiddleware(builder.Configuration);
+// *** پایان بخش مهم ***
 
 app.UseCors("AllowAll");
 app.UseResponseCaching();

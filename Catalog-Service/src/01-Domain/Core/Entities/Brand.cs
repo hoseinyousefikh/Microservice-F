@@ -16,6 +16,7 @@ namespace Catalog_Service.src._01_Domain.Core.Entities
         public DateTime? UpdatedAt { get; private set; }
         public string? MetaTitle { get; private set; }
         public string? MetaDescription { get; private set; }
+        public string CreatedByUserId { get; private set; }
 
         // Navigation properties
         public IReadOnlyCollection<Product> Products => _products.AsReadOnly();
@@ -26,6 +27,7 @@ namespace Catalog_Service.src._01_Domain.Core.Entities
         public Brand(
             string name,
             string description,
+            string createdByUserId,
             string? logoUrl = null,
             string? websiteUrl = null,
             string? metaTitle = null,
@@ -33,6 +35,7 @@ namespace Catalog_Service.src._01_Domain.Core.Entities
         {
             Name = name;
             Description = description;
+            CreatedByUserId = createdByUserId;
             LogoUrl = logoUrl;
             WebsiteUrl = websiteUrl;
             IsActive = true;
@@ -81,4 +84,3 @@ namespace Catalog_Service.src._01_Domain.Core.Entities
         }
     }
 }
-

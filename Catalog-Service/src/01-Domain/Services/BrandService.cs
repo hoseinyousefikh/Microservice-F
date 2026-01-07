@@ -57,12 +57,15 @@ namespace Catalog_Service.src._01_Domain.Services
             return await _brandRepository.GetActiveBrandsAsync(cancellationToken);
         }
 
-        public async Task<Brand> CreateAsync(string name, string description, string? logoUrl = null, string? websiteUrl = null, string? metaTitle = null, string? metaDescription = null, CancellationToken cancellationToken = default)
+        public async Task<Brand> CreateAsync(string name, string description, string createdByUserId, string? logoUrl = null, string? websiteUrl = null, string? metaTitle = null, string? metaDescription = null, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(name))
                 throw new ArgumentException("Brand name is required", nameof(name));
 
-            var brand = new Brand(name, description, logoUrl, websiteUrl, metaTitle, metaDescription);
+            if (string.IsNullOrWhiteSpace(createdByUserId))
+                throw new ArgumentException("CreatedByUserId is required", nameof(createdByUserId));
+
+            var brand = new Brand(name, description, createdByUserId, logoUrl, websiteUrl, metaTitle, metaDescription);
 
             var slug = await _slugService.CreateUniqueSlugForBrandAsync(
                 title: name,

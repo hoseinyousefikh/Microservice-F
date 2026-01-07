@@ -28,6 +28,10 @@ namespace Catalog_Service.src._02_Infrastructure.Configuration
                 .IsRequired()
                 .HasMaxLength(50);
 
+            builder.Property(p => p.CreatedByUserId)
+                .IsRequired()
+                .HasMaxLength(450);
+
             builder.Property(p => p.Status)
                 .IsRequired()
                 .HasDefaultValue(ProductStatus.Draft);
@@ -68,11 +72,18 @@ namespace Catalog_Service.src._02_Infrastructure.Configuration
             builder.Property(p => p.StockStatus)
                 .IsRequired()
                 .HasDefaultValue(StockStatus.OutOfStock);
+
             builder.Property(p => p.Price)
                 .HasConversion<MoneyConverter>();
 
             builder.Property(p => p.OriginalPrice)
                 .HasConversion<MoneyConverter>();
+
+            builder.Property(p => p.Slug)
+                .HasConversion(
+                    slug => slug.Value,
+                    value => Slug.FromString(value));
+
             // تنظیمات روابط
             builder.HasOne(p => p.Brand)
                 .WithMany(b => b.Products)
@@ -83,17 +94,7 @@ namespace Catalog_Service.src._02_Infrastructure.Configuration
                 .WithMany(c => c.Products)
                 .HasForeignKey(p => p.CategoryId)
                 .OnDelete(DeleteBehavior.Restrict);
-            // در ProductConfiguration.cs
-            builder.Property(p => p.Slug)
-                .HasConversion(
-                    slug => slug.Value,
-                    value => Slug.FromString(value));
 
-            // در CategoryConfiguration.cs
-            builder.Property(c => c.Slug)
-                .HasConversion(
-                    slug => slug.Value,
-                    value => Slug.FromString(value));
             // تنظیمات مجموعه‌ها
             builder.HasMany(p => p.Variants)
                 .WithOne(v => v.Product)
@@ -129,15 +130,7 @@ namespace Catalog_Service.src._02_Infrastructure.Configuration
 
             builder.HasIndex(p => new { p.StockStatus, p.StockQuantity })
                 .HasDatabaseName("IX_Product_StockStatus_StockQuantity");
-            // در فایل ProductConfiguration.cs
 
-            builder.Property(p => p.Price)
-                .HasConversion(
-                    // تبدیل Money به decimal برای ذخیره در دیتابیس
-                    money => money.Amount,
-                    // تبدیل decimal به Money برای خواندن از دیتابیس
-                    amount => Money.Create(amount, "IRR")
-                );
             // تنظیمات پیش‌فرض برای مقادیر اختیاری
             builder.Property(p => p.MetaTitle).HasDefaultValue(null);
             builder.Property(p => p.MetaDescription).HasDefaultValue(null);

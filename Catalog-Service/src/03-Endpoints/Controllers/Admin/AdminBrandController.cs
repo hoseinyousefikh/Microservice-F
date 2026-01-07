@@ -60,10 +60,40 @@ namespace Catalog_Service.src._03_Endpoints.Controllers.Admin
                 return BadRequest(validationResult.Errors);
             }
 
+            // --- DEBUGGING CODE ---
+            // Print all claims to the console/log to find the correct one
+            if (User.Identity.IsAuthenticated)
+            {
+                _logger.LogInformation("User is authenticated. Claims:");
+                foreach (var claim in User.Claims)
+                {
+                    _logger.LogInformation($"Type: {claim.Type}, Value: {claim.Value}");
+                }
+            }
+            else
+            {
+                _logger.LogWarning("User is NOT authenticated.");
+            }
+            // --- END DEBUGGING CODE ---
+
+            var userId = User.FindFirst("sub")?.Value;
+            if (string.IsNullOrEmpty(userId))
+            {
+                // You can also check for other common claim types like "nameidentifier" or "userid"
+                userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Unauthorized("User ID not found in token.");
+                }
+            }
+
             var brand = await _brandService.CreateAsync(
                 request.Name,
                 request.Description,
+                userId, // Pass the extracted user ID
                 request.LogoUrl,
+                request.WebsiteUrl,
                 request.MetaTitle,
                 request.MetaDescription);
 

@@ -41,9 +41,8 @@ namespace Catalog_Service.src.CrossCutting.Security.Handlers
                 return;
             }
 
-            // Check if the user is the owner of the product through the brand
-            // Since Brand doesn't have VendorId, we'll check if the user has permission to manage products
-            if (userRole == RoleConstants.Vendor && context.User.HasClaim(c => c.Type == "permission" && c.Value == PermissionConstants.UpdateProduct))
+            // Check if the user is the owner of the product
+            if (userRole == RoleConstants.Vendor && product.CreatedByUserId == userId)
             {
                 context.Succeed(requirement);
                 return;

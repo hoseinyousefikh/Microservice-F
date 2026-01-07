@@ -8,13 +8,16 @@ namespace Catalog_Service.src._01_Domain.Core.Contracts.Services
     {
         // متدهای اصلی CRUD
         Task<Product> GetByIdAsync(int id, CancellationToken cancellationToken = default);
-        Task<Product> GetBySkuAsync(string sku, CancellationToken cancellationToken = default);
+        Task<Product?> GetBySkuAsync(string sku, CancellationToken cancellationToken = default); // *** اصلاح شد به nullable ***
         Task<Product> GetBySlugAsync(string slug, CancellationToken cancellationToken = default);
         Task<IEnumerable<Product>> GetAllAsync(CancellationToken cancellationToken = default);
-        Task<Product> CreateAsync(string name, string description, Money price, int brandId, int categoryId, string sku, Dimensions dimensions, Weight weight, string? metaTitle = null, string? metaDescription = null, CancellationToken cancellationToken = default);
+        Task<Product> CreateAsync(string name, string description, Money price, int brandId, int categoryId, string sku, Dimensions dimensions, Weight weight, string createdByUserId, string? metaTitle = null, string? metaDescription = null, CancellationToken cancellationToken = default);
         Task UpdateAsync(int id, string name, string description, Money price, Money? originalPrice, Dimensions dimensions, Weight weight, string? metaTitle = null, string? metaDescription = null, CancellationToken cancellationToken = default);
         Task DeleteAsync(int id, CancellationToken cancellationToken = default);
         Task<bool> ExistsAsync(int id, CancellationToken cancellationToken = default);
+
+        // *** این متد جدید اضافه شده است ***
+        Task<bool> ExistsBySkuAsync(string sku, CancellationToken cancellationToken = default);
 
         // متدهای جستجو و فیلتر
         Task<(IEnumerable<Product> Products, int TotalCount)> GetPagedAsync(int pageNumber, int pageSize, string searchTerm = null, int? categoryId = null, int? brandId = null, ProductStatus? status = null, decimal? minPrice = null, decimal? maxPrice = null, string sortBy = null, bool sortAscending = true, CancellationToken cancellationToken = default);
@@ -45,7 +48,7 @@ namespace Catalog_Service.src._01_Domain.Core.Contracts.Services
         Task DeactivateVariantAsync(int variantId, CancellationToken cancellationToken = default);
 
         // متدهای مدیریت تصاویر
-        Task<ImageResource> AddImageAsync(int productId, string originalFileName, string fileExtension, string storagePath, string publicUrl, long fileSize, int width, int height, ImageType imageType, string? altText = null, bool isPrimary = false, CancellationToken cancellationToken = default);
+        Task<ImageResource> AddImageAsync(int productId, string originalFileName, string fileExtension, string storagePath, string publicUrl, long fileSize, int width, int height, ImageType imageType, string createdByUserId, string? altText = null, bool isPrimary = false, CancellationToken cancellationToken = default);
         Task UpdateImageAsync(int imageId, string? altText = null, bool? isPrimary = null, CancellationToken cancellationToken = default);
         Task DeleteImageAsync(int imageId, CancellationToken cancellationToken = default);
         Task SetPrimaryImageAsync(int imageId, CancellationToken cancellationToken = default);

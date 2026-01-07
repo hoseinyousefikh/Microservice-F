@@ -26,7 +26,8 @@ namespace Catalog_Service.Migrations
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
                     MetaTitle = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
-                    MetaDescription = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true)
+                    MetaDescription = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    CreatedByUserId = table.Column<string>(type: "nvarchar(450)", maxLength: 450, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -49,7 +50,8 @@ namespace Catalog_Service.Migrations
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
                     MetaTitle = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
-                    MetaDescription = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true)
+                    MetaDescription = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    CreatedByUserId = table.Column<string>(type: "nvarchar(450)", maxLength: 450, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -92,7 +94,8 @@ namespace Catalog_Service.Migrations
                     MetaTitle = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
                     MetaDescription = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
                     StockQuantity = table.Column<int>(type: "int", nullable: false, defaultValue: 0),
-                    StockStatus = table.Column<int>(type: "int", nullable: false, defaultValue: 1)
+                    StockStatus = table.Column<int>(type: "int", nullable: false, defaultValue: 1),
+                    CreatedByUserId = table.Column<string>(type: "nvarchar(450)", maxLength: 450, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -239,6 +242,7 @@ namespace Catalog_Service.Migrations
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
                     IsPrimary = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
+                    CreatedByUserId = table.Column<string>(type: "nvarchar(450)", maxLength: 450, nullable: false),
                     BrandId = table.Column<int>(type: "int", nullable: true),
                     CategoryId = table.Column<int>(type: "int", nullable: true),
                     ProductId = table.Column<int>(type: "int", nullable: true),

@@ -113,6 +113,14 @@ namespace Catalog_Service.src._03_Endpoints.Controllers.Admin
                 return BadRequest(validationResult.Errors);
             }
 
+            // Get the user ID from the JWT token
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value
+                         ?? User.FindFirst("sub")?.Value;
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized("User ID not found in token.");
+            }
+
             var product = await _productService.CreateAsync(
                 request.Name,
                 request.Description,
@@ -122,6 +130,7 @@ namespace Catalog_Service.src._03_Endpoints.Controllers.Admin
                 request.Sku,
                 _mapper.Map<Dimensions>(request.Dimensions),
                 Weight.Create(request.Weight, "kg"),
+                userId, // Pass the extracted user ID
                 request.MetaTitle,
                 request.MetaDescription);
 

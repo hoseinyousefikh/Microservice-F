@@ -1,4 +1,8 @@
 ﻿using System.Diagnostics;
+using System.Net;
+using System.Text.Json;
+using Catalog_Service.src.CrossCutting.Exceptions;
+using AppUnauthorizedAccessException = Catalog_Service.src.CrossCutting.Exceptions.UnauthorizedAccessException;
 
 namespace Catalog_Service.src.CrossCutting.Middleware
 {
@@ -31,6 +35,38 @@ namespace Catalog_Service.src.CrossCutting.Middleware
             {
                 await _next(context);
             }
+            catch (Exception ex)
+            {
+                // *** این بخش جدید برای مدیریت خطا اضافه شده است ***
+                if (!context.Response.HasStarted)
+                {
+                    _logger.LogError(ex, "An unhandled exception occurred.");
+
+                    var statusCode = ex switch
+                    {
+                        NotFoundException => HttpStatusCode.NotFound,
+                        AppUnauthorizedAccessException => HttpStatusCode.Unauthorized,
+                        BusinessRuleException => HttpStatusCode.BadRequest,
+                        DuplicateEntityException => HttpStatusCode.Conflict,
+                        InvalidImageException => HttpStatusCode.BadRequest,
+                        ServiceUnavailableException => HttpStatusCode.ServiceUnavailable,
+                        _ => HttpStatusCode.InternalServerError
+                    };
+
+                    context.Response.StatusCode = (int)statusCode;
+                    context.Response.ContentType = "application/json";
+
+                    var errorResponse = new { StatusCode = (int)statusCode, Message = ex.Message };
+                    var jsonResponse = JsonSerializer.Serialize(errorResponse);
+
+                    // پاسخ خطا را در همان MemoryStream موقت می‌نویسیم
+                    await context.Response.Body.WriteAsync(System.Text.Encoding.UTF8.GetBytes(jsonResponse));
+                }
+                else
+                {
+                    _logger.LogError(ex, "An error occurred after the response started.");
+                }
+            }
             finally
             {
                 sw.Stop();
@@ -55,8 +91,13 @@ namespace Catalog_Service.src.CrossCutting.Middleware
                         method, path, duration, statusCode);
                 }
 
-                // Add performance metrics header
-                context.Response.Headers.Add("X-Response-Time-Ms", duration.ToString());
+                // *** این بخش اصلاح شده است ***
+                // فقط در صورتی هدر را اضافه کن که پاسخ شروع نشده باشد
+                if (!context.Response.HasStarted)
+                {
+                    context.Response.Headers.Add("X-Response-Time-Ms", duration.ToString());
+                }
+                // *** پایان بخش اصلاح شده ***
 
                 // Collect metrics (in a real implementation, you might send these to a metrics system)
                 CollectMetrics(method, path, statusCode, duration);
@@ -65,11 +106,7 @@ namespace Catalog_Service.src.CrossCutting.Middleware
 
         private void CollectMetrics(string method, string path, int statusCode, long duration)
         {
-            // In a real implementation, you would send these metrics to a system like Prometheus, InfluxDB, etc.
-            // For now, we'll just log them
-
             var endpoint = $"{method} {path}";
-
             _logger.LogDebug("Performance metrics collected: Endpoint={Endpoint}, StatusCode={StatusCode}, Duration={Duration}ms",
                 endpoint, statusCode, duration);
         }

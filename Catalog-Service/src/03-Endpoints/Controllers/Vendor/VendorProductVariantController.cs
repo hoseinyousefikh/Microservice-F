@@ -75,11 +75,10 @@ namespace Catalog_Service.src._03_Endpoints.Controllers.Vendor
             return Ok(variantResponse);
         }
 
-        [HttpPost]
         public async Task<ActionResult<VendorProductVariantResponse>> CreateVariant(
-            int productId,
-            [FromBody] CreateProductVariantRequest request,
-            CancellationToken cancellationToken)
+        int productId,
+        [FromBody] CreateProductVariantRequest request,
+        CancellationToken cancellationToken)
         {
             await _createVariantValidator.ValidateAndThrowAsync(request, cancellationToken);
 
@@ -91,6 +90,14 @@ namespace Catalog_Service.src._03_Endpoints.Controllers.Vendor
             var existingVariant = await _productVariantService.GetBySkuAsync(request.Sku, cancellationToken);
             if (existingVariant != null)
                 throw new DuplicateEntityException("ProductVariant", request.Sku);
+
+            // Get the user ID from the JWT token
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value
+                         ?? User.FindFirst("sub")?.Value;
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized("User ID not found in token.");
+            }
 
             var variant = await _productVariantService.CreateAsync(
                 productId,
@@ -115,6 +122,7 @@ namespace Catalog_Service.src._03_Endpoints.Controllers.Vendor
                     800, // width
                     600, // height
                     ImageType.Variant,
+                    userId, // Pass the extracted user ID
                     null, // altText
                     true, // isPrimary
                     cancellationToken);
@@ -123,7 +131,6 @@ namespace Catalog_Service.src._03_Endpoints.Controllers.Vendor
             var variantResponse = _mapper.Map<VendorProductVariantResponse>(variant);
             return CreatedAtAction(nameof(GetVariant), new { productId, id = variant.Id }, variantResponse);
         }
-
         [HttpPut("{id}")]
         public async Task<ActionResult<VendorProductVariantResponse>> UpdateVariant(
             int productId,

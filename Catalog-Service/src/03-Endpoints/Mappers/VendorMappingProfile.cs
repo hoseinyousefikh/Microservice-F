@@ -10,7 +10,7 @@ namespace Catalog_Service.src._03_Endpoints.Mappers
     {
         public VendorMappingProfile()
         {
-            // Product mappings
+            // Product mappings (اصلاح شده)
             CreateMap<Product, VendorProductResponse>()
                 .ForMember(dest => dest.BrandName, opt => opt.MapFrom(src => src.Brand.Name))
                 .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category.Name))
@@ -27,18 +27,23 @@ namespace Catalog_Service.src._03_Endpoints.Mappers
                 .ForMember(dest => dest.Dimensions, opt => opt.MapFrom(src =>
                     Dimensions.Create(src.Dimensions.Length, src.Dimensions.Width, src.Dimensions.Height, "cm")))
                 .ForMember(dest => dest.Weight, opt => opt.MapFrom(src =>
-                    Weight.Create(src.Weight, "kg")));
+                    Weight.Create(src.Weight, "kg")))
+                // CreatedByUserId باید در کنترلر قبل از فراخوانی سرویس تنظیم شود.
+                .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
 
             CreateMap<UpdateProductRequest, Product>()
+                .ForMember(dest => dest.Id, opt => opt.Ignore())
+                .ForMember(dest => dest.Slug, opt => opt.Ignore())
                 .ForMember(dest => dest.Price, opt => opt.MapFrom(src => Money.Create(src.Price, "USD")))
                 .ForMember(dest => dest.OriginalPrice, opt => opt.MapFrom(src => src.OriginalPrice.HasValue ?
                     Money.Create(src.OriginalPrice.Value, "USD") : null))
                 .ForMember(dest => dest.Dimensions, opt => opt.MapFrom(src =>
                     Dimensions.Create(src.Dimensions.Length, src.Dimensions.Width, src.Dimensions.Height, "cm")))
                 .ForMember(dest => dest.Weight, opt => opt.MapFrom(src =>
-                    Weight.Create(src.Weight, "kg")));
+                    Weight.Create(src.Weight, "kg")))
+                .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
 
-            // Product variant mappings
+            // Product variant mappings (اصلاح شده)
             CreateMap<ProductVariant, VendorProductVariantResponse>();
 
             CreateMap<CreateProductVariantRequest, ProductVariant>()
@@ -48,7 +53,9 @@ namespace Catalog_Service.src._03_Endpoints.Mappers
                 .ForMember(dest => dest.Dimensions, opt => opt.MapFrom(src =>
                     Dimensions.Create(src.Dimensions.Length, src.Dimensions.Width, src.Dimensions.Height, "cm")))
                 .ForMember(dest => dest.Weight, opt => opt.MapFrom(src =>
-                    Weight.Create(src.Weight, "kg")));
+                    Weight.Create(src.Weight, "kg")))
+                // CreatedByUserId برای ProductVariant تنظیم نمی‌شود، چون مالکیت آن از طریق Product مشخص است.
+                .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
 
             CreateMap<UpdateProductVariantRequest, ProductVariant>()
                 .ForMember(dest => dest.Price, opt => opt.MapFrom(src => Money.Create(src.Price, "USD")))
@@ -57,9 +64,10 @@ namespace Catalog_Service.src._03_Endpoints.Mappers
                 .ForMember(dest => dest.Dimensions, opt => opt.MapFrom(src =>
                     Dimensions.Create(src.Dimensions.Length, src.Dimensions.Width, src.Dimensions.Height, "cm")))
                 .ForMember(dest => dest.Weight, opt => opt.MapFrom(src =>
-                    Weight.Create(src.Weight, "kg")));
+                    Weight.Create(src.Weight, "kg")))
+                .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
 
-            // Other mappings
+            // Other mappings (بدون تغییر)
             CreateMap<ImageResource, VendorProductImageResponse>();
             CreateMap<ProductAttribute, VendorProductAttributeResponse>();
 

@@ -18,6 +18,7 @@ namespace Catalog_Service.src._01_Domain.Core.Entities
         public DateTime? UpdatedAt { get; private set; }
         public string? MetaTitle { get; private set; }
         public string? MetaDescription { get; private set; }
+        public string CreatedByUserId { get; private set; }
 
         // Navigation properties
         public Category ParentCategory { get; private set; }
@@ -30,6 +31,7 @@ namespace Catalog_Service.src._01_Domain.Core.Entities
         public Category(
             string name,
             string description,
+            string createdByUserId,
             int displayOrder,
             int? parentCategoryId = null,
             string? imageUrl = null,
@@ -38,6 +40,7 @@ namespace Catalog_Service.src._01_Domain.Core.Entities
         {
             Name = name;
             Description = description;
+            CreatedByUserId = createdByUserId;
             DisplayOrder = displayOrder;
             ParentCategoryId = parentCategoryId;
             ImageUrl = imageUrl;

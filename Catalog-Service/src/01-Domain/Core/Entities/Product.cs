@@ -31,6 +31,7 @@ namespace Catalog_Service.src._01_Domain.Core.Entities
         public string? MetaDescription { get; private set; }
         public int StockQuantity { get; private set; }
         public StockStatus StockStatus { get; private set; }
+        public string CreatedByUserId { get; private set; }
 
         // Navigation properties
         public Brand Brand { get; private set; }
@@ -53,6 +54,7 @@ namespace Catalog_Service.src._01_Domain.Core.Entities
             string sku,
             Dimensions dimensions,
             Weight weight,
+            string createdByUserId,
             string? metaTitle = null,
             string? metaDescription = null)
         {
@@ -64,6 +66,7 @@ namespace Catalog_Service.src._01_Domain.Core.Entities
             Sku = sku;
             Dimensions = dimensions;
             Weight = weight;
+            CreatedByUserId = createdByUserId;
             MetaTitle = metaTitle;
             MetaDescription = metaDescription;
             Status = ProductStatus.Draft;
@@ -75,14 +78,14 @@ namespace Catalog_Service.src._01_Domain.Core.Entities
         }
 
         public void UpdateDetails(
-            string name,
-            string description,
-            Money price,
-            Money? originalPrice,
-            Dimensions dimensions,
-            Weight weight,
-            string? metaTitle = null,
-            string? metaDescription = null)
+      string name,
+      string description,
+      Money price,
+      Money? originalPrice,
+      Dimensions dimensions,
+      Weight weight,
+      string? metaTitle = null,
+      string? metaDescription = null)
         {
             Name = name;
             Description = description;

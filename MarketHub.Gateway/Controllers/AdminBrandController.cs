@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace MarketHub.Gateway.Controllers
 {
     [ApiController]
-    [Route("api/admin/brands")]
+    [Route("api/admin/brands")] // مسیر در Gateway
     [Authorize] // The AdminPolicy is enforced by the downstream service
     public class AdminBrandController : ControllerBase
     {
@@ -57,7 +57,8 @@ namespace MarketHub.Gateway.Controllers
                 () => {
                     var client = _httpClientFactory.CreateClient();
                     AddAuthorizationHeader(client);
-                    return client.GetAsync($"{CatalogServiceBaseUrl}/api/admin/brands");
+                    // اصلاح مسیر: از AdminBrand استفاده می‌کنیم
+                    return client.GetAsync($"{CatalogServiceBaseUrl}/api/admin/AdminBrand");
                 },
                 "Get all admin brands"
             );
@@ -70,7 +71,8 @@ namespace MarketHub.Gateway.Controllers
                 () => {
                     var client = _httpClientFactory.CreateClient();
                     AddAuthorizationHeader(client);
-                    return client.GetAsync($"{CatalogServiceBaseUrl}/api/admin/brands/{id}");
+                    // اصلاح مسیر
+                    return client.GetAsync($"{CatalogServiceBaseUrl}/api/admin/AdminBrand/{id}");
                 },
                 "Get admin brand by ID"
             );
@@ -83,7 +85,8 @@ namespace MarketHub.Gateway.Controllers
                 () => {
                     var client = _httpClientFactory.CreateClient();
                     AddAuthorizationHeader(client);
-                    return client.PostAsJsonAsync($"{CatalogServiceBaseUrl}/api/admin/brands", request);
+                    // اصلاح مسیر
+                    return client.PostAsJsonAsync($"{CatalogServiceBaseUrl}/api/admin/AdminBrand", request);
                 },
                 "Create brand"
             );
@@ -96,7 +99,8 @@ namespace MarketHub.Gateway.Controllers
                 () => {
                     var client = _httpClientFactory.CreateClient();
                     AddAuthorizationHeader(client);
-                    return client.PutAsJsonAsync($"{CatalogServiceBaseUrl}/api/admin/brands/{id}", request);
+                    // اصلاح مسیر
+                    return client.PutAsJsonAsync($"{CatalogServiceBaseUrl}/api/admin/AdminBrand/{id}", request);
                 },
                 "Update brand"
             );
@@ -109,7 +113,8 @@ namespace MarketHub.Gateway.Controllers
                 () => {
                     var client = _httpClientFactory.CreateClient();
                     AddAuthorizationHeader(client);
-                    return client.DeleteAsync($"{CatalogServiceBaseUrl}/api/admin/brands/{id}");
+                    // اصلاح مسیر
+                    return client.DeleteAsync($"{CatalogServiceBaseUrl}/api/admin/AdminBrand/{id}");
                 },
                 "Delete brand"
             );
@@ -122,7 +127,8 @@ namespace MarketHub.Gateway.Controllers
                 () => {
                     var client = _httpClientFactory.CreateClient();
                     AddAuthorizationHeader(client);
-                    return client.PostAsync($"{CatalogServiceBaseUrl}/api/admin/brands/{id}/activate", null);
+                    // اصلاح مسیر
+                    return client.PostAsync($"{CatalogServiceBaseUrl}/api/admin/AdminBrand/{id}/activate", null);
                 },
                 "Activate brand"
             );
@@ -135,7 +141,8 @@ namespace MarketHub.Gateway.Controllers
                 () => {
                     var client = _httpClientFactory.CreateClient();
                     AddAuthorizationHeader(client);
-                    return client.PostAsync($"{CatalogServiceBaseUrl}/api/admin/brands/{id}/deactivate", null);
+                    // اصلاح مسیر
+                    return client.PostAsync($"{CatalogServiceBaseUrl}/api/admin/AdminBrand/{id}/deactivate", null);
                 },
                 "Deactivate brand"
             );

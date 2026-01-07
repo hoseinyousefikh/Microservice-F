@@ -22,6 +22,10 @@ namespace Catalog_Service.src._02_Infrastructure.Configuration
             builder.Property(b => b.Description)
                 .HasMaxLength(1000);
 
+            builder.Property(b => b.CreatedByUserId)
+                .IsRequired()
+                .HasMaxLength(450);
+
             builder.Property(b => b.IsActive)
                 .IsRequired()
                 .HasDefaultValue(true);
@@ -35,10 +39,8 @@ namespace Catalog_Service.src._02_Infrastructure.Configuration
             builder.Property(b => b.LogoUrl)
                 .HasMaxLength(500);
 
-            // *** این بخش را اصلاح کنید ***
             builder.Property(b => b.WebsiteUrl)
                 .HasMaxLength(500);
-            // HasDefaultValue(null) را حذف کردیم چون با Check Constraint تداخل دارد
 
             builder.Property(b => b.MetaTitle)
                 .HasMaxLength(200);
@@ -61,14 +63,12 @@ namespace Catalog_Service.src._02_Infrastructure.Configuration
             builder.HasIndex(b => b.IsActive)
                 .HasDatabaseName("IX_Brand_IsActive");
 
-            // تنظیمات پیش‌فرض برای مقادیر اختیاری (به جز WebsiteUrl)
+            // تنظیمات پیش‌فرض برای مقادیر اختیاری
             builder.Property(b => b.LogoUrl).HasDefaultValue(null);
+            builder.Property(b => b.WebsiteUrl).HasDefaultValue(null);
             builder.Property(b => b.MetaTitle).HasDefaultValue(null);
             builder.Property(b => b.MetaDescription).HasDefaultValue(null);
             builder.Property(b => b.UpdatedAt).HasDefaultValue(null);
-
-            // *** این بخش را با نسخه قطعی جایگزین کنید ***
-           
         }
     }
 }

@@ -57,11 +57,14 @@ namespace Catalog_Service.src._01_Domain.Services
             return await _categoryRepository.GetActiveCategoriesAsync(cancellationToken);
         }
 
-        public async Task<Category> CreateAsync(string name, string description, int displayOrder, int? parentCategoryId = null, string? imageUrl = null, string? metaTitle = null, string? metaDescription = null, CancellationToken cancellationToken = default)
+        public async Task<Category> CreateAsync(string name, string description, int displayOrder, string createdByUserId, int? parentCategoryId = null, string? imageUrl = null, string? metaTitle = null, string? metaDescription = null, CancellationToken cancellationToken = default)
         {
             // Validate inputs
             if (string.IsNullOrWhiteSpace(name))
                 throw new ArgumentException("Category name is required", nameof(name));
+
+            if (string.IsNullOrWhiteSpace(createdByUserId))
+                throw new ArgumentException("CreatedByUserId is required", nameof(createdByUserId));
 
             // Check if parent category exists (if specified)
             if (parentCategoryId.HasValue)
@@ -76,10 +79,10 @@ namespace Catalog_Service.src._01_Domain.Services
             }
 
             // Create category
-            var category = new Category(name, description, displayOrder, parentCategoryId, imageUrl, metaTitle, metaDescription);
+            var category = new Category(name, description, createdByUserId, displayOrder, parentCategoryId, imageUrl, metaTitle, metaDescription);
 
             // Generate and set slug
-            var slug = await _slugService.CreateUniqueSlugForBrandAsync(
+            var slug = await _slugService.CreateUniqueSlugForCategoryAsync(
                 title: name,
                 cancellationToken: cancellationToken
             ); category.SetSlug(slug);
@@ -125,21 +128,21 @@ namespace Catalog_Service.src._01_Domain.Services
 
             foreach (var category in allCategories)
             {
-              
+
                 if (category.ParentCategoryId.HasValue)
                 {
-                  
+
                     if (categoryLookup.TryGetValue(category.ParentCategoryId.Value, out var parentCategory))
                     {
-                     
+
                         if (!parentCategory.SubCategories.Any(sc => sc.Id == category.Id))
                         {
-                            
+
                             parentCategory.AddSubCategory(category);
                         }
                     }
                 }
-                else 
+                else
                 {
                     rootCategories.Add(category);
                 }

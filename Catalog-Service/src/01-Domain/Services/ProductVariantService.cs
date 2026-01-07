@@ -320,11 +320,14 @@ namespace Catalog_Service.src._01_Domain.Services
             return await _productAttributeRepository.GetAttributesAsync(variantId, cancellationToken);
         }
 
-        public async Task<ImageResource> AddImageAsync(int variantId, string originalFileName, string fileExtension, string storagePath, string publicUrl, long fileSize, int width, int height, string? altText = null, bool isPrimary = false, CancellationToken cancellationToken = default)
+        public async Task<ImageResource> AddImageAsync(int variantId, string originalFileName, string fileExtension, string storagePath, string publicUrl, long fileSize, int width, int height, string createdByUserId, string? altText = null, bool isPrimary = false, CancellationToken cancellationToken = default)
         {
             var variant = await GetByIdAsync(variantId, cancellationToken);
 
-            var image = new ImageResource(originalFileName, fileExtension, storagePath, publicUrl, fileSize, width, height, ImageType.Variant, altText, isPrimary);
+            if (string.IsNullOrWhiteSpace(createdByUserId))
+                throw new ArgumentException("CreatedByUserId is required", nameof(createdByUserId));
+
+            var image = new ImageResource(originalFileName, fileExtension, storagePath, publicUrl, fileSize, width, height, ImageType.Variant, createdByUserId, altText, isPrimary);
 
             // Set shadow property for product variant
             // This will be handled by the repository

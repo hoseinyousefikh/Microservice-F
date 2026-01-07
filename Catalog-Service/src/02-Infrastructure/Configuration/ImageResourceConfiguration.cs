@@ -44,6 +44,10 @@ namespace Catalog_Service.src._02_Infrastructure.Configuration
                 .IsRequired()
                 .HasDefaultValue(ImageType.Product);
 
+            builder.Property(i => i.CreatedByUserId)
+                .IsRequired()
+                .HasMaxLength(450);
+
             builder.Property(i => i.CreatedAt)
                 .IsRequired();
 

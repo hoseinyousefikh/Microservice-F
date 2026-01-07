@@ -4,8 +4,7 @@ namespace Catalog_Service.src._03_Endpoints.DTOs.Requests.Vendor
 {
     public class UpdateProductRequest
     {
-        [Required(ErrorMessage = "Product ID is required")]
-        public int Id { get; set; }
+        public int? Id { get; set; }
 
         [Required(ErrorMessage = "Product name is required")]
         [StringLength(200, ErrorMessage = "Product name cannot exceed 200 characters")]

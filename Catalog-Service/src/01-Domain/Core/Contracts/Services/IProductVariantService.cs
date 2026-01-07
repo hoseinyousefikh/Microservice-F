@@ -46,7 +46,7 @@ namespace Catalog_Service.src._01_Domain.Core.Contracts.Services
         Task<IEnumerable<ProductAttribute>> GetAttributesAsync(int variantId, CancellationToken cancellationToken = default);
 
         // متدهای برای مدیریت تصاویر
-        Task<ImageResource> AddImageAsync(int variantId, string originalFileName, string fileExtension, string storagePath, string publicUrl, long fileSize, int width, int height, string? altText = null, bool isPrimary = false, CancellationToken cancellationToken = default);
+        Task<ImageResource> AddImageAsync(int variantId, string originalFileName, string fileExtension, string storagePath, string publicUrl, long fileSize, int width, int height, string createdByUserId, string? altText = null, bool isPrimary = false, CancellationToken cancellationToken = default);
         Task UpdateImageAsync(int imageId, string? altText = null, bool? isPrimary = null, CancellationToken cancellationToken = default);
         Task DeleteImageAsync(int imageId, CancellationToken cancellationToken = default);
         Task<IEnumerable<ImageResource>> GetImagesAsync(int variantId, CancellationToken cancellationToken = default);

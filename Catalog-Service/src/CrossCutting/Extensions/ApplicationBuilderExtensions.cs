@@ -14,7 +14,7 @@ namespace Catalog_Service.src.CrossCutting.Extensions
             app.UseMiddleware<CorrelationIdMiddleware>();
 
             // Use error handling middleware
-            app.UseMiddleware<ErrorHandlingMiddleware>();
+            //app.UseMiddleware<ErrorHandlingMiddleware>();
 
             // Use rate limiting middleware
             app.UseMiddleware<RateLimitingMiddleware>();
