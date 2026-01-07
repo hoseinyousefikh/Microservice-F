@@ -40,7 +40,7 @@ builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
     options.Lockout.AllowedForNewUsers = true;
 
     options.User.RequireUniqueEmail = true;
-    options.SignIn.RequireConfirmedEmail = true;
+    //options.SignIn.RequireConfirmedEmail = true;
 })
 .AddEntityFrameworkStores<AppDbContext>()
 .AddDefaultTokenProviders();

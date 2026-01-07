@@ -5,6 +5,9 @@ using IdentityService._03_EndPoints.DTOs.Requests;
 using IdentityService._03_EndPoints.DTOs.Responses;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging; // اضافه شد
+using System.Linq; // اضافه شد
+using System.Threading.Tasks; // اضافه شد
 
 namespace IdentityService._01_Domain.Services
 {
@@ -60,30 +63,36 @@ namespace IdentityService._01_Domain.Services
             }
         }
 
-        public async Task<ApiResponseDto> ChangeEmailAsync(string userId, ChangeEmailRequestDto request)
+        public async Task<ApiResponseDto<ChangeEmailResponseDto>> ChangeEmailAsync(string userId, ChangeEmailRequestDto request)
         {
             try
             {
                 var user = await _userManager.FindByIdAsync(userId);
                 if (user == null)
                 {
-                    return new ApiResponseDto { Success = false, Message = "User not found" };
+                    return new ApiResponseDto<ChangeEmailResponseDto> { Success = false, Message = "User not found" };
                 }
 
                 var token = await _userManager.GenerateChangeEmailTokenAsync(user, request.NewEmail);
-                // In a real app, send this token via email
-                _logger.LogInformation($"Email change token for {user.Email}: {token}");
 
-                return new ApiResponseDto
+                var responseDto = new ChangeEmailResponseDto
+                {
+                    Token = token,
+                    UserId = user.Id,
+                    NewEmail = request.NewEmail
+                };
+
+                return new ApiResponseDto<ChangeEmailResponseDto>
                 {
                     Success = true,
-                    Message = "Email change request sent. Please check your new email for confirmation."
+                    Message = "Email change request sent. Please check your new email for confirmation.",
+                    Data = responseDto
                 };
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error changing email");
-                return new ApiResponseDto { Success = false, Message = "An error occurred" };
+                return new ApiResponseDto<ChangeEmailResponseDto> { Success = false, Message = "An error occurred" };
             }
         }
 
@@ -92,16 +101,25 @@ namespace IdentityService._01_Domain.Services
             try
             {
                 var user = await _userManager.FindByEmailAsync(request.Email);
+
+                // پیام عمومی برای جلوگیری از حملات شمارش
                 if (user == null || !user.EmailConfirmed)
                 {
-                    return new ApiResponseDto { Success = true, Message = "If your email is registered, you'll receive a reset link" };
+                    return new ApiResponseDto { Success = true, Message = "If your email is registered, you'll receive a code." };
                 }
 
+                // توکن ریست پسورد را تولید می‌کنیم
                 var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-                // In a real app, send this token via email
-                _logger.LogInformation($"Password reset token for {user.Email}: {token}");
 
-                return new ApiResponseDto { Success = true, Message = "Password reset link sent if email exists" };
+                // توکن را در دیتابیس به همراه زمان انقضا ذخیره می‌کنیم
+                user.ResetPasswordToken = token;
+                user.ResetPasswordTokenExpiry = DateTime.UtcNow.AddHours(1); // کد به مدت 1 ساعت معتبر است
+                await _userManager.UpdateAsync(user);
+
+                // ارسال کد به ایمیل کاربر
+                await _emailService.SendPasswordResetEmailAsync(user.Email, token);
+
+                return new ApiResponseDto { Success = true, Message = "Password reset code has been sent to your email." };
             }
             catch (Exception ex)
             {
@@ -110,19 +128,22 @@ namespace IdentityService._01_Domain.Services
             }
         }
 
-        public async Task<ApiResponseDto> ResetPasswordAsync(string token, string newPassword)
+        public async Task<ApiResponseDto> ResetPasswordAsync(ResetPasswordWithCodeRequestDto request)
         {
             try
             {
-                var user = await _userManager.Users.FirstOrDefaultAsync(u =>
-                    u.ResetPasswordToken == token && u.ResetPasswordTokenExpiry > DateTime.UtcNow);
+                // کاربر را بر اساس توکن و زمان انقضا پیدا می‌کنیم
+                var user = await _userManager.Users
+                    .FirstOrDefaultAsync(u => u.ResetPasswordToken == request.Token && u.ResetPasswordTokenExpiry > DateTime.UtcNow);
 
                 if (user == null)
                 {
-                    return new ApiResponseDto { Success = false, Message = "Invalid or expired token" };
+                    return new ApiResponseDto { Success = false, Message = "Invalid or expired code." };
                 }
 
-                var result = await _userManager.ResetPasswordAsync(user, token, newPassword);
+                // رمز عبور را با استفاده از توکن ریست می‌کنیم
+                var result = await _userManager.ResetPasswordAsync(user, request.Token, request.NewPassword);
+
                 if (!result.Succeeded)
                 {
                     return new ApiResponseDto
@@ -133,14 +154,16 @@ namespace IdentityService._01_Domain.Services
                     };
                 }
 
+                // توکن و زمان انقضا را پاک می‌کنیم تا دیگر قابل استفاده نباشد
                 user.ResetPasswordToken = null;
                 user.ResetPasswordTokenExpiry = null;
                 await _userManager.UpdateAsync(user);
 
+                // تمام توکن‌های فعال کاربر را باطل می‌کنیم
                 await _unitOfWork.RefreshTokenRepository.RevokeAllUserTokensAsync(user.Id, "Password reset");
                 await _unitOfWork.CommitAsync();
 
-                return new ApiResponseDto { Success = true, Message = "Password reset successfully" };
+                return new ApiResponseDto { Success = true, Message = "Password reset successfully." };
             }
             catch (Exception ex)
             {

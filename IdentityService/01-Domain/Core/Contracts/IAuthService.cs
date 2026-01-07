@@ -10,5 +10,6 @@ namespace IdentityService._01_Domain.Core.Contracts
         Task<ApiResponseDto> LogoutAsync(string userId);
         Task<ApiResponseDto<AuthResponseDto>> RefreshTokenAsync(string refreshToken);
         Task<ApiResponseDto> ConfirmEmailAsync(string userId, string token);
+        Task<ApiResponseDto> ConfirmChangeEmailAsync(string userId, string token, string newEmail);
     }
 }

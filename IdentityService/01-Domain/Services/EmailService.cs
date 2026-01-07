@@ -21,10 +21,12 @@ namespace IdentityService._01_Domain.Services
                 $"Please confirm your account by <a href='{callbackUrl}'>clicking here</a>.");
         }
 
-        public async Task SendPasswordResetEmailAsync(string email, string callbackUrl)
+
+        public async Task SendPasswordResetEmailAsync(string email, string code)
         {
-            await SendEmailAsync(email, "Reset Password",
-                $"Please reset your password by <a href='{callbackUrl}'>clicking here</a>.");
+            // به جای callbackUrl، کد را ارسال می‌کنیم
+            await SendEmailAsync(email, "Your Password Reset Code",
+                $"Your password reset code is: <h2>{code}</h2>. This code is valid for 1 hour.");
         }
 
         public async Task SendEmailChangeConfirmationAsync(string newEmail, string callbackUrl)

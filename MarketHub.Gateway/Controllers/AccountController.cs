@@ -76,7 +76,20 @@ namespace MarketHub.Gateway.Controllers
                 return StatusCode(500, new { Message = $"An error occurred during {operationName}." });
             }
         }
+        // در پروژه Gateway، در AccountController
 
+        [HttpGet("confirm-change-email")]
+        [AllowAnonymous]
+        public async Task<IActionResult> ConfirmChangeEmail([FromQuery] string userId, [FromQuery] string token, [FromQuery] string newEmail)
+        {
+            return await ForwardRequest(
+                () => {
+                    var client = _httpClientFactory.CreateClient();
+                    return client.GetAsync($"{IdentityServiceBaseUrl}/confirm-change-email?userId={userId}&token={token}&newEmail={newEmail}");
+                },
+                "Email change confirmation"
+            );
+        }
         [HttpGet("confirm-email")]
         [AllowAnonymous]
         public async Task<IActionResult> ConfirmEmail([FromQuery] string userId, [FromQuery] string token)

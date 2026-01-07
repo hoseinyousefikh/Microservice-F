@@ -234,6 +234,90 @@ namespace IdentityService._01_Domain.Services
                 };
             }
         }
+        //public async Task<ApiResponseDto> ConfirmChangeEmailAsync(string userId, string token, string newEmail)
+        //{
+        //    try
+        //    {
+        //        // --- شروع بخش تست ---
+        //        // به طور موقت، توکن دریافتی را نادیده بگیر و از توکن ثابت استفاده کن
+        //        token = "CfDJ8BFzOAY04cFHgKh58J2c/wvlkoqppasKJgpDbMwpGq5niLoXAHFktMU8EZkYu09iVPcDNXp2ZaFdc5DbGDUhB0vzC6FzHKLs4MwqWNzEXPOVri/rLZmVDLI3KU/LY/58kyaP7UcAAOus6cMS0NHJEVoup0ZAzZzkvk8szTPz37+aRxF5/MoZud+XN7oo0kQOPeKhNRp/W2/pbNiokJH//bUTWVBVz0ntIBsgXFG4o8n6spQr8vVvEo5TJfb/GTvHbPOgR6mp9/406meX6CNCabc=";
+        //        // --- پایان بخش تست ---
+
+        //        var user = await _userManager.FindByIdAsync(userId);
+        //        if (user == null)
+        //        {
+        //            return new ApiResponseDto { Success = false, Message = "Invalid user ID" };
+        //        }
+
+        //        var result = await _userManager.ChangeEmailAsync(user, newEmail, token);
+
+        //        if (!result.Succeeded)
+        //        {
+        //            var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+        //            _logger.LogWarning("EMAIL CHANGE FAILED (HARDCODED TOKEN TEST): User {UserId}. Errors: {Errors}", userId, errors);
+
+        //            return new ApiResponseDto
+        //            {
+        //                Success = false,
+        //                Message = "Email change confirmation failed",
+        //                Errors = result.Errors.Select(e => e.Description).ToList()
+        //            };
+        //        }
+
+        //        user.Status = AccountStatus.Active;
+        //        await _userManager.UpdateAsync(user);
+
+        //        return new ApiResponseDto
+        //        {
+        //            Success = true,
+        //            Message = "Email changed and confirmed successfully."
+        //        };
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        _logger.LogError(ex, "Error during email change confirmation");
+        //        return new ApiResponseDto { Success = false, Message = "An error occurred during email change confirmation" };
+        //    }
+        //}
+        public async Task<ApiResponseDto> ConfirmChangeEmailAsync(string userId, string token, string newEmail)
+        {
+            try
+            {
+                var user = await _userManager.FindByIdAsync(userId);
+                if (user == null)
+                {
+                    return new ApiResponseDto { Success = false, Message = "Invalid user ID" };
+                }
+
+                // متد ChangeEmailAsync هم ایمیل را تغییر می‌دهد و هم توکن را تأیید می‌کند
+                var result = await _userManager.ChangeEmailAsync(user, newEmail, token);
+
+                if (!result.Succeeded)
+                {
+                    return new ApiResponseDto
+                    {
+                        Success = false,
+                        Message = "Email change confirmation failed",
+                        Errors = result.Errors.Select(e => e.Description).ToList()
+                    };
+                }
+
+                // وضعیت کاربر را در صورت نیاز آپدیت کنید
+                user.Status = AccountStatus.Active;
+                await _userManager.UpdateAsync(user);
+
+                return new ApiResponseDto
+                {
+                    Success = true,
+                    Message = "Email changed and confirmed successfully."
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error during email change confirmation");
+                return new ApiResponseDto { Success = false, Message = "An error occurred during email change confirmation" };
+            }
+        }
 
         public async Task<ApiResponseDto<AuthResponseDto>> RefreshTokenAsync(string refreshToken)
         {

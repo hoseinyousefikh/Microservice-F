@@ -38,7 +38,15 @@ namespace IdentityService._03_EndPoints.Controllers
             _forgotPasswordValidator = forgotPasswordValidator;
             _editProfileValidator = editProfileValidator;
         }
+        // در پروژه IdentityService، در AccountController
 
+        [HttpGet("confirm-change-email")]
+        [AllowAnonymous]
+        public async Task<IActionResult> ConfirmChangeEmail([FromQuery] string userId, [FromQuery] string token, [FromQuery] string newEmail)
+        {
+            var result = await _authService.ConfirmChangeEmailAsync(userId, token, newEmail);
+            return result.Success ? Ok(result) : BadRequest(result);
+        }
         [HttpGet("confirm-email")]
         [AllowAnonymous]
         public async Task<IActionResult> ConfirmEmail([FromQuery] string userId, [FromQuery] string token)
@@ -59,18 +67,18 @@ namespace IdentityService._03_EndPoints.Controllers
             return result.Success ? Ok(result) : BadRequest(result);
         }
 
+        // در پروژه IdentityService، در AccountController
+
         [HttpPost("change-email")]
+        [Authorize]
         public async Task<IActionResult> ChangeEmail([FromBody] ChangeEmailRequestDto request)
         {
-            ValidationResult validationResult = await _changeEmailValidator.ValidateAsync(request);
-            if (!validationResult.IsValid)
-                return BadRequest(new ApiResponseDto { Success = false, Errors = validationResult.Errors.Select(e => e.ErrorMessage).ToList() });
+            // userId را از توکن کاربر استخراج می‌کنیم
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
 
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var result = await _accountService.ChangeEmailAsync(userId, request);
             return result.Success ? Ok(result) : BadRequest(result);
         }
-
         [HttpPost("forgot-password")]
         [AllowAnonymous]
         public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequestDto request)
@@ -85,9 +93,10 @@ namespace IdentityService._03_EndPoints.Controllers
 
         [HttpPost("reset-password")]
         [AllowAnonymous]
-        public async Task<IActionResult> ResetPassword([FromQuery] string token, [FromBody] string newPassword)
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordWithCodeRequestDto request)
         {
-            var result = await _accountService.ResetPasswordAsync(token, newPassword);
+            // این متد اکنون یک آبجکت با توکن و رمز عبور جدید دریافت می‌کند
+            var result = await _accountService.ResetPasswordAsync(request);
             return result.Success ? Ok(result) : BadRequest(result);
         }
 
