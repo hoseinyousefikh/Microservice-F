@@ -3,6 +3,7 @@ using Catalog_Service.src._01_Domain.Core.Contracts.Services;
 using Catalog_Service.src._01_Domain.Core.Entities;
 using Catalog_Service.src._01_Domain.Core.Enums;
 using Catalog_Service.src._01_Domain.Core.Primitives;
+using Catalog_Service.src._03_Endpoints.DTOs.Requests.Vendor;
 using Catalog_Service.src.CrossCutting.Exceptions;
 
 namespace Catalog_Service.src._01_Domain.Services
@@ -76,9 +77,21 @@ namespace Catalog_Service.src._01_Domain.Services
             return await _productRepository.GetAllAsync(cancellationToken);
         }
 
-        public async Task<Product> CreateAsync(string name, string description, Money price, int brandId, int categoryId, string sku, Dimensions dimensions, Weight weight, string createdByUserId, string? metaTitle = null, string? metaDescription = null, CancellationToken cancellationToken = default)
+        public async Task<Product> CreateAsync(
+           string name,
+           string description,
+           Money price,
+           int brandId,
+           int categoryId,
+           string sku,
+           Dimensions dimensions,
+           Weight weight,
+           string createdByUserId,
+           string? metaTitle = null,
+           string? metaDescription = null,
+           List<CreateProductImageRequest>? images = null,
+           CancellationToken cancellationToken = default)
         {
-            // Validate inputs
             if (string.IsNullOrWhiteSpace(name))
                 throw new ArgumentException("Product name is required", nameof(name));
 
@@ -91,36 +104,77 @@ namespace Catalog_Service.src._01_Domain.Services
             if (string.IsNullOrWhiteSpace(createdByUserId))
                 throw new ArgumentException("CreatedByUserId is required", nameof(createdByUserId));
 
-            // Check if brand exists
             var brand = await _brandRepository.GetByIdAsync(brandId, cancellationToken);
             if (brand == null)
                 throw new NotFoundException($"Brand with ID {brandId} not found");
 
-            // Check if category exists
             var category = await _categoryRepository.GetByIdAsync(categoryId, cancellationToken);
             if (category == null)
                 throw new NotFoundException($"Category with ID {categoryId} not found");
 
-            // Check if SKU is unique
             if (await _productRepository.ExistsBySkuAsync(sku, cancellationToken))
                 throw new DuplicateEntityException($"Product with SKU {sku} already exists");
 
-            // Create product
-            var product = new Product(name, description, price, brandId, categoryId, sku, dimensions, weight, createdByUserId, metaTitle, metaDescription);
+            if (images != null && images.Count > 10)
+                throw new Exception("You can upload a maximum of 10 images.");
 
-            // Generate and set slug
+            var product = new Product(
+                name,
+                description,
+                price,
+                brandId,
+                categoryId,
+                sku,
+                dimensions,
+                weight,
+                createdByUserId,
+                metaTitle,
+                metaDescription);
+
             var slug = await _slugService.CreateUniqueSlugForProductAsync(
                 title: name,
-                cancellationToken: cancellationToken
-            ); product.SetSlug(slug);
+                cancellationToken: cancellationToken);
 
-            // Add to repository
-            product = await _productRepository.AddAsync(product, cancellationToken);
+            product.SetSlug(slug);
+
+            if (images != null && images.Any())
+            {
+                var primary = images.FirstOrDefault(i => i.IsPrimary) ?? images.First();
+                foreach (var img in images)
+                {
+                    var uri = new Uri(img.PublicUrl);
+                    var extension = Path.GetExtension(uri.AbsolutePath).TrimStart('.');
+
+                    var image = new ImageResource(
+                        originalFileName: Path.GetFileName(uri.AbsolutePath),
+                        fileExtension: extension,
+                        storagePath: img.PublicUrl,
+                        publicUrl: img.PublicUrl,
+                        fileSize: 0,
+                        width: 0,
+                        height: 0,
+                        imageType: ImageType.Product,
+                        createdByUserId: createdByUserId,
+                        altText: img.AltText ?? name,
+                        isPrimary: img == primary
+                    );
+
+                    product.AddImage(image);
+                }
+            }
+
+            await _productRepository.AddAsync(product, cancellationToken);
             await _productRepository.SaveChangesAsync(cancellationToken);
 
-            _logger.LogInformation("Created new product with ID {ProductId} and SKU {ProductSku}", product.Id, product.Sku);
+            _logger.LogInformation(
+                "Created product {ProductId} with SKU {Sku} and {ImageCount} images",
+                product.Id,
+                product.Sku,
+                product.Images.Count);
+
             return product;
         }
+
 
         public async Task UpdateAsync(int id, string name, string description, Money price, Money? originalPrice, Dimensions dimensions, Weight weight, string? metaTitle = null, string? metaDescription = null, CancellationToken cancellationToken = default)
         {

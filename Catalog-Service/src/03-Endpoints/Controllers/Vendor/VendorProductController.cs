@@ -15,7 +15,7 @@ namespace Catalog_Service.src._03_Endpoints.Controllers.Vendor
 {
     [ApiController]
     [Route("api/vendor/products")]
-    [Authorize(Roles = RoleConstants.Vendor)]
+    [Authorize(Roles = RoleConstants.Vendor + "," + RoleConstants.SuperAdministrator)]
     public class VendorProductController : ControllerBase
     {
         private readonly IProductService _productService;
@@ -99,21 +99,18 @@ namespace Catalog_Service.src._03_Endpoints.Controllers.Vendor
         {
             await _createProductValidator.ValidateAndThrowAsync(request, cancellationToken);
 
-            // Check if SKU already exists using the service method
             if (await _productService.ExistsBySkuAsync(request.Sku, cancellationToken))
-            {
                 throw new DuplicateEntityException($"A product with SKU '{request.Sku}' already exists.");
-            }
 
-            // Get the user ID from the JWT token
+            if (request.Images.Count > 10)
+                return BadRequest("You can upload a maximum of 10 images.");
+
             var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value
                          ?? User.FindFirst("sub")?.Value;
-            if (string.IsNullOrEmpty(userId))
-            {
-                return Unauthorized("User ID not found in token.");
-            }
 
-            // The CreateAsync method in ProductService handles slug generation automatically.
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized("User ID not found in token.");
+
             var product = await _productService.CreateAsync(
                 request.Name,
                 request.Description,
@@ -121,14 +118,18 @@ namespace Catalog_Service.src._03_Endpoints.Controllers.Vendor
                 request.BrandId,
                 request.CategoryId,
                 request.Sku,
-                Dimensions.Create(request.Dimensions.Length, request.Dimensions.Width, request.Dimensions.Height, "cm"),
+                Dimensions.Create(
+                    request.Dimensions.Length,
+                    request.Dimensions.Width,
+                    request.Dimensions.Height,
+                    "cm"),
                 Weight.Create(request.Weight, "kg"),
                 userId,
                 request.MetaTitle,
                 request.MetaDescription,
+                request.Images,
                 cancellationToken);
 
-            // Set original price if provided
             if (request.OriginalPrice.HasValue)
             {
                 await _productService.UpdateAsync(
@@ -147,6 +148,8 @@ namespace Catalog_Service.src._03_Endpoints.Controllers.Vendor
             var productResponse = _mapper.Map<VendorProductResponse>(product);
             return CreatedAtAction(nameof(GetProduct), new { id = product.Id }, productResponse);
         }
+
+
 
         [HttpPut("{id}")]
         public async Task<ActionResult<VendorProductResponse>> UpdateProduct(

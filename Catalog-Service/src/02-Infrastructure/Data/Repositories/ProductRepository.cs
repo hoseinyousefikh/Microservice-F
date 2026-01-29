@@ -14,66 +14,119 @@ namespace Catalog_Service.src._02_Infrastructure.Data.Repositories
     public class ProductRepository : IProductRepository
     {
         private readonly AppDbContext _dbContext;
+        private readonly IImageRepository _imageRepository;
 
-        public ProductRepository(AppDbContext dbContext)
+        public ProductRepository(AppDbContext dbContext, IImageRepository imageRepository)
         {
             _dbContext = dbContext;
+            _imageRepository = imageRepository;
         }
 
-        // در کلاس ProductRepository
-        public async Task<Product> GetByIdAsync(int id, CancellationToken cancellationToken = default)
+        public async Task<Product> GetByIdAsync(
+            int id,
+            CancellationToken cancellationToken = default)
         {
-            // استفاده از IgnoreQueryFilters برای غیرفعال کردن موقت فیلترهای سراسری
-            return await _dbContext.Products
-                .IgnoreQueryFilters() // <-- این خط کلیدی است
+            var product = await _dbContext.Products
+                .IgnoreQueryFilters()
                 .Include(p => p.Brand)
                 .Include(p => p.Category)
-                .Include(p => p.Images)
                 .Include(p => p.Variants)
                 .Include(p => p.Attributes)
                 .Include(p => p.Reviews)
                 .Include(p => p.Tags)
                 .FirstOrDefaultAsync(p => p.Id == id, cancellationToken);
+
+            if (product != null)
+            {
+                var primaryImage = await _imageRepository.GetPrimaryImageAsync(product.Id, cancellationToken);
+                if (primaryImage != null && !product.Images.Any(img => img.Id == primaryImage.Id))
+                {
+                    product.AddImage(primaryImage);
+                }
+            }
+
+            return product;
         }
 
-        // *** این متد اصلاح شده است ***
         public async Task<Product?> GetBySkuAsync(string sku, CancellationToken cancellationToken = default)
         {
-            // اگر محصولی پیدا نشود، به طور خودکار null برمی‌گرداند
-            return await _dbContext.Products
+            var product = await _dbContext.Products
                 .Include(p => p.Brand)
                 .Include(p => p.Category)
                 .FirstOrDefaultAsync(p => p.Sku == sku, cancellationToken);
+
+            if (product != null)
+            {
+                var primaryImage = await _imageRepository.GetPrimaryImageAsync(product.Id, cancellationToken);
+                if (primaryImage != null && !product.Images.Any(img => img.Id == primaryImage.Id))
+                {
+                    product.AddImage(primaryImage);
+                }
+            }
+
+            return product;
         }
 
         public async Task<Product> GetBySlugAsync(Slug slug, CancellationToken cancellationToken = default)
         {
-            return await _dbContext.Products
+            var product = await _dbContext.Products
                 .Include(p => p.Brand)
                 .Include(p => p.Category)
-                .Include(p => p.Images)
                 .Include(p => p.Variants)
                 .Include(p => p.Attributes)
                 .Include(p => p.Reviews)
                 .Include(p => p.Tags)
                 .FirstOrDefaultAsync(p => p.Slug == slug, cancellationToken);
+
+            if (product != null)
+            {
+                var primaryImage = await _imageRepository.GetPrimaryImageAsync(product.Id, cancellationToken);
+                if (primaryImage != null && !product.Images.Any(img => img.Id == primaryImage.Id))
+                {
+                    product.AddImage(primaryImage);
+                }
+            }
+
+            return product;
         }
 
         public async Task<IEnumerable<Product>> GetAllAsync(CancellationToken cancellationToken = default)
         {
-            return await _dbContext.Products
+            var products = await _dbContext.Products
                 .Include(p => p.Brand)
                 .Include(p => p.Category)
                 .ToListAsync(cancellationToken);
+
+            foreach (var product in products)
+            {
+                var primaryImage = await _imageRepository.GetPrimaryImageAsync(product.Id, cancellationToken);
+                if (primaryImage != null && !product.Images.Any(img => img.Id == primaryImage.Id))
+                {
+                    product.AddImage(primaryImage);
+                }
+            }
+
+            return products;
         }
 
         public async Task<IEnumerable<Product>> GetActiveProductsAsync(CancellationToken cancellationToken = default)
         {
-            return await _dbContext.Products
+            var products = await _dbContext.Products
                 .Include(p => p.Brand)
                 .Include(p => p.Category)
                 .Where(p => p.Status == ProductStatus.Published)
                 .ToListAsync(cancellationToken);
+
+            foreach (var product in products)
+            {
+                var primaryImage = await _imageRepository.GetPrimaryImageAsync(product.Id, cancellationToken);
+                if (primaryImage != null && !product.Images.Any(img => img.Id == primaryImage.Id))
+                {
+                    product.AddImage(primaryImage);
+                }
+            }
+
+            return products;
         }
 
         public async Task<Product> AddAsync(Product product, CancellationToken cancellationToken = default)
@@ -99,88 +152,157 @@ namespace Catalog_Service.src._02_Infrastructure.Data.Repositories
 
         public async Task<IEnumerable<Product>> GetByCategoryAsync(int categoryId, CancellationToken cancellationToken = default)
         {
-            return await _dbContext.Products
+            var products = await _dbContext.Products
                 .Include(p => p.Brand)
                 .Include(p => p.Category)
                 .Where(p => p.CategoryId == categoryId && p.Status == ProductStatus.Published)
                 .ToListAsync(cancellationToken);
+
+            foreach (var product in products)
+            {
+                var primaryImage = await _imageRepository.GetPrimaryImageAsync(product.Id, cancellationToken);
+                if (primaryImage != null && !product.Images.Any(img => img.Id == primaryImage.Id))
+                {
+                    product.AddImage(primaryImage);
+                }
+            }
+
+            return products;
         }
 
         public async Task<IEnumerable<Product>> GetByBrandAsync(int brandId, CancellationToken cancellationToken = default)
         {
-            return await _dbContext.Products
+            var products = await _dbContext.Products
                 .Include(p => p.Brand)
                 .Include(p => p.Category)
                 .Where(p => p.BrandId == brandId && p.Status == ProductStatus.Published)
                 .ToListAsync(cancellationToken);
+
+            foreach (var product in products)
+            {
+                var primaryImage = await _imageRepository.GetPrimaryImageAsync(product.Id, cancellationToken);
+                if (primaryImage != null && !product.Images.Any(img => img.Id == primaryImage.Id))
+                {
+                    product.AddImage(primaryImage);
+                }
+            }
+
+            return products;
         }
 
         public async Task<IEnumerable<Product>> GetByPriceRangeAsync(Money minPrice, Money maxPrice, CancellationToken cancellationToken = default)
         {
-            return await _dbContext.Products
+            var products = await _dbContext.Products
                 .Include(p => p.Brand)
                 .Include(p => p.Category)
                 .Where(p => p.Price.Amount >= minPrice.Amount && p.Price.Amount <= maxPrice.Amount && p.Status == ProductStatus.Published)
                 .ToListAsync(cancellationToken);
+
+            foreach (var product in products)
+            {
+                var primaryImage = await _imageRepository.GetPrimaryImageAsync(product.Id, cancellationToken);
+                if (primaryImage != null && !product.Images.Any(img => img.Id == primaryImage.Id))
+                {
+                    product.AddImage(primaryImage);
+                }
+            }
+
+            return products;
         }
 
         public async Task<IEnumerable<Product>> GetFeaturedProductsAsync(int count, CancellationToken cancellationToken = default)
         {
-            return await _dbContext.Products
+            var products = await _dbContext.Products
                 .Include(p => p.Brand)
                 .Include(p => p.Category)
                 .Where(p => p.IsFeatured && p.Status == ProductStatus.Published)
                 .OrderByDescending(p => p.CreatedAt)
                 .Take(count)
                 .ToListAsync(cancellationToken);
+
+            foreach (var product in products)
+            {
+                var primaryImage = await _imageRepository.GetPrimaryImageAsync(product.Id, cancellationToken);
+                if (primaryImage != null && !product.Images.Any(img => img.Id == primaryImage.Id))
+                {
+                    product.AddImage(primaryImage);
+                }
+            }
+
+            return products;
         }
 
         public async Task<IEnumerable<Product>> GetNewestProductsAsync(int count, CancellationToken cancellationToken = default)
         {
-            return await _dbContext.Products
+            var products = await _dbContext.Products
                 .Include(p => p.Brand)
                 .Include(p => p.Category)
                 .Where(p => p.Status == ProductStatus.Published)
                 .OrderByDescending(p => p.CreatedAt)
                 .Take(count)
                 .ToListAsync(cancellationToken);
+
+            foreach (var product in products)
+            {
+                var primaryImage = await _imageRepository.GetPrimaryImageAsync(product.Id, cancellationToken);
+                if (primaryImage != null && !product.Images.Any(img => img.Id == primaryImage.Id))
+                {
+                    product.AddImage(primaryImage);
+                }
+            }
+
+            return products;
         }
 
         public async Task<IEnumerable<Product>> GetBestSellingProductsAsync(int count, CancellationToken cancellationToken = default)
         {
-            // در یک پیاده‌سازی واقعی، این متد باید با داده‌های فروش کار کند
-            return await _dbContext.Products
+            var products = await _dbContext.Products
                 .Include(p => p.Brand)
                 .Include(p => p.Category)
                 .Where(p => p.Status == ProductStatus.Published)
                 .OrderByDescending(p => p.ViewCount)
                 .Take(count)
                 .ToListAsync(cancellationToken);
+
+            foreach (var product in products)
+            {
+                var primaryImage = await _imageRepository.GetPrimaryImageAsync(product.Id, cancellationToken);
+                if (primaryImage != null && !product.Images.Any(img => img.Id == primaryImage.Id))
+                {
+                    product.AddImage(primaryImage);
+                }
+            }
+
+            return products;
         }
 
         public async Task<(IEnumerable<Product> Products, int TotalCount)> GetPagedAsync(
-       int pageNumber,
-       int pageSize,
-       string searchTerm = null,
-       int? categoryId = null,
-       int? brandId = null,
-       ProductStatus? status = null,
-       decimal? minPrice = null,
-       decimal? maxPrice = null,
-       string sortBy = null,
-       bool sortAscending = true,
-       CancellationToken cancellationToken = default)
+            int pageNumber,
+            int pageSize,
+            string searchTerm = null,
+            int? categoryId = null,
+            int? brandId = null,
+            ProductStatus? status = null,
+            decimal? minPrice = null,
+            decimal? maxPrice = null,
+            string sortBy = null,
+            bool sortAscending = true,
+            CancellationToken cancellationToken = default)
         {
-            // مرحله ۱: ساخت کوئری پایه با فیلترهای قابل ترجمه برای دیتابیس
             var dbQuery = _dbContext.Products
                 .Include(p => p.Brand)
                 .Include(p => p.Category)
                 .Include(p => p.Reviews)
+                .Include(p => p.Images)   
                 .AsQueryable();
 
-            if (!string.IsNullOrWhiteSpace(searchTerm))
+            if (status.HasValue)
             {
-                dbQuery = dbQuery.Where(p => p.Name.Contains(searchTerm) || p.Description.Contains(searchTerm));
+                dbQuery = dbQuery.Where(p => p.Status == status.Value);
+            }
+            else
+            {
+                dbQuery = dbQuery.Where(p => p.Status == ProductStatus.Published);
             }
 
             if (categoryId.HasValue)
@@ -193,72 +315,126 @@ namespace Catalog_Service.src._02_Infrastructure.Data.Repositories
                 dbQuery = dbQuery.Where(p => p.BrandId == brandId.Value);
             }
 
-            if (status.HasValue)
+            var productsFromDb = await dbQuery.ToListAsync(cancellationToken);
+
+            IEnumerable<Product> filteredProducts = productsFromDb;
+
+            if (!string.IsNullOrWhiteSpace(searchTerm))
             {
-                dbQuery = dbQuery.Where(p => p.Status == status.Value);
+                searchTerm = searchTerm.Trim().ToLower();
+
+                filteredProducts = filteredProducts
+                    .Where(p =>
+                        (p.Name != null && p.Name.ToLower().Contains(searchTerm)) ||
+                        (p.Slug != null && p.Slug.Value.ToLower().Contains(searchTerm))
+                    )
+                    .ToList();
             }
-
-            // مرحله ۲: خواندن نتایج فیلتر شده از دیتابیس به حافظه
-            var filteredProductsFromDb = await dbQuery.ToListAsync(cancellationToken);
-
-            // مرحله ۳: اعمال فیلتر قیمت و مرتب‌سازی در حافظه
-            IEnumerable<Product> finalQuery = filteredProductsFromDb;
 
             if (minPrice.HasValue)
             {
-                finalQuery = finalQuery.Where(p => p.Price.Amount >= minPrice.Value);
+                filteredProducts = filteredProducts.Where(p => p.Price.Amount >= minPrice.Value);
             }
 
             if (maxPrice.HasValue)
             {
-                finalQuery = finalQuery.Where(p => p.Price.Amount <= maxPrice.Value);
+                filteredProducts = filteredProducts.Where(p => p.Price.Amount <= maxPrice.Value);
             }
 
-            // حالا مرتب‌سازی را در حافظه انجام دهید
-            finalQuery = sortBy switch
+            var sortedProducts = sortBy?.ToLower() switch
             {
-                "name" => sortAscending ? finalQuery.OrderBy(p => p.Name) : finalQuery.OrderByDescending(p => p.Name),
-                "price" => sortAscending ? finalQuery.OrderBy(p => p.Price.Amount) : finalQuery.OrderByDescending(p => p.Price.Amount),
-                "date" => sortAscending ? finalQuery.OrderBy(p => p.CreatedAt) : finalQuery.OrderByDescending(p => p.CreatedAt),
-                "rating" => sortAscending ?
-                    finalQuery.OrderBy(p => p.Reviews.Any() ? p.Reviews.Average(r => r.Rating) : 0) :
-                    finalQuery.OrderByDescending(p => p.Reviews.Any() ? p.Reviews.Average(r => r.Rating) : 0),
-                _ => finalQuery.OrderByDescending(p => p.CreatedAt)
+                "name" => sortAscending
+                    ? filteredProducts.OrderBy(p => p.Name)
+                    : filteredProducts.OrderByDescending(p => p.Name),
+                "price" => sortAscending
+                    ? filteredProducts.OrderBy(p => p.Price.Amount)
+                    : filteredProducts.OrderByDescending(p => p.Price.Amount),
+                "date" => sortAscending
+                    ? filteredProducts.OrderBy(p => p.CreatedAt)
+                    : filteredProducts.OrderByDescending(p => p.CreatedAt),
+                "rating" => sortAscending
+                    ? filteredProducts.OrderBy(p => p.Reviews.Any() ? p.Reviews.Average(r => r.Rating) : 0)
+                    : filteredProducts.OrderByDescending(p => p.Reviews.Any() ? p.Reviews.Average(r => r.Rating) : 0),
+                _ => filteredProducts.OrderByDescending(p => p.CreatedAt)
             };
 
-            var totalCount = finalQuery.Count();
-            var products = finalQuery
-                .Skip((pageNumber - 1) * pageSize)
-                .Take(pageSize);
+            var totalCount = sortedProducts.Count();
 
-            return (products, totalCount);
+            var pagedProducts = sortedProducts
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            foreach (var product in pagedProducts)
+            {
+                var primaryImage = await _imageRepository.GetPrimaryImageAsync(product.Id, cancellationToken);
+                if (primaryImage != null && !product.Images.Any(img => img.Id == primaryImage.Id))
+                {
+                    product.AddImage(primaryImage);
+                }
+            }
+
+            return (pagedProducts, totalCount);
         }
 
         public async Task<IEnumerable<Product>> GetByStatusAsync(ProductStatus status, CancellationToken cancellationToken = default)
         {
-            return await _dbContext.Products
+            var products = await _dbContext.Products
                 .Include(p => p.Brand)
                 .Include(p => p.Category)
                 .Where(p => p.Status == status)
                 .ToListAsync(cancellationToken);
+
+            foreach (var product in products)
+            {
+                var primaryImage = await _imageRepository.GetPrimaryImageAsync(product.Id, cancellationToken);
+                if (primaryImage != null && !product.Images.Any(img => img.Id == primaryImage.Id))
+                {
+                    product.AddImage(primaryImage);
+                }
+            }
+
+            return products;
         }
 
         public async Task<IEnumerable<Product>> GetOutOfStockProductsAsync(CancellationToken cancellationToken = default)
         {
-            return await _dbContext.Products
+            var products = await _dbContext.Products
                 .Include(p => p.Brand)
                 .Include(p => p.Category)
                 .Where(p => p.StockStatus == StockStatus.OutOfStock)
                 .ToListAsync(cancellationToken);
+
+            foreach (var product in products)
+            {
+                var primaryImage = await _imageRepository.GetPrimaryImageAsync(product.Id, cancellationToken);
+                if (primaryImage != null && !product.Images.Any(img => img.Id == primaryImage.Id))
+                {
+                    product.AddImage(primaryImage);
+                }
+            }
+
+            return products;
         }
 
         public async Task<IEnumerable<Product>> GetLowStockProductsAsync(int threshold, CancellationToken cancellationToken = default)
         {
-            return await _dbContext.Products
+            var products = await _dbContext.Products
                 .Include(p => p.Brand)
                 .Include(p => p.Category)
                 .Where(p => p.StockQuantity <= threshold && p.StockQuantity > 0)
                 .ToListAsync(cancellationToken);
+
+            foreach (var product in products)
+            {
+                var primaryImage = await _imageRepository.GetPrimaryImageAsync(product.Id, cancellationToken);
+                if (primaryImage != null && !product.Images.Any(img => img.Id == primaryImage.Id))
+                {
+                    product.AddImage(primaryImage);
+                }
+            }
+
+            return products;
         }
 
         public async Task<bool> ExistsAsync(int id, CancellationToken cancellationToken = default)
@@ -266,7 +442,6 @@ namespace Catalog_Service.src._02_Infrastructure.Data.Repositories
             return await _dbContext.Products.AnyAsync(p => p.Id == id, cancellationToken);
         }
 
-        // *** این متد صحیح است و نیازی به تغییر ندارد ***
         public async Task<bool> ExistsBySkuAsync(string sku, CancellationToken cancellationToken = default)
         {
             return await _dbContext.Products.AnyAsync(p => p.Sku == sku, cancellationToken);
@@ -397,20 +572,16 @@ namespace Catalog_Service.src._02_Infrastructure.Data.Repositories
             }
         }
 
-        // متدهای جدید برای بررسی‌ها
         public async Task<double> GetAverageRatingAsync(int productId, CancellationToken cancellationToken = default)
         {
-            // دریافت تمام بررسی‌های تایید شده برای محصول مشخص شده
             var approvedReviews = await _dbContext.ProductReviews
                 .Where(r => r.ProductId == productId && r.Status == ReviewStatus.Approved)
-                .Select(r => r.Rating) // فقط امتیازات را انتخاب می‌کنیم
+                .Select(r => r.Rating)
                 .ToListAsync(cancellationToken);
 
-            // اگر هیچ بررسی تایید شده‌ای وجود نداشت، 0.0 برمی‌گردانیم
             if (!approvedReviews.Any())
                 return 0.0;
 
-            // محاسبه میانگین امتیازات
             return approvedReviews.Average();
         }
 
@@ -429,7 +600,6 @@ namespace Catalog_Service.src._02_Infrastructure.Data.Repositories
                 .Select(g => new { Rating = g.Key, Count = g.Count() })
                 .ToDictionaryAsync(x => x.Rating, x => x.Count, cancellationToken);
 
-            // اطمینان از وجود تمام رتبه‌بندی‌ها از 1 تا 5
             for (int i = 1; i <= 5; i++)
             {
                 if (!distribution.ContainsKey(i))
@@ -439,6 +609,44 @@ namespace Catalog_Service.src._02_Infrastructure.Data.Repositories
             }
 
             return distribution;
+        }
+
+        public async Task<IEnumerable<Product>> GetProductsWithPrimaryImagesAsync(
+            IEnumerable<int> productIds,
+            CancellationToken cancellationToken = default)
+        {
+            var products = await _dbContext.Products
+                .Include(p => p.Brand)
+                .Include(p => p.Category)
+                .Where(p => productIds.Contains(p.Id))
+                .ToListAsync(cancellationToken);
+
+            foreach (var product in products)
+            {
+                var primaryImage = await _imageRepository.GetPrimaryImageAsync(product.Id, cancellationToken);
+                if (primaryImage != null && !product.Images.Any(img => img.Id == primaryImage.Id))
+                {
+                    product.AddImage(primaryImage);
+                }
+            }
+
+            return products;
+        }
+
+        public async Task<IEnumerable<Product>> GetProductsByTagAsync(
+            string tagText,
+            CancellationToken cancellationToken = default)
+        {
+            var productIds = await _dbContext.ProductTags
+                .Where(t => t.TagText.Equals(tagText, StringComparison.OrdinalIgnoreCase))
+                .Select(t => t.ProductId)
+                .Distinct()
+                .ToListAsync(cancellationToken);
+
+            if (!productIds.Any())
+                return Enumerable.Empty<Product>();
+
+            return await GetProductsWithPrimaryImagesAsync(productIds, cancellationToken);
         }
     }
 }

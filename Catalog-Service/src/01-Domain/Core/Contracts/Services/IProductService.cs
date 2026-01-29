@@ -1,6 +1,7 @@
 ﻿using Catalog_Service.src._01_Domain.Core.Entities;
 using Catalog_Service.src._01_Domain.Core.Enums;
 using Catalog_Service.src._01_Domain.Core.Primitives;
+using Catalog_Service.src._03_Endpoints.DTOs.Requests.Vendor;
 
 namespace Catalog_Service.src._01_Domain.Core.Contracts.Services
 {
@@ -11,7 +12,20 @@ namespace Catalog_Service.src._01_Domain.Core.Contracts.Services
         Task<Product?> GetBySkuAsync(string sku, CancellationToken cancellationToken = default); // *** اصلاح شد به nullable ***
         Task<Product> GetBySlugAsync(string slug, CancellationToken cancellationToken = default);
         Task<IEnumerable<Product>> GetAllAsync(CancellationToken cancellationToken = default);
-        Task<Product> CreateAsync(string name, string description, Money price, int brandId, int categoryId, string sku, Dimensions dimensions, Weight weight, string createdByUserId, string? metaTitle = null, string? metaDescription = null, CancellationToken cancellationToken = default);
+        Task<Product> CreateAsync(
+           string name,
+           string description,
+           Money price,
+           int brandId,
+           int categoryId,
+           string sku,
+           Dimensions dimensions,
+           Weight weight,
+           string createdByUserId,
+           string? metaTitle = null,
+           string? metaDescription = null,
+           List<CreateProductImageRequest>? images = null,
+           CancellationToken cancellationToken = default);
         Task UpdateAsync(int id, string name, string description, Money price, Money? originalPrice, Dimensions dimensions, Weight weight, string? metaTitle = null, string? metaDescription = null, CancellationToken cancellationToken = default);
         Task DeleteAsync(int id, CancellationToken cancellationToken = default);
         Task<bool> ExistsAsync(int id, CancellationToken cancellationToken = default);

@@ -15,5 +15,6 @@ namespace IdentityService._01_Domain.Core.Entities
         public DateTime? LastLoginAt { get; set; }
         public string? RefreshToken { get; set; }
         public DateTime? RefreshTokenExpiry { get; set; }
+        
     }
 }

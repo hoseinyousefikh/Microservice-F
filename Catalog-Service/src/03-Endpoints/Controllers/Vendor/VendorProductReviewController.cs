@@ -11,7 +11,7 @@ namespace Catalog_Service.src._03_Endpoints.Controllers.Vendor
 {
     [ApiController]
     [Route("api/vendor/products/{productId}/reviews")]
-    [Authorize(Roles = RoleConstants.Vendor)]
+    [Authorize(Roles = RoleConstants.Vendor + "," + RoleConstants.SuperAdministrator)]
     public class VendorProductReviewController : ControllerBase
     {
         private readonly IProductService _productService;

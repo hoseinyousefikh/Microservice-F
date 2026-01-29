@@ -39,8 +39,9 @@ namespace Catalog_Service.src._03_Endpoints.DTOs.Requests.Vendor
         [StringLength(160, ErrorMessage = "Meta description cannot exceed 160 characters")]
         public string MetaDescription { get; set; }
 
-        public string? ImageUrl { get; set; }
         public decimal? OriginalPrice { get; set; }
+
+        public List<CreateProductImageRequest> Images { get; set; } = new();
     }
 
     public class DimensionsRequest
@@ -56,5 +57,15 @@ namespace Catalog_Service.src._03_Endpoints.DTOs.Requests.Vendor
         [Required(ErrorMessage = "Height is required")]
         [Range(0.01, double.MaxValue, ErrorMessage = "Height must be greater than 0")]
         public decimal Height { get; set; }
+    }
+
+    public class CreateProductImageRequest
+    {
+        [Required(ErrorMessage = "Image public URL is required")]
+        public string PublicUrl { get; set; }
+
+        public string? AltText { get; set; }
+
+        public bool IsPrimary { get; set; }
     }
 }

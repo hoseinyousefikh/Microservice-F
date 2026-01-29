@@ -30,7 +30,12 @@ namespace Catalog_Service.src._01_Domain.Core.Contracts.Services
 
         // متدهای صفحه‌بندی
         Task<(IEnumerable<ImageResource> Images, int TotalCount)> GetPagedAsync(int pageNumber, int pageSize, ImageType? imageType = null, int? entityId = null, bool onlyPrimary = false, CancellationToken cancellationToken = default);
-
+        Task<ImageResource> CreateProductImageFromUrlAsync(
+    int productId,
+    string imageUrl,
+    string createdByUserId,
+    bool isPrimary = false,
+    CancellationToken cancellationToken = default);
         // متدهای آپلود و پردازش تصویر
         Task<ImageResource> UploadProductImageAsync(int productId, Stream imageStream, string originalFileName, string createdByUserId, string? altText = null, bool isPrimary = false, CancellationToken cancellationToken = default);
         Task<ImageResource> UploadCategoryImageAsync(int categoryId, Stream imageStream, string originalFileName, string createdByUserId, string? altText = null, bool isPrimary = false, CancellationToken cancellationToken = default);

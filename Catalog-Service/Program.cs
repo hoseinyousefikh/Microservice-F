@@ -101,6 +101,7 @@ builder.Services.AddHttpClient("PricingService", client =>
 });
 
 var app = builder.Build();
+app.UseStaticFiles();
 
 // 9. پیکربندی Middleware pipeline
 if (app.Environment.IsDevelopment())

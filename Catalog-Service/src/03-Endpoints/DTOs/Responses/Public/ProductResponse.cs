@@ -11,6 +11,7 @@ namespace Catalog_Service.src._03_Endpoints.DTOs.Responses.Public
         public decimal Price { get; set; }
         public decimal? OriginalPrice { get; set; }
         public string Sku { get; set; }
+        public int ViewCount { get;  set; }
         public string Slug { get; set; }
         public int BrandId { get; set; }
         public string BrandName { get; set; }
@@ -40,7 +41,7 @@ namespace Catalog_Service.src._03_Endpoints.DTOs.Responses.Public
         public int StockQuantity { get; set; }
         public StockStatus StockStatus { get; set; }
         public bool IsActive { get; set; }
-        public string ImageUrl { get; set; }
+        public string? ImageUrl { get; set; }
         public DimensionsResponse Dimensions { get; set; }
         public WeightResponse Weight { get; set; }
 

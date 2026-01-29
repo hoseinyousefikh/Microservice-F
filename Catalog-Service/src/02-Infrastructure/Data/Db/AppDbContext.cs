@@ -241,43 +241,29 @@ namespace Catalog_Service.src._02_Infrastructure.Data.Db
         }
 
         // *** این متد را با نسخه تشخیصی جایگزین کنید ***
-        public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+        public override async Task<int> SaveChangesAsync(
+            CancellationToken cancellationToken = default)
         {
-            // مدیریت خودکار Timestamp برای موجودیت‌ها
             UpdateTimestamps();
 
-            // پردازش رویدادهای دامنه
-            await ProcessDomainEventsAsync(cancellationToken);
+            // ⛔️ Domain Events نباید با Request Token کنسل شوند
+            await ProcessDomainEventsAsync(CancellationToken.None);
 
-            // *** بخش تشخیصی برای پیدا کردن مشکل CHECK Constraint ***
             var logger = this.GetService<ILogger<AppDbContext>>();
-            var addedOrModifiedEntries = ChangeTracker.Entries()
-                .Where(e => e.State == EntityState.Added || e.State == EntityState.Modified);
-
-            foreach (var entry in addedOrModifiedEntries)
-            {
-                if (entry.Entity is Brand brandEntity)
-                {
-                    var websiteUrlProperty = entry.Property("WebsiteUrl");
-                    var websiteUrlValue = websiteUrlProperty.CurrentValue?.ToString() ?? "NULL";
-                    logger.LogWarning("DIAGNOSTIC: Attempting to save Brand '{BrandName}' with WebsiteUrl: '{WebsiteUrl}'", brandEntity.Name, websiteUrlValue);
-                }
-            }
-            // *** پایان بخش تشخیصی ***
 
             try
             {
-                return await base.SaveChangesAsync(cancellationToken);
+                // ⛔️ SaveChanges هم با None
+                return await base.SaveChangesAsync(CancellationToken.None);
             }
             catch (DbUpdateException ex)
             {
-                logger.LogError(ex, "Database update failed. See inner exception for details.");
-                // می‌توانید جزئیات بیشتری از خطا را اینجا لاگ کنید
+                logger.LogError(ex, "Database update failed");
+
                 if (ex.InnerException != null)
-                {
-                    logger.LogError("Inner Exception: {InnerExceptionMessage}", ex.InnerException.Message);
-                }
-                throw; // دوباره خطا را پرتاب کنید تا به لایه بالاتر برسد
+                    logger.LogError("Inner Exception: {Message}", ex.InnerException.Message);
+
+                throw;
             }
         }
 

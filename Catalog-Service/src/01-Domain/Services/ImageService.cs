@@ -228,6 +228,52 @@ namespace Catalog_Service.src._01_Domain.Services
         {
             return await _imageRepository.GetPagedAsync(pageNumber, pageSize, imageType, entityId, onlyPrimary, cancellationToken);
         }
+        public async Task<ImageResource> CreateProductImageFromUrlAsync(
+    int productId,
+    string imageUrl,
+    string createdByUserId,
+    bool isPrimary = false,
+    CancellationToken cancellationToken = default)
+        {
+            var product = await _productRepository.GetByIdAsync(productId, cancellationToken);
+            if (product == null)
+                throw new NotFoundException($"Product with ID {productId} not found");
+
+            var uri = new Uri(imageUrl);
+            var fileExtension = Path.GetExtension(uri.AbsolutePath).TrimStart('.');
+
+            var image = new ImageResource(
+                originalFileName: Path.GetFileName(uri.AbsolutePath),
+                fileExtension: fileExtension,
+                storagePath: imageUrl, // چون URL خارجی است
+                publicUrl: imageUrl,
+                fileSize: 0,           // چون فایل آپلود نشده
+                width: 0,
+                height: 0,
+                imageType: ImageType.Product,
+                createdByUserId: createdByUserId,
+                altText: product.Name,
+                isPrimary: isPrimary
+            );
+
+            image = await _imageRepository.AddAsync(image, cancellationToken);
+            await _imageRepository.SaveChangesAsync(cancellationToken);
+
+            if (isPrimary)
+            {
+                await _imageRepository.UpdateAllProductImagesPrimaryStatusAsync(
+                    productId,
+                    image.Id,
+                    cancellationToken);
+            }
+
+            _logger.LogInformation(
+                "Created image for product {ProductId} with URL {ImageUrl}",
+                productId,
+                imageUrl);
+
+            return image;
+        }
 
         public async Task<ImageResource> UploadProductImageAsync(int productId, Stream imageStream, string originalFileName, string createdByUserId, string? altText = null, bool isPrimary = false, CancellationToken cancellationToken = default)
         {

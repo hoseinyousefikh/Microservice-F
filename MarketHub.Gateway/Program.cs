@@ -12,45 +12,60 @@ builder.Services.AddAuthentication(options =>
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
 }).AddJwtBearer(options =>
 {
-    // کلید امضای توکن را از سرویس هویت کپی کرده‌ایم
     var key = Encoding.UTF8.GetBytes("ThisIsAVeryLongAndSecureSecretKeyForJWTTokenGenerationThatIsAtLeast64BytesLong!");
-
     options.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuer = true,
         ValidateAudience = true,
         ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
-        // این مقادیر نیز با فایل appsettings.json مطابقت دارند
         ValidIssuer = "MarketHub.IdentityService",
         ValidAudience = "MarketHub.Apps",
         IssuerSigningKey = new SymmetricSecurityKey(key)
     };
 });
 
-// --- شروع بخش جدید: افزودن CORS ---
-// 2. افزودن سرویس CORS
-// یک نام برای سیاست CORS خود انتخاب می‌کنیم (مثلاً "VueAppCorsPolicy")
-// origins باید دقیقاً آدرسی باشد که برنامه Vue شما روی آن اجرا می‌شود.
+// 2. 🔥 اصلاح CORS برای فرانت‌اند React 🔥
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy(name: "VueAppCorsPolicy",
+    options.AddPolicy(name: "ReactAppCorsPolicy",
                       policy =>
                       {
-                          // آدرس فرانت‌اند Vue.js شما را اینجا قرار دهید
-                          // معمولاً http://localhost:5173 است اما می‌تواند متفاوت باشد.
-                          // بهتر است هر دو http و https را برای اطمینان اضافه کنید.
-                          policy.WithOrigins("http://localhost:5173",
-                                            "https://localhost:5173")
-                                .AllowAnyHeader()
-                                .AllowAnyMethod()
-                                .AllowCredentials(); // AllowCredentials برای ارسال کوکی یا توکن در هدرها مهم است
+                          // تمام پورت‌های رایج توسعه فرانت‌اند را اضافه کنید
+                          policy.WithOrigins(
+                              "http://localhost:3000",    // Create React App پیش‌فرض
+                              "https://localhost:3000",
+                              "http://localhost:5173",    // Vite پیش‌فرض
+                              "https://localhost:5173",
+                              "http://localhost:5174",
+                              "https://localhost:5174",
+                              "http://localhost:8000",    // Python HTTP Server
+                              "https://localhost:8000",
+                              "http://127.0.0.1:5500",    // Live Server VS Code
+                              "http://127.0.0.1:5500/product.html",
+                              "http://localhost:5500",
+                              "https://localhost:5500",
+                              // --- آدرس جدید شما اضافه شد ---
+                              "http://127.0.0.1:5501",    // آدرس فعلی فرانت‌اند شما
+                              "http://127.0.0.1:5501/product.html" // آدرس کامل فایل
+                          )
+                          .AllowAnyHeader()
+                          .AllowAnyMethod()
+                          .AllowCredentials(); // اگر از کوکی‌ها یا احراز هویت استفاده می‌کنید
                       });
+
+    // 🔥 گزینه دوم: برای توسعه، همه را اجازه بده (امن نیست برای production)
+    // اگر پالیسی بالا جواب نداد، می‌توانید به طور موقت از این استفاده کنید
+    options.AddPolicy("AllowAll",
+        builder =>
+        {
+            builder.AllowAnyOrigin()
+                   .AllowAnyMethod()
+                   .AllowAnyHeader();
+        });
 });
-// --- پایان بخش جدید ---
 
-
-// 3. ثبت سرویس‌های اصلی برنامه
+// 3. ثبت سرویس‌های اصلی
 builder.Services.AddControllers();
 builder.Services.AddHttpClient();
 
@@ -61,13 +76,13 @@ builder.Services.AddReverseProxy()
 
 var app = builder.Build();
 
-// 5. ترتیب صحیح میدل‌ورها (بسیار مهم)
+// 5. ترتیب میدل‌ورها
 app.UseHttpsRedirection();
 
-// --- شروع بخش جدید: فعال‌سازی CORS ---
-// این خط باید قبل از UseAuthentication و UseAuthorization قرار بگیرد
-app.UseCors("VueAppCorsPolicy");
-// --- پایان بخش جدید ---
+// 🔥 از این خط استفاده کنید (یکی از دو گزینه زیر):
+app.UseCors("ReactAppCorsPolicy");  // گزینه اول: محدود به پورت‌های مشخص
+// یا
+// app.UseCors("AllowAll");         // گزینه دوم: همه را اجازه بده (برای تست راحت‌تر)
 
 app.UseAuthentication();
 app.UseAuthorization();

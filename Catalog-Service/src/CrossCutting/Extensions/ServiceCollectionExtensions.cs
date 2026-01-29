@@ -9,6 +9,7 @@ using Catalog_Service.src._02_Infrastructure.ExternalServices;
 using Catalog_Service.src._02_Infrastructure.FileStorage;
 using Catalog_Service.src._02_Infrastructure.Security;
 using Catalog_Service.src._03_Endpoints.Mappers;
+using Catalog_Service.src.CrossCutting.Profiles;
 using Catalog_Service.src.CrossCutting.Security;
 using Catalog_Service.src.CrossCutting.Validation;
 using Catalog_Service.src.CrossCutting.Validation.Admin;
@@ -94,6 +95,8 @@ namespace Catalog_Service.src.CrossCutting.Extensions
 
             services.AddAutoMapper(cfg =>
             {
+                cfg.AddProfile<ProductProfile>();
+
                 cfg.AddProfile<AdminMappingProfile>();
                 cfg.AddProfile<VendorMappingProfile>();
                 cfg.AddProfile<PublicMappingProfile>();
